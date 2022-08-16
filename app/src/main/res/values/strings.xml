@@ -1,6 +1,5 @@
 <resources>
     <string name="app_name">procon33_RemoteTravelers_app</string>
     <string name="travel_button">旅行する</string>
-    <string name="participant_id_input">参加者ID</string>
-    <string name="hint">参加者IDを入力</string>
+    <string name="participant_input">参加者ID</string>
 </resources>
