@@ -1,9 +1,10 @@
 package com.example.procon33_remotetravelers_app.activities
 
+
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.widget.Button
 import com.example.procon33_remotetravelers_app.R
-
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
@@ -27,6 +28,11 @@ class TravelerActivity : AppCompatActivity(), OnMapReadyCallback {
         val mapFragment = supportFragmentManager
             .findFragmentById(R.id.map) as SupportMapFragment
         mapFragment.getMapAsync(this)
+
+        val cameraButton = findViewById<Button>(R.id.camera_button)
+        cameraButton.setOnClickListener {
+
+        }
     }
 
     /**
