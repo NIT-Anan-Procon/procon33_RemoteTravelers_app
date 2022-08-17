@@ -12,8 +12,8 @@
 
     <Button
         android:id="@+id/camera_button"
-        android:layout_width="80dp"
-        android:layout_height="80dp"
+        android:layout_width="70dp"
+        android:layout_height="70dp"
         android:layout_gravity="right"
         android:backgroundTint="@color/camera_button"
         android:text="@string/camera_button" />
