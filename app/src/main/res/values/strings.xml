@@ -3,4 +3,5 @@
     <string name="travel_button">旅行する</string>
     <string name="participant_input">参加者ID</string>
     <string name="title_activity_traveler">TravelerActivity</string>
+    <string name="user_id_text">あなたのID:%s</string>
 </resources>

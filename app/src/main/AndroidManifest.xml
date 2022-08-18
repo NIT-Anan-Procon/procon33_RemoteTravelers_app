@@ -10,7 +10,8 @@
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/Theme.Procon33_RemoteTravelers_app">
+        android:theme="@style/Theme.Procon33_RemoteTravelers_app"
+        android:usesCleartextTraffic="true">
 
         <!--
              TODO: Before you run your application, you need a Google Maps API key.
