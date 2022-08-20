@@ -13,6 +13,9 @@
         android:theme="@style/Theme.Procon33_RemoteTravelers_app"
         android:usesCleartextTraffic="true">
         <activity
+            android:name=".activities.ViewReportActivity"
+            android:exported="false" />
+        <activity
             android:name=".activities.CreateReportActivity"
             android:exported="false" />
         <!--
@@ -28,12 +31,8 @@
         -->
         <meta-data
             android:name="com.google.android.geo.API_KEY"
-            android:value="YOUR_API_KEY" />
+            android:value="${MAPS_API_KEY}" />
 
-        <activity
-            android:name=".activities.ViewerActivity"
-            android:exported="false"
-            android:label="@string/title_activity_viewer" />
         <activity
             android:name=".activities.TravelerActivity"
             android:exported="false"
