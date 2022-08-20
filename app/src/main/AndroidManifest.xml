@@ -15,6 +15,9 @@
         <activity
             android:name=".activities.ViewReportActivity"
             android:exported="false" />
+        <activity
+            android:name=".activities.CreateReportActivity"
+            android:exported="false" />
         <!--
              TODO: Before you run your application, you need a Google Maps API key.
 
