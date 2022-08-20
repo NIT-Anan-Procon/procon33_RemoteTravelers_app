@@ -26,8 +26,12 @@
         -->
         <meta-data
             android:name="com.google.android.geo.API_KEY"
-            android:value="${MAPS_API_KEY}" />
+            android:value="YOUR_API_KEY" />
 
+        <activity
+            android:name=".activities.ViewerActivity"
+            android:exported="false"
+            android:label="@string/title_activity_viewer" />
         <activity
             android:name=".activities.TravelerActivity"
             android:exported="false"
