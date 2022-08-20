@@ -1,18 +1,30 @@
 package com.example.procon33_remotetravelers_app.activities
 
-import androidx.appcompat.app.AppCompatActivity
+import android.content.Intent
+import android.graphics.Bitmap
 import android.os.Bundle
+import android.provider.MediaStore
+import android.widget.Button
+import androidx.activity.result.ActivityResult
+import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
+import androidx.appcompat.app.AppCompatActivity
 import com.example.procon33_remotetravelers_app.R
-
+import com.example.procon33_remotetravelers_app.databinding.ActivityTravelerBinding
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MarkerOptions
-import com.example.procon33_remotetravelers_app.databinding.ActivityTravelerBinding
+import java.util.*
+
 
 class TravelerActivity : AppCompatActivity(), OnMapReadyCallback {
+
+    companion object {
+        const val CAMERA_REQUEST_CODE = 1
+        const val CAMERA_PERMISSION_REQUEST_CODE = 2
+    }
 
     private lateinit var mMap: GoogleMap
     private lateinit var binding: ActivityTravelerBinding
@@ -27,6 +39,12 @@ class TravelerActivity : AppCompatActivity(), OnMapReadyCallback {
         val mapFragment = supportFragmentManager
             .findFragmentById(R.id.map) as SupportMapFragment
         mapFragment.getMapAsync(this)
+
+        val cameraButton = findViewById<Button>(R.id.camera_button)
+        cameraButton.setOnClickListener {
+            val intent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
+            resultLauncher.launch(intent)
+        }
     }
 
     /**
@@ -45,5 +63,19 @@ class TravelerActivity : AppCompatActivity(), OnMapReadyCallback {
         val sydney = LatLng(-34.0, 151.0)
         mMap.addMarker(MarkerOptions().position(sydney).title("Marker in Sydney"))
         mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney))
+    }
+
+    var resultLauncher = registerForActivityResult(
+        StartActivityForResult()
+    ) { result: ActivityResult ->
+        if (result.resultCode == RESULT_OK) {
+            val data = result.data
+            if (data != null) {
+                // cancelしたケースも含む
+                if (data.extras == null) {
+                    return@registerForActivityResult
+                }
+            }
+        }
     }
 }
