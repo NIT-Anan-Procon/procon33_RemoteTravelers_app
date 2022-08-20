@@ -12,7 +12,9 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Procon33_RemoteTravelers_app"
         android:usesCleartextTraffic="true">
-
+        <activity
+            android:name=".activities.CreateReportActivity"
+            android:exported="false" />
         <!--
              TODO: Before you run your application, you need a Google Maps API key.
 
