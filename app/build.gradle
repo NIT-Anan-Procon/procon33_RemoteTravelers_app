@@ -6,6 +6,7 @@ plugins {
 
 android {
     compileSdk 31
+    buildToolsVersion "30.0.3"
 
     defaultConfig {
         configurations.all {
@@ -20,7 +21,7 @@ android {
         }
         applicationId "com.example.procon33_remotetravelers_app"
         minSdk 24
-        targetSdk 31
+        targetSdk 30
         versionCode 1
         versionName "1.0"
 
