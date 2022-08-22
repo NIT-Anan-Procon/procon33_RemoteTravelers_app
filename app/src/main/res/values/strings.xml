@@ -3,5 +3,7 @@
     <string name="travel_button">旅行する</string>
     <string name="participant_input">参加者ID</string>
     <string name="title_activity_traveler">TravelerActivity</string>
+    <string name="camera_button">写真\n撮る</string>
     <string name="user_id_text">あなたのID:%s</string>
+    <string name="title_activity_viewer">ViewerActivity</string>
 </resources>

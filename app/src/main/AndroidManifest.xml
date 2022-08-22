@@ -3,6 +3,11 @@
     package="com.example.procon33_remotetravelers_app">
 
     <uses-permission android:name="android.permission.INTERNET" />
+    <queries>
+        <intent>
+            <action android:name="android.media.action.IMAGE_CAPTURE" />
+        </intent>
+    </queries>
 
     <application
         android:allowBackup="true"
@@ -12,7 +17,12 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Procon33_RemoteTravelers_app"
         android:usesCleartextTraffic="true">
-
+        <activity
+            android:name=".activities.ViewReportActivity"
+            android:exported="false" />
+        <activity
+            android:name=".activities.CreateReportActivity"
+            android:exported="false" />
         <!--
              TODO: Before you run your application, you need a Google Maps API key.
 
@@ -41,6 +51,16 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="com.example.practiceapplication.fileprovider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/file_paths"/>
+        </provider>
     </application>
 
 </manifest>
