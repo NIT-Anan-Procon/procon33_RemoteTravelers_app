@@ -75,6 +75,10 @@ class TravelerActivity : AppCompatActivity(), OnMapReadyCallback {
                 if (data.extras == null) {
                     return@registerForActivityResult
                 }
+                else{
+                    val intent = Intent(this,CreateReportActivity::class.java)
+                    startActivity(intent)
+                }
             }
         }
     }
