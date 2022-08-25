@@ -1,3 +1,1 @@
 # procon33_RemoteTravelers_app
-MAPS_API_KEY=AIzaSyCwgwPDWNZmTqvjOksPprEmPSztGxnOc8I
-local.properties
