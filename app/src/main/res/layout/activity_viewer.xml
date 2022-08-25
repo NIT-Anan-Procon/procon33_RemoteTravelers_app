@@ -21,6 +21,7 @@
         android:layout_height="70dp"
         android:backgroundTint="@color/pin_button"
         android:contentDescription="@string/pin_button"
+        android:text="@string/pin_button"
         android:textColor="@color/white"
         android:textSize="17sp"
         app:layout_constraintEnd_toEndOf="parent"

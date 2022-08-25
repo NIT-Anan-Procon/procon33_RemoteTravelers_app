@@ -43,6 +43,11 @@
             android:exported="false"
             android:label="@string/title_activity_traveler" />
         <activity
+            android:name=".activities.ViewerActivity"
+            android:exported="false"
+            android:label="ViewerActivity"/>
+
+        <activity
             android:name=".MainActivity"
             android:exported="true">
             <intent-filter>
