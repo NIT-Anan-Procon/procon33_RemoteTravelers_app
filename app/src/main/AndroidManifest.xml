@@ -46,6 +46,10 @@
             android:name=".activities.ViewerActivity"
             android:exported="false"
             android:label="ViewerActivity"/>
+        <activity
+            android:name=".activities.SuggestDestinationActivity"
+            android:exported="false"
+            android:label="SuggestDestinationActivity"/>
 
         <activity
             android:name=".MainActivity"
