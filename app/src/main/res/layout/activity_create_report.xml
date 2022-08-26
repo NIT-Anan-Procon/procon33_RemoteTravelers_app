@@ -22,10 +22,8 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="25dp"
-        android:layout_marginBottom="10dp"
         android:text="@string/comment_headline"
         android:textAlignment="center"
-        app:layout_constraintBottom_toTopOf="@+id/comment"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="1.0"
         app:layout_constraintStart_toStartOf="parent"
@@ -55,18 +53,20 @@
 
     <EditText
         android:id="@+id/comment"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
+        android:layout_width="375dp"
+        android:layout_height="195dp"
+        android:autofillHints=""
         android:ems="10"
+        android:gravity="start|top"
         android:hint="@string/report_comment_hint"
-        android:inputType="textPersonName"
-        android:minHeight="48dp"
+        android:inputType="textMultiLine"
+        android:selectAllOnFocus="false"
+        android:singleLine="false"
         app:layout_constraintBottom_toTopOf="@+id/keep_button"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/textView2"
-        app:layout_constraintVertical_bias="1.0"
-        android:autofillHints="" />
+        tools:ignore="SpeakableTextPresentCheck" />
 
     <Button
         android:id="@+id/cancel_button"
@@ -83,6 +83,7 @@
         android:id="@+id/title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:autofillHints=""
         android:ems="10"
         android:hint="@string/report_title_hint"
         android:inputType="textPersonName"
@@ -91,6 +92,5 @@
         app:layout_constraintBottom_toTopOf="@+id/cancel_button"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/report_image"
-        android:autofillHints="" />
+        app:layout_constraintTop_toBottomOf="@+id/report_image" />
 </androidx.constraintlayout.widget.ConstraintLayout>
