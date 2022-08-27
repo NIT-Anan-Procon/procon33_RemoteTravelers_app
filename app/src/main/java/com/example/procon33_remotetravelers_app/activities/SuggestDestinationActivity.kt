@@ -42,6 +42,7 @@ class SuggestDestinationActivity : AppCompatActivity(), OnMapReadyCallback,
 
             val intent = Intent(this, ViewerActivity::class.java)
             startActivity(intent)
+            finish()
         }
     }
 
