@@ -7,4 +7,5 @@
     <string name="pin_button">ピン\n置く</string>
     <string name="user_id_text">あなたのID:%s</string>
     <string name="title_activity_viewer">ViewerActivity</string>
+    <string name="determine_pin_button">ピンを決定する</string>
 </resources>

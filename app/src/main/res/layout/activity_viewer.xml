@@ -11,15 +11,17 @@
         android:name="com.google.android.gms.maps.SupportMapFragment"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        tools:context=".activities.ViewerActivity"
-        tools:layout_editor_absoluteX="0dp"
-        tools:layout_editor_absoluteY="0dp" />
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:context=".activities.ViewerActivity" />
 
     <Button
         android:id="@+id/pin_button"
         android:layout_width="70dp"
         android:layout_height="70dp"
-        android:backgroundTint="@color/pin_button"
+        android:backgroundTint="@color/pin"
         android:contentDescription="@string/pin_button"
         android:text="@string/pin_button"
         android:textColor="@color/white"
