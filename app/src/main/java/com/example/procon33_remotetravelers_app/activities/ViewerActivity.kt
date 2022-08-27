@@ -34,6 +34,7 @@ class ViewerActivity : AppCompatActivity(), OnMapReadyCallback {
         button.setOnClickListener {
             val intent = Intent(this, SuggestDestinationActivity::class.java)
             startActivity(intent)
+            finish()
         }
     }
 
