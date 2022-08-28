@@ -22,7 +22,7 @@
         android:id="@+id/textView2"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="15dp"
+        android:layout_marginTop="10dp"
         android:text="@string/comment_headline"
         android:textAlignment="center"
         android:textSize="24sp"
@@ -55,9 +55,12 @@
 
     <EditText
         android:id="@+id/comment"
-        android:layout_width="375dp"
-        android:layout_height="164dp"
+        android:layout_width="354dp"
+        android:layout_height="127dp"
+        android:layout_marginTop="5dp"
+        android:layout_marginBottom="15dp"
         android:autofillHints=""
+        android:background="@drawable/participants_input_design"
         android:ems="10"
         android:gravity="start|top"
         android:hint="@string/report_comment_hint"
