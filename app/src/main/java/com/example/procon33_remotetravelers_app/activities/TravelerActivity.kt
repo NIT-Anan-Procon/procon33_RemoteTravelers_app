@@ -78,8 +78,6 @@ class TravelerActivity : AppCompatActivity(), OnMapReadyCallback, LocationListen
         val testButton = findViewById<Button>(R.id.current_location_button)
         testButton.setOnClickListener {
             if(::mMap.isInitialized){
-                currentLocationMarker?.remove()
-                currentLocationMarker = mMap.addMarker(MarkerOptions().position(currentLocation).title("現在地"))
                 mMap.moveCamera(CameraUpdateFactory.newLatLng(currentLocation))
             }
         }
