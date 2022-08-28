@@ -21,7 +21,6 @@ import androidx.activity.result.contract.ActivityResultContracts.StartActivityFo
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
-import androidx.core.content.ContextCompat.startActivity
 import com.example.procon33_remotetravelers_app.R
 import com.example.procon33_remotetravelers_app.databinding.ActivityTravelerBinding
 import com.google.android.gms.maps.CameraUpdateFactory
@@ -29,8 +28,8 @@ import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.maps.model.Marker
 import com.google.android.gms.maps.model.MarkerOptions
-import kotlin.properties.Delegates
 
 
 class TravelerActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener {
@@ -43,8 +42,8 @@ class TravelerActivity : AppCompatActivity(), OnMapReadyCallback, LocationListen
     private lateinit var mMap: GoogleMap
     private lateinit var binding: ActivityTravelerBinding
     private lateinit var locationManager: LocationManager
-    private var latitude by Delegates.notNull<Double>()
-    private var longitude by Delegates.notNull<Double>()
+    private lateinit var currentLocation: LatLng
+    private var currentLocationMarker: Marker? = null
     private val requestPermissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestPermission()
     ) { isGranted: Boolean ->
@@ -76,12 +75,12 @@ class TravelerActivity : AppCompatActivity(), OnMapReadyCallback, LocationListen
             resultLauncher.launch(intent)
         }
 
-        val testButton = findViewById<Button>(R.id.test_button)
+        val testButton = findViewById<Button>(R.id.current_location_button)
         testButton.setOnClickListener {
             if(::mMap.isInitialized){
-                var me = LatLng(latitude, longitude)
-                mMap.addMarker(MarkerOptions().position(me).title("me"))
-                mMap.moveCamera(CameraUpdateFactory.newLatLng(me))
+                currentLocationMarker?.remove()
+                currentLocationMarker = mMap.addMarker(MarkerOptions().position(currentLocation).title("現在地"))
+                mMap.moveCamera(CameraUpdateFactory.newLatLng(currentLocation))
             }
         }
 
@@ -126,8 +125,11 @@ class TravelerActivity : AppCompatActivity(), OnMapReadyCallback, LocationListen
     }
 
     override fun onLocationChanged(location: Location) {
-        latitude = location.latitude
-        longitude = location.longitude
+        currentLocation = LatLng(location.latitude, location.longitude)
+        if(::mMap.isInitialized){
+            currentLocationMarker?.remove()
+            currentLocationMarker = mMap.addMarker(MarkerOptions().position(currentLocation).title("現在地"))
+        }
     }
 
     override fun onProviderEnabled(provider: String) {
@@ -149,10 +151,9 @@ class TravelerActivity : AppCompatActivity(), OnMapReadyCallback, LocationListen
      */
     override fun onMapReady(googleMap: GoogleMap) {
         mMap = googleMap
-
-        var me = LatLng(latitude, longitude)
-        mMap.addMarker(MarkerOptions().position(me).title("me"))
-        mMap.moveCamera(CameraUpdateFactory.newLatLng(me))
+        mMap.setMinZoomPreference(8f)
+        currentLocationMarker = mMap.addMarker(MarkerOptions().position(currentLocation).title("現在地"))
+        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(currentLocation, 13f))
     }
 
     var resultLauncher = registerForActivityResult(
