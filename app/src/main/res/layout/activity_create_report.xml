@@ -54,6 +54,8 @@
         android:gravity="start|top"
         android:hint="@string/report_comment_hint"
         android:inputType="textMultiLine"
+        android:paddingLeft="7dp"
+        android:paddingTop="7dp"
         android:selectAllOnFocus="false"
         android:singleLine="false"
         app:layout_constraintBottom_toTopOf="@+id/keep_button"
