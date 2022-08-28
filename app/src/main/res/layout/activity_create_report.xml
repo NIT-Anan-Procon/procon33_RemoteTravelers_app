@@ -8,8 +8,9 @@
 
     <ImageView
         android:id="@+id/report_image"
-        android:layout_width="416dp"
-        android:layout_height="287dp"
+        android:layout_width="399dp"
+        android:layout_height="329dp"
+        android:layout_marginTop="10dp"
         android:contentDescription="@string/report_image"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -54,7 +55,7 @@
     <EditText
         android:id="@+id/comment"
         android:layout_width="375dp"
-        android:layout_height="195dp"
+        android:layout_height="164dp"
         android:autofillHints=""
         android:ems="10"
         android:gravity="start|top"
