@@ -101,9 +101,9 @@ class MainActivity : AppCompatActivity() {
             try {
                 // 旅行に参加するユーザのIDを取得
                 val host = getUserId().toInt()
-                val viewer1 = findViewById<EditText>(R.id.viewer1).text.toString().toInt()
-                val viewer2 = findViewById<EditText>(R.id.viewer2).text.toString().toInt()
-                val viewer3 = findViewById<EditText>(R.id.viewer3).text.toString().toInt()
+                val viewer1 = getViewerId(findViewById(R.id.viewer1))
+                val viewer2 = getViewerId(findViewById(R.id.viewer2))
+                val viewer3 = getViewerId(findViewById(R.id.viewer3))
 
                 // APIを実行
                 val service: StartTravelService =
@@ -132,6 +132,16 @@ class MainActivity : AppCompatActivity() {
                     toast.show()
                 }
             }
+        }
+    }
+
+    private fun getViewerId(viewer: EditText): Int {
+        // 閲覧者のユーザIDが入力されていなければ0を返す
+        val viewerId = viewer.text.toString()
+        if (viewerId.isNotEmpty()) {
+            return viewerId.toInt()
+        } else {
+            return 0
         }
     }
 
