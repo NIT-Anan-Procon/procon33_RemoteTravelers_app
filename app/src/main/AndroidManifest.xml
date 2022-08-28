@@ -3,6 +3,10 @@
     package="com.example.procon33_remotetravelers_app">
 
     <uses-permission android:name="android.permission.INTERNET" />
+
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
+
     <queries>
         <intent>
             <action android:name="android.media.action.IMAGE_CAPTURE" />
@@ -42,6 +46,15 @@
             android:name=".activities.TravelerActivity"
             android:exported="false"
             android:label="@string/title_activity_traveler" />
+        <activity
+            android:name=".activities.ViewerActivity"
+            android:exported="false"
+            android:label="ViewerActivity"/>
+        <activity
+            android:name=".activities.SuggestDestinationActivity"
+            android:exported="false"
+            android:label="SuggestDestinationActivity"/>
+
         <activity
             android:name=".MainActivity"
             android:exported="true">

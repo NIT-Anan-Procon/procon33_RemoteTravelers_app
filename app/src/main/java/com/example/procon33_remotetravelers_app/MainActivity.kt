@@ -12,6 +12,7 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.example.procon33_remotetravelers_app.activities.TravelerActivity
+import com.example.procon33_remotetravelers_app.activities.ViewerActivity
 import com.example.procon33_remotetravelers_app.services.SignupService
 import com.example.procon33_remotetravelers_app.services.StartTravelService
 import com.squareup.moshi.Moshi
@@ -49,6 +50,13 @@ class MainActivity : AppCompatActivity() {
         val travelButton = findViewById<Button>(R.id.travel_button)
         travelButton.setOnClickListener {
             startTravel()
+        }
+
+        // デバッグ用ボタンが押されるとViewerActivityに遷移する
+        val debugButton = findViewById<Button>(R.id.debug_button)
+        debugButton.setOnClickListener {
+            val intent = Intent(this, ViewerActivity::class.java)
+            startActivity(intent)
         }
     }
 

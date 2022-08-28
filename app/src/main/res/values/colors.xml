@@ -10,4 +10,5 @@
     <color name="gray">#8F8F8F</color>
     <color name="travel_button">#F0F345</color>
     <color name="camera_button">#4B4B4B</color>
+    <color name="pin">#4CAF50</color>
 </resources>

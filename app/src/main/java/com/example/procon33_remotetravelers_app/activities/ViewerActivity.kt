@@ -1,7 +1,9 @@
 package com.example.procon33_remotetravelers_app.activities
 
+import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.widget.Button
 import com.example.procon33_remotetravelers_app.R
 
 import com.google.android.gms.maps.CameraUpdateFactory
@@ -27,7 +29,15 @@ class ViewerActivity : AppCompatActivity(), OnMapReadyCallback {
         val mapFragment = supportFragmentManager
             .findFragmentById(R.id.map) as SupportMapFragment
         mapFragment.getMapAsync(this)
+
+        val button = findViewById<Button>(R.id.pin_button)
+        button.setOnClickListener {
+            val intent = Intent(this, SuggestDestinationActivity::class.java)
+            startActivity(intent)
+            finish()
+        }
     }
+
 
     /**
      * Manipulates the map once available.
