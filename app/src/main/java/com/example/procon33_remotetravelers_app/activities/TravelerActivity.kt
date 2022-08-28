@@ -77,7 +77,9 @@ class TravelerActivity : AppCompatActivity(), OnMapReadyCallback, LocationListen
 
         val testButton = findViewById<Button>(R.id.current_location_button)
         testButton.setOnClickListener {
-            if(::mMap.isInitialized){
+            if(::mMap.isInitialized && ::currentLocation.isInitialized){
+                currentLocationMarker?.remove()
+                currentLocationMarker = mMap.addMarker(MarkerOptions().position(currentLocation).title("現在地"))
                 mMap.moveCamera(CameraUpdateFactory.newLatLng(currentLocation))
             }
         }
@@ -151,8 +153,10 @@ class TravelerActivity : AppCompatActivity(), OnMapReadyCallback, LocationListen
     override fun onMapReady(googleMap: GoogleMap) {
         mMap = googleMap
         mMap.setMinZoomPreference(8f)
-        currentLocationMarker = mMap.addMarker(MarkerOptions().position(currentLocation).title("現在地"))
-        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(currentLocation, 13f))
+        if(::currentLocation.isInitialized) {
+            currentLocationMarker = mMap.addMarker(MarkerOptions().position(currentLocation).title("現在地"))
+            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(currentLocation, 13f))
+        }
     }
 
     var resultLauncher = registerForActivityResult(
