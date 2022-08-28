@@ -35,10 +35,10 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        // ユーザIDが登録されていれば表示し、無ければ新規登録APIをたたき表示する
+        // ユーザIDを取得し表示する
         var userId = getUserId()
         val userIdText = findViewById<TextView>(R.id.userIdText)
-        if (userId!!.isNotEmpty()) {
+        if (userId.isNotEmpty()) {
             userId = getString(R.string.user_id_text, userId)
             userIdText.text = userId
         } else {
@@ -49,31 +49,37 @@ class MainActivity : AppCompatActivity() {
         val travelButton = findViewById<Button>(R.id.travel_button)
         travelButton.setOnClickListener {
             startTravel()
-            val intent = Intent(this, TravelerActivity::class.java)
-            startActivity(intent)
         }
     }
 
     private fun signup(userIdText: TextView) {
         thread {
             try {
-                 val service: SignupService =
+                // APIを実行
+                val service: SignupService =
                      retrofit.create(SignupService::class.java)
                 val signupApiResponse = service.getUserId().execute().body()
                     ?: throw IllegalStateException("body is null")
 
                 Handler(Looper.getMainLooper()).post {
+                    // レスポンスからuserIDを取得
                     val userId = signupApiResponse.data.toString()
+
+                    // sharedPreferencesにuserIDを保存
                     getSharedPreferences("AppSettings", Context.MODE_PRIVATE).edit().apply {
                         putString("userId", userId)
                         apply()
                     }
 
+                    // userIDを表示
                     userIdText.text = getString(R.string.user_id_text, userId)
                 }
             } catch (e: Exception) {
                 Handler(Looper.getMainLooper()).post {
+                    // エラー内容を出力
                     Log.e("error", e.message.toString())
+
+                    // 通信に失敗したことを通知する
                     val toast =
                         Toast.makeText(this, "新規登録に失敗しました", Toast.LENGTH_SHORT)
                     toast.show()
@@ -85,49 +91,39 @@ class MainActivity : AppCompatActivity() {
     private fun startTravel() {
         thread {
             try {
-                val userId = getUserId().toInt()
-                val viewer1 = findViewById<EditText>(R.id.viewer1)
-                val viewer2 = findViewById<EditText>(R.id.viewer2)
-                val viewer3 = findViewById<EditText>(R.id.viewer3)
-                val viewersTextView = arrayOf(viewer1, viewer2, viewer3)
-                val viewers = mutableListOf<Int>()
-                for (viewerTextView in viewersTextView) {
-                    if (viewerTextView.text.isNotEmpty()) {
-                        viewers.add(viewerTextView.text.toString().toInt())
-                    }
-                }
+                // 旅行に参加するユーザのIDを取得
+                val host = getUserId().toInt()
+                val viewer1 = findViewById<EditText>(R.id.viewer1).text.toString().toInt()
+                val viewer2 = findViewById<EditText>(R.id.viewer2).text.toString().toInt()
+                val viewer3 = findViewById<EditText>(R.id.viewer3).text.toString().toInt()
 
-                startTravelRequest(userId, viewers)
-
+                // APIを実行
                 val service: StartTravelService =
                     retrofit.create(StartTravelService::class.java)
                 val startTravelResponse = service.startTravel(
-                    userId,
-                    viewers
+                    host, viewer1, viewer2, viewer3
                 ).execute().body()
+                    ?: throw IllegalStateException("body is null")
 
                 Handler(Looper.getMainLooper()).post {
-                    Log.d("viewers", viewers.toString())
+                    // 実行結果を出力
                     Log.d("startTravelResponse", startTravelResponse.toString())
+
+                    // 旅行者画面に遷移
+                    val intent = Intent(this, TravelerActivity::class.java)
+                    startActivity(intent)
                 }
             } catch (e: Exception) {
                 Handler(Looper.getMainLooper()).post {
+                    // エラー内容を出力
                     Log.e("error", e.message.toString())
+
+                    // 通信に失敗したことを通知
                     val toast =
                         Toast.makeText(this, "旅行を始めることができませんでした", Toast.LENGTH_SHORT)
                     toast.show()
                 }
             }
-        }
-    }
-
-    public class startTravelRequest {
-        var host: Int? = null
-        var viewers: MutableList<Int>? = null
-
-        fun startTravelRequest(host: Int, viewers: MutableList<Int>) {
-            this.host = host
-            this.viewers = viewers
         }
     }
 
