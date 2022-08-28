@@ -22,9 +22,9 @@
         android:id="@+id/textView2"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="10dp"
+        android:layout_marginTop="25dp"
         android:text="@string/comment_headline"
-        android:textAlignment="center"
+        android:textAlignment="viewStart"
         android:textSize="24sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="1.0"
@@ -55,10 +55,8 @@
 
     <EditText
         android:id="@+id/comment"
-        android:layout_width="354dp"
-        android:layout_height="127dp"
-        android:layout_marginTop="5dp"
-        android:layout_marginBottom="15dp"
+        android:layout_width="373dp"
+        android:layout_height="167dp"
         android:autofillHints=""
         android:background="@drawable/participants_input_design"
         android:ems="10"
@@ -71,7 +69,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/textView2"
-        tools:ignore="SpeakableTextPresentCheck" />
+        tools:ignore="SpeakableTextPresentCheck,TextContrastCheck" />
 
     <Button
         android:id="@+id/cancel_button"
