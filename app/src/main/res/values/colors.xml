@@ -11,4 +11,6 @@
     <color name="travel_button">#F0F345</color>
     <color name="camera_button">#4B4B4B</color>
     <color name="pin">#4CAF50</color>
+    <color name="back_button">#4B4B4B</color>
+    <color name="save_report_button">#F35151</color>
 </resources>
