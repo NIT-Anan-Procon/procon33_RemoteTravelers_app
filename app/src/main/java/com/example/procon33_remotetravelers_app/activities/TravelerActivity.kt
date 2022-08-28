@@ -79,10 +79,10 @@ class TravelerActivity : AppCompatActivity(), OnMapReadyCallback {
                     return@registerForActivityResult
                 }
                 else{
-                    val intent2 = getIntent()
-                    val photo = intent2.getParcelableExtra<Bitmap>("data")
+                    val photo = data.getParcelableExtra<Bitmap>("data")
 //                    Log.d("テスト", data.toString())
                     val intent = Intent(this,CreateReportActivity::class.java)
+                    intent.putExtra("data",photo)
                     startActivity(intent)
                 }
             }
