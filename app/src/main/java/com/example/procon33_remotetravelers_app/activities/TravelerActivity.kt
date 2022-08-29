@@ -79,8 +79,8 @@ class TravelerActivity : AppCompatActivity(), OnMapReadyCallback {
                     return@registerForActivityResult
                 }
                 else{
+                    // CreateReportActivityに写真データを持って遷移する
                     val photo = data.getParcelableExtra<Bitmap>("data")
-//                    Log.d("テスト", data.toString())
                     val intent = Intent(this,CreateReportActivity::class.java)
                     intent.putExtra("data",photo)
                     startActivity(intent)

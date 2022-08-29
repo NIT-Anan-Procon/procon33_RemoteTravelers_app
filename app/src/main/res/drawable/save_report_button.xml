@@ -13,7 +13,7 @@
                 android:top="0dp"
                 android:left="0dp"
                 android:right="0dp" />
-            <solid android:color="@color/back_button" />
+            <solid android:color="@color/save_report_button" />
         </shape>
     </item>
 </selector>

@@ -11,9 +11,11 @@ class CreateReportActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_create_report)
 
+        // TravelerActivityから写真データを取得する
         val intent = intent
         val photo = intent.getParcelableExtra<Bitmap>("data")
 
+        // 受け取った写真データを表示
         val imageView = findViewById<ImageView>(R.id.report_image)
         imageView.setImageBitmap(photo)
     }
