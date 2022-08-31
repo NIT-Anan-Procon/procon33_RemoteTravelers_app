@@ -37,7 +37,7 @@
         tools:text="ユーザID" />
 
     <EditText
-        android:id="@+id/editTextTextPersonName2"
+        android:id="@+id/viewer1"
         android:layout_width="200dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="102dp"
@@ -57,7 +57,7 @@
         tools:ignore="DuplicateSpeakableTextCheck" />
 
     <EditText
-        android:id="@+id/editTextTextPersonName3"
+        android:id="@+id/viewer2"
         android:layout_width="200dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="101dp"
@@ -73,10 +73,10 @@
         android:textColorHint="@color/gray"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/editTextTextPersonName2" />
+        app:layout_constraintTop_toBottomOf="@+id/viewer1" />
 
     <EditText
-        android:id="@+id/editTextTextPersonName4"
+        android:id="@+id/viewer3"
         android:layout_width="200dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="102dp"
@@ -92,7 +92,7 @@
         android:textColorHint="@color/gray"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/editTextTextPersonName3" />
+        app:layout_constraintTop_toBottomOf="@+id/viewer2" />
 
     <Button
         android:id="@+id/debug_button"
