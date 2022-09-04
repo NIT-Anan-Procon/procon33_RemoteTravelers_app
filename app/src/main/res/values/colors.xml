@@ -13,4 +13,5 @@
     <color name="pin">#4CAF50</color>
     <color name="back_button">#4B4B4B</color>
     <color name="save_report_button">#F35151</color>
+    <color name="cancel_button">#5C5F61</color>
 </resources>
