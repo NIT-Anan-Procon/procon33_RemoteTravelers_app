@@ -1,9 +1,12 @@
 package com.example.procon33_remotetravelers_app.activities
 
+import android.R.attr
+import android.R.attr.bitmap
 import android.content.Intent
 import android.graphics.Bitmap
 import android.os.Bundle
 import android.provider.MediaStore
+import android.util.Log
 import android.widget.Button
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
@@ -76,7 +79,10 @@ class TravelerActivity : AppCompatActivity(), OnMapReadyCallback {
                     return@registerForActivityResult
                 }
                 else{
+                    // CreateReportActivityに写真データを持って遷移する
+                    val photo = data.getParcelableExtra<Bitmap>("data")
                     val intent = Intent(this,CreateReportActivity::class.java)
+                    intent.putExtra("data",photo)
                     startActivity(intent)
                 }
             }
