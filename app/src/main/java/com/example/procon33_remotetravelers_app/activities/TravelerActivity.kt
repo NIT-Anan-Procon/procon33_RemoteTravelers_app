@@ -80,7 +80,7 @@ class TravelerActivity : AppCompatActivity(), OnMapReadyCallback, LocationListen
             if(::mMap.isInitialized && ::currentLocation.isInitialized){
                 currentLocationMarker?.remove()
                 currentLocationMarker = mMap.addMarker(MarkerOptions().position(currentLocation).title("現在地"))
-                mMap.moveCamera(CameraUpdateFactory.newLatLng(currentLocation))
+                mMap.animateCamera(CameraUpdateFactory.newLatLng(currentLocation))
             }
         }
 
@@ -120,14 +120,13 @@ class TravelerActivity : AppCompatActivity(), OnMapReadyCallback, LocationListen
             locationManager.requestLocationUpdates(
             GPS_PROVIDER,
             1000,
-            50f,
+            25f,
             this)
     }
 
     override fun onLocationChanged(location: Location) {
         currentLocation = LatLng(location.latitude, location.longitude)
         if(::mMap.isInitialized){
-            Toast.makeText(applicationContext, "現在地更新", Toast.LENGTH_SHORT).show()
             currentLocationMarker?.remove()
             currentLocationMarker = mMap.addMarker(MarkerOptions().position(currentLocation).title("現在地"))
         }

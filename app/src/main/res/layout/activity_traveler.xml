@@ -22,6 +22,7 @@
         android:layout_gravity="right"
         android:backgroundTint="@color/camera_button"
         android:text="@string/camera_button"
+        android:textColor="@color/white"
         android:textSize="17sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="@+id/map" />
