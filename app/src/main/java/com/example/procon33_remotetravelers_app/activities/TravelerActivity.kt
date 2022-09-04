@@ -22,6 +22,7 @@ import androidx.activity.result.contract.ActivityResultContracts.StartActivityFo
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.core.content.ContextCompat.startActivity
 import com.example.procon33_remotetravelers_app.R
 import com.example.procon33_remotetravelers_app.databinding.ActivityTravelerBinding
 import com.google.android.gms.maps.CameraUpdateFactory
@@ -153,10 +154,9 @@ class TravelerActivity : AppCompatActivity(), OnMapReadyCallback, LocationListen
     override fun onMapReady(googleMap: GoogleMap) {
         mMap = googleMap
         mMap.setMinZoomPreference(8f)
-        if(::currentLocation.isInitialized) {
-            currentLocationMarker = mMap.addMarker(MarkerOptions().position(currentLocation).title("現在地"))
-            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(currentLocation, 13f))
-        }
+        locationStart()
+        currentLocationMarker = mMap.addMarker(MarkerOptions().position(currentLocation).title("現在地"))
+        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(currentLocation, 13f))
     }
 
     var resultLauncher = registerForActivityResult(
