@@ -4,6 +4,7 @@ import android.Manifest
 import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
+import android.graphics.Bitmap
 import android.content.pm.PackageManager
 import android.location.Location
 import android.location.LocationListener
@@ -118,10 +119,10 @@ class TravelerActivity : AppCompatActivity(), OnMapReadyCallback, LocationListen
             Log.d("debug", "checkSelfPermission false")
         } else
             locationManager.requestLocationUpdates(
-            GPS_PROVIDER,
-            1000,
-            25f,
-            this)
+                GPS_PROVIDER,
+                1000,
+                25f,
+                this)
     }
 
     override fun onLocationChanged(location: Location) {
@@ -169,7 +170,10 @@ class TravelerActivity : AppCompatActivity(), OnMapReadyCallback, LocationListen
                     return@registerForActivityResult
                 }
                 else{
+                    // CreateReportActivityに写真データを持って遷移する
+                    val photo = data.getParcelableExtra<Bitmap>("data")
                     val intent = Intent(this,CreateReportActivity::class.java)
+                    intent.putExtra("data",photo)
                     startActivity(intent)
                 }
             }
