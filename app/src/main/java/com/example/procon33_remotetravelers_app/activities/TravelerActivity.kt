@@ -131,6 +131,7 @@ class TravelerActivity : AppCompatActivity(), OnMapReadyCallback, LocationListen
         if(::mMap.isInitialized){
             currentLocationMarker?.remove()
             currentLocationMarker = mMap.addMarker(MarkerOptions().position(currentLocation).title("現在地"))
+            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(currentLocation, 13f))
         }
     }
 
@@ -142,24 +143,12 @@ class TravelerActivity : AppCompatActivity(), OnMapReadyCallback, LocationListen
 
     }
 
-    /**
-     * Manipulates the map once available.
-     * This callback is triggered when the map is ready to be used.
-     * This is where we can add markers or lines, add listeners or move the camera. In this case,
-     * we just add a marker near Sydney, Australia.
-     * If Google Play services is not installed on the device, the user will be prompted to install
-     * it inside the SupportMapFragment. This method will only be triggered once the user has
-     * installed Google Play services and returned to the app.
-     */
     override fun onMapReady(googleMap: GoogleMap) {
         mMap = googleMap
         mMap.setMinZoomPreference(8f)
-        locationStart()
-        currentLocationMarker = mMap.addMarker(MarkerOptions().position(currentLocation).title("現在地"))
-        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(currentLocation, 13f))
     }
 
-    var resultLauncher = registerForActivityResult(
+    private val resultLauncher = registerForActivityResult(
         StartActivityForResult()
     ) { result: ActivityResult ->
         if (result.resultCode == RESULT_OK) {
