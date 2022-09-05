@@ -131,7 +131,6 @@ class TravelerActivity : AppCompatActivity(), OnMapReadyCallback, LocationListen
         if(::mMap.isInitialized){
             currentLocationMarker?.remove()
             currentLocationMarker = mMap.addMarker(MarkerOptions().position(currentLocation).title("現在地"))
-            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(currentLocation, 13f))
         }
     }
 
@@ -147,8 +146,6 @@ class TravelerActivity : AppCompatActivity(), OnMapReadyCallback, LocationListen
         mMap = googleMap
         mMap.setMinZoomPreference(8f)
         currentLocationMarker?.remove()
-        currentLocationMarker = mMap.addMarker(MarkerOptions().position(currentLocation).title("現在地"))
-        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(currentLocation, 13f))
     }
 
     private val resultLauncher = registerForActivityResult(
