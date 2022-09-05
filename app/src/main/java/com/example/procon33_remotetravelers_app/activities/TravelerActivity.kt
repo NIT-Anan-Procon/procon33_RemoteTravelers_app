@@ -146,6 +146,9 @@ class TravelerActivity : AppCompatActivity(), OnMapReadyCallback, LocationListen
     override fun onMapReady(googleMap: GoogleMap) {
         mMap = googleMap
         mMap.setMinZoomPreference(8f)
+        currentLocationMarker?.remove()
+        currentLocationMarker = mMap.addMarker(MarkerOptions().position(currentLocation).title("現在地"))
+        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(currentLocation, 13f))
     }
 
     private val resultLauncher = registerForActivityResult(
