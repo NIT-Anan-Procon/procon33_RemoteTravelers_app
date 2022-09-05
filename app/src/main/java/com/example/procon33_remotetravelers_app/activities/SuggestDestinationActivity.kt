@@ -103,6 +103,7 @@ class SuggestDestinationActivity : AppCompatActivity(), OnMapReadyCallback,
                 val service: SuggestDestinationService =
                     retrofit.create(SuggestDestinationService::class.java)
                 val suggestDestinationResponse = service.suggestDestination(
+                    //userID仮置き!!!!
                     user_id = 6, lat = latitude, lon = longitude, suggestion_flag = 1
                 ).execute().body()
                     ?: throw IllegalStateException("body is null")
