@@ -47,6 +47,8 @@ class SuggestDestinationActivity : AppCompatActivity(), OnMapReadyCallback,
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        val userId = intent.getIntExtra("userId", 0)
+
         binding = ActivitySuggestDestinationBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
@@ -59,17 +61,12 @@ class SuggestDestinationActivity : AppCompatActivity(), OnMapReadyCallback,
         suggestButton.setOnClickListener {
             //ここで最終的なピンの情報をDBに保存(APIを叩く)
             if(suggestMarker != null)
-                decidePin()
-
-            val intent = Intent(this, ViewerActivity::class.java)
-            startActivity(intent)
+                decidePin(userId)
             finish()
         }
 
         val cancelButton = findViewById<Button>(R.id.cancel_suggestion_button)
         cancelButton.setOnClickListener {
-            val intent = Intent(this, ViewerActivity::class.java)
-            startActivity(intent)
             finish()
         }
     }
@@ -94,7 +91,7 @@ class SuggestDestinationActivity : AppCompatActivity(), OnMapReadyCallback,
         )
     }
 
-    private fun decidePin(){
+    private fun decidePin(userId: Int){
         val latitude = suggestDestination.latitude
         val longitude = suggestDestination.longitude
         thread {
@@ -103,8 +100,7 @@ class SuggestDestinationActivity : AppCompatActivity(), OnMapReadyCallback,
                 val service: SuggestDestinationService =
                     retrofit.create(SuggestDestinationService::class.java)
                 val suggestDestinationResponse = service.suggestDestination(
-                    //userID仮置き!!!!
-                    user_id = 6, lat = latitude, lon = longitude, suggestion_flag = 1
+                    user_id = userId, lat = latitude, lon = longitude, suggestion_flag = 1
                 ).execute().body()
                     ?: throw IllegalStateException("body is null")
 

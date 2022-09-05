@@ -56,7 +56,7 @@ class MainActivity : AppCompatActivity() {
         val debugButton = findViewById<Button>(R.id.debug_button)
         debugButton.setOnClickListener {
             val intent = Intent(this, ViewerActivity::class.java)
-            intent.putExtra("userId", userId)
+            intent.putExtra("userId", getUserId().toInt())
             startActivity(intent)
         }
     }
