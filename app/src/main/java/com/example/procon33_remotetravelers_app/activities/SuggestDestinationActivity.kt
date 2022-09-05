@@ -94,7 +94,7 @@ class SuggestDestinationActivity : AppCompatActivity(), OnMapReadyCallback,
         )
     }
 
-    fun decidePin(){
+    private fun decidePin(){
         val latitude = suggestDestination.latitude
         val longitude = suggestDestination.longitude
         thread {
