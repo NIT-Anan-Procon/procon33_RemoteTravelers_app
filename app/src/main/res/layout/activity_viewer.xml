@@ -31,17 +31,38 @@
         tools:ignore="TextContrastCheck"
         tools:text="@string/pin_button" />
 
-    <Button
-        android:id="@+id/comment_button"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:text="@string/comment"
-        android:textColor="#000000"
-        android:background="#D9D9D9"
-        app:backgroundTint="#D9D9D9"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintStart_toStartOf="parent" />
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        tools:context=".MainActivity"
+        >
+
+        <Button
+            android:id="@+id/comment_button"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/comment"
+            android:textColor="#000000"
+            android:background="#D9D9D9"
+            app:backgroundTint="#D9D9D9"
+            android:orientation="vertical"
+            android:layout_gravity="center_horizontal|bottom"
+            android:layout_marginBottom="0dp"
+            />
+
+        <LinearLayout
+            android:id="@+id/ll"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:orientation="vertical"
+            android:background="#888888"
+            android:layout_gravity="center_horizontal|bottom"
+            android:layout_marginBottom="-50dp"
+            >
+
+        </LinearLayout>
+
+    </FrameLayout>
+
 
 </androidx.constraintlayout.widget.ConstraintLayout>

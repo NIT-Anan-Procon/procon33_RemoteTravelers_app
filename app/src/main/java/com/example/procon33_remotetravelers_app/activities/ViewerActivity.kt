@@ -1,18 +1,16 @@
 package com.example.procon33_remotetravelers_app.activities
-
 import android.content.Intent
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.widget.Button
-import com.example.procon33_remotetravelers_app.R
-
+import androidx.appcompat.app.AppCompatActivity
+import com.example.procon33_remotetravelers_app.databinding.ActivityViewerBinding
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MarkerOptions
-import com.example.procon33_remotetravelers_app.databinding.ActivityViewerBinding
+
 
 class ViewerActivity : AppCompatActivity(), OnMapReadyCallback {
 
@@ -27,20 +25,19 @@ class ViewerActivity : AppCompatActivity(), OnMapReadyCallback {
 
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         val mapFragment = supportFragmentManager
-            .findFragmentById(R.id.map) as SupportMapFragment
+            .findFragmentById(com.example.procon33_remotetravelers_app.R.id.map) as SupportMapFragment
         mapFragment.getMapAsync(this)
 
-        val button = findViewById<Button>(R.id.pin_button)
+        val button = findViewById<Button>(com.example.procon33_remotetravelers_app.R.id.pin_button)
         button.setOnClickListener {
             val intent = Intent(this, SuggestDestinationActivity::class.java)
             startActivity(intent)
             finish()
         }
 
-        val button_comment = findViewById<Button>(R.id.comment_button)
+        val button_comment = findViewById<Button>(com.example.procon33_remotetravelers_app.R.id.comment_button)
         button_comment.setOnClickListener { openComment() }
     }
-
 
     /**
      * Manipulates the map once available.
