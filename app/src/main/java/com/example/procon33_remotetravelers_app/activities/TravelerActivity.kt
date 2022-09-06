@@ -208,11 +208,6 @@ class TravelerActivity : AppCompatActivity(), OnMapReadyCallback,
                 Handler(Looper.getMainLooper()).post {
                     // エラー内容を出力
                     Log.e("error", e.message.toString())
-
-                    // 通信に失敗したことを通知
-                    val toast =
-                        Toast.makeText(this, "通信に失敗しました", Toast.LENGTH_SHORT)
-                    toast.show()
                 }
             }
         }
