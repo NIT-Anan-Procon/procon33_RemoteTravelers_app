@@ -11,6 +11,8 @@ import android.location.LocationListener
 import android.location.LocationManager
 import android.location.LocationManager.GPS_PROVIDER
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.provider.MediaStore
 import android.provider.Settings
 import android.util.Log
@@ -22,9 +24,10 @@ import androidx.activity.result.contract.ActivityResultContracts.StartActivityFo
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
-import androidx.core.content.ContextCompat.startActivity
+import com.example.procon33_remotetravelers_app.BuildConfig
 import com.example.procon33_remotetravelers_app.R
 import com.example.procon33_remotetravelers_app.databinding.ActivityTravelerBinding
+import com.example.procon33_remotetravelers_app.services.SaveCurrentLocationService
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
@@ -32,6 +35,12 @@ import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.Marker
 import com.google.android.gms.maps.model.MarkerOptions
+import com.squareup.moshi.Moshi
+import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
+import retrofit2.Retrofit
+import retrofit2.converter.moshi.MoshiConverterFactory
+import kotlin.concurrent.thread
+import kotlin.properties.Delegates
 
 
 class TravelerActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener {
@@ -40,11 +49,20 @@ class TravelerActivity : AppCompatActivity(), OnMapReadyCallback, LocationListen
         const val CAMERA_REQUEST_CODE = 1
         const val CAMERA_PERMISSION_REQUEST_CODE = 2
     }
+    private val moshi = Moshi.Builder()
+        .add(KotlinJsonAdapterFactory())
+        .build()
+
+    private val retrofit = Retrofit.Builder()
+        .baseUrl(BuildConfig.API_URL)
+        .addConverterFactory(MoshiConverterFactory.create(moshi))
+        .build()
 
     private lateinit var mMap: GoogleMap
     private lateinit var binding: ActivityTravelerBinding
     private lateinit var locationManager: LocationManager
     private lateinit var currentLocation: LatLng
+    private var userId by Delegates.notNull<Int>()
     private var firstLocationChange: Boolean = true
     private var currentLocationMarker: Marker? = null
     private val requestPermissionLauncher = registerForActivityResult(
@@ -63,6 +81,8 @@ class TravelerActivity : AppCompatActivity(), OnMapReadyCallback, LocationListen
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        userId = intent.getIntExtra("userId", 0)
 
         binding = ActivityTravelerBinding.inflate(layoutInflater)
         setContentView(binding.root)
@@ -129,6 +149,7 @@ class TravelerActivity : AppCompatActivity(), OnMapReadyCallback, LocationListen
 
     override fun onLocationChanged(location: Location) {
         currentLocation = LatLng(location.latitude, location.longitude)
+        saveCurrentLocation()
         if(::mMap.isInitialized){
             currentLocationMarker?.remove()
             currentLocationMarker = mMap.addMarker(MarkerOptions().position(currentLocation).title("現在地"))
@@ -150,6 +171,37 @@ class TravelerActivity : AppCompatActivity(), OnMapReadyCallback, LocationListen
     override fun onMapReady(googleMap: GoogleMap) {
         mMap = googleMap
         mMap.setMinZoomPreference(9f)
+    }
+
+    private fun saveCurrentLocation(){
+        val latitude = currentLocation.latitude
+        val longitude = currentLocation.longitude
+        thread {
+            try {
+                // APIを実行
+                val service: SaveCurrentLocationService =
+                    retrofit.create(SaveCurrentLocationService::class.java)
+                val saveCurrentLocationResponse = service.saveCurrentLocation(
+                    user_id = userId, lat = latitude, lon = longitude, suggestion_flag = 0
+                ).execute().body()
+                    ?: throw IllegalStateException("body is null")
+
+                Handler(Looper.getMainLooper()).post {
+                    // 実行結果を出力
+                    Log.d("SaveCurrentLocationResponse", saveCurrentLocationResponse.toString())
+                }
+            } catch (e: Exception) {
+                Handler(Looper.getMainLooper()).post {
+                    // エラー内容を出力
+                    Log.e("error", e.message.toString())
+
+                    // 通信に失敗したことを通知
+                    val toast =
+                        Toast.makeText(this, "通信に失敗しました", Toast.LENGTH_SHORT)
+                    toast.show()
+                }
+            }
+        }
     }
 
     private val resultLauncher = registerForActivityResult(
