@@ -227,7 +227,7 @@ class TravelerActivity : AppCompatActivity(), OnMapReadyCallback,
                     // CreateReportActivityに写真データを持って遷移する
                     val photo = data.getParcelableExtra<Bitmap>("data")
                     val intent = Intent(this,CreateReportActivity::class.java)
-                    intent.putExtra("data",photo)
+                    intent.putExtra("data", photo)
                     startActivity(intent)
                 }
             }
