@@ -146,6 +146,8 @@ class TravelerActivity : AppCompatActivity(), OnMapReadyCallback, LocationListen
         mMap = googleMap
         mMap.setMinZoomPreference(8f)
         currentLocationMarker?.remove()
+        currentLocationMarker = mMap.addMarker(MarkerOptions().position(currentLocation).title("現在地"))
+        mMap.animateCamera(CameraUpdateFactory.newLatLng(currentLocation))
     }
 
     private val resultLauncher = registerForActivityResult(
