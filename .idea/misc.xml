@@ -1,5 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
+  <component name="DesignSurface">
+    <option name="filePathToZoomLevelMap">
+      <map>
+        <entry key="..\:/Users/5t1ng/システム/clubSystem/procon33_RemoteTravelers_app/app/src/main/res/drawable/without_save_button.xml" value="0.115" />
+        <entry key="..\:/Users/5t1ng/システム/clubSystem/procon33_RemoteTravelers_app/app/src/main/res/layout/activity_main.xml" value="0.10364583333333334" />
+        <entry key="..\:/Users/5t1ng/システム/clubSystem/procon33_RemoteTravelers_app/app/src/main/res/layout/activity_traveler.xml" value="0.10364583333333334" />
+        <entry key="..\:/Users/5t1ng/システム/clubSystem/procon33_RemoteTravelers_app/app/src/main/res/layout/activity_view_report.xml" value="0.10364583333333334" />
+        <entry key="..\:/Users/5t1ng/システム/clubSystem/procon33_RemoteTravelers_app/app/src/main/res/layout/activity_viewer.xml" value="0.21739130434782608" />
+      </map>
+    </option>
+  </component>
   <component name="ProjectRootManager" version="2" languageLevel="JDK_11" default="true" project-jdk-name="1.8" project-jdk-type="JavaSDK">
     <output url="file://$PROJECT_DIR$/build/classes" />
   </component>
