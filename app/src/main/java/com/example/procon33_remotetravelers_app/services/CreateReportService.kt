@@ -6,13 +6,14 @@ import retrofit2.Call
 import retrofit2.http.Field
 import retrofit2.http.FormUrlEncoded
 import retrofit2.http.POST
+import java.io.File
 
 interface CreateReportService {
     @FormUrlEncoded
     @POST("/api/traveler/add-report")
     fun createReport(
         @Field("user_id")user_id: Int,
-        @Field("image")image: Bitmap?,
+        @Field("image")image: File,
         @Field("comment")comment: String,
         @Field("excitement")excitement: Int,
         @Field("lat")lat: Double,
