@@ -105,7 +105,7 @@ class TravelerActivity : AppCompatActivity(), OnMapReadyCallback,
             if(::mMap.isInitialized && ::currentLocation.isInitialized){
                 track = true
                 createMarker()
-                mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(currentLocation, 15f))
+                mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(currentLocation, 100f))
             }
         }
 
@@ -145,7 +145,7 @@ class TravelerActivity : AppCompatActivity(), OnMapReadyCallback,
             locationManager.requestLocationUpdates(
                 GPS_PROVIDER,
                 1000,
-                25f,
+                3f,
                 this)
     }
 
@@ -156,7 +156,7 @@ class TravelerActivity : AppCompatActivity(), OnMapReadyCallback,
             createMarker()
             if(firstLocationChange){
                 track = true
-                mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(currentLocation, 15f))
+                mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(currentLocation, 100f))
                 firstLocationChange = false
                 return
             }
