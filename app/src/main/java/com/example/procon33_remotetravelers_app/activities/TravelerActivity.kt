@@ -83,7 +83,7 @@ class TravelerActivity : AppCompatActivity(), OnMapReadyCallback, LocationListen
             if(::mMap.isInitialized && ::currentLocation.isInitialized){
                 currentLocationMarker?.remove()
                 currentLocationMarker = mMap.addMarker(MarkerOptions().position(currentLocation).title("現在地"))
-                mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(currentLocation, 13f))
+                mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(currentLocation, 15f))
             }
         }
 
@@ -133,7 +133,7 @@ class TravelerActivity : AppCompatActivity(), OnMapReadyCallback, LocationListen
             currentLocationMarker?.remove()
             currentLocationMarker = mMap.addMarker(MarkerOptions().position(currentLocation).title("現在地"))
             if(firstLocationChange){
-                mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(currentLocation, 13f))
+                mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(currentLocation, 15f))
                 firstLocationChange = false
             }
         }
