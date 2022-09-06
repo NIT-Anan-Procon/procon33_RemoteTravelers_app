@@ -15,10 +15,14 @@ import com.example.procon33_remotetravelers_app.R
 import com.example.procon33_remotetravelers_app.services.CreateReportService
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
+import okhttp3.MediaType
+import okhttp3.MultipartBody
+import okhttp3.RequestBody
 import retrofit2.Retrofit
 import retrofit2.converter.moshi.MoshiConverterFactory
 import java.io.File
 import java.io.FileOutputStream
+import java.util.*
 import kotlin.concurrent.thread
 
 class CreateReportActivity : AppCompatActivity() {
@@ -52,26 +56,27 @@ class CreateReportActivity : AppCompatActivity() {
             Context.MODE_PRIVATE
         )
 
-        val file = File(directory, "file_name")
+        val file = File(directory, "image_name")
 
         if(photo != null) {
             FileOutputStream(file).use { stream ->
                 photo.compress(Bitmap.CompressFormat.JPEG, 100, stream)
-
             }
         }
 
         //保存したファイルを取得
-        val image = File(context.getFilesDir(), "file_name.jpg")
+        val image = File("/data/data/com.example.procon33_remotetravelers_app/app_image", "image_name")
 
         //ユーザーIDを取得
         val userId = getUserId().toInt()
+
+        val imageMulti :MultipartBody? = fixImage(photo, image)
 
         val keepButton = findViewById<Button>(R.id.keep_button)
         val backButton = findViewById<Button>(R.id.back_button)
 
         keepButton.setOnClickListener {
-            saveData(userId, image)
+            saveData(userId, imageMulti)
             finish()
         }
 
@@ -81,14 +86,13 @@ class CreateReportActivity : AppCompatActivity() {
     }
 
     //DBにレポートの内容を保存する(ネストが深くなりそうだったので関数にする)
-    private fun saveData(userId: Int, image: File){
+    private fun saveData(userId: Int, imageMulti:  MultipartBody?){
         thread {
             try {
-                Log.d("image", image.toString())
                 val service: CreateReportService =
                     retrofit.create(CreateReportService::class.java)
                 val createReportResponse = service.createReport(
-                    user_id = userId, image = image, comment = "a", excitement = 1, lat = 1.0, lon = 1.0
+                    user_id = userId, image = imageMulti, comment = "a", excitement = 1, lat = 1.0, lon = 1.0
                 ).execute().body()
                     ?: throw IllegalStateException("body is null")
 
@@ -109,5 +113,25 @@ class CreateReportActivity : AppCompatActivity() {
         val pref = getSharedPreferences("AppSettings", Context.MODE_PRIVATE)
         val userId = pref.getString("userId", "").toString()
         return userId
+    }
+
+    //DBに送るための画像データに変換
+    private fun fixImage(photo: Bitmap?, file: File): MultipartBody?{
+        //photoがnullでなければDBに送る画像データを適切な方に変換し作成する
+        if(photo != null) {
+            val requestBody = RequestBody.create(MediaType.parse("app_image?*"), file)
+
+            //ランダムな値の生成
+            val boundary = UUID.randomUUID().toString()
+            val imageMulti = MultipartBody.Builder("--" + boundary)
+                .setType(MultipartBody.FORM)
+                .addFormDataPart("image", file.name, requestBody)
+                .build()
+
+            return imageMulti
+        }
+        else {
+            return null
+        }
     }
 }
