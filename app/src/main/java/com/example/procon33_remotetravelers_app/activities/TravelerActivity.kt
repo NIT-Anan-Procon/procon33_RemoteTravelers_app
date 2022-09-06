@@ -158,6 +158,7 @@ class TravelerActivity : AppCompatActivity(), OnMapReadyCallback,
             createMarker()
             if(firstLocationChange){
                 mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(currentLocation, 15f))
+                firstLocationChange = false
                 return
             }
             if(track)
