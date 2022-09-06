@@ -64,7 +64,6 @@ class TravelerActivity : AppCompatActivity(), OnMapReadyCallback,
     private lateinit var locationManager: LocationManager
     private lateinit var currentLocation: LatLng
     private var userId by Delegates.notNull<Int>()
-    private var firstLocationChange = true
     private var track = true
     private var currentLocationMarker: Marker? = null
     private val requestPermissionLauncher = registerForActivityResult(
@@ -103,9 +102,10 @@ class TravelerActivity : AppCompatActivity(), OnMapReadyCallback,
         val currentLocationButton = findViewById<Button>(R.id.current_location_button)
         currentLocationButton.setOnClickListener {
             if(::mMap.isInitialized && ::currentLocation.isInitialized){
-                track = true
+                //ここはバグが起きた時用に一応置いてる
                 createMarker()
-                mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(currentLocation, 100f))
+                track = true
+                mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(currentLocation, 15f))
             }
         }
 
@@ -145,7 +145,7 @@ class TravelerActivity : AppCompatActivity(), OnMapReadyCallback,
             locationManager.requestLocationUpdates(
                 GPS_PROVIDER,
                 1000,
-                3f,
+                25f,
                 this)
     }
 
@@ -154,12 +154,6 @@ class TravelerActivity : AppCompatActivity(), OnMapReadyCallback,
         saveCurrentLocation()
         if(::mMap.isInitialized){
             createMarker()
-            if(firstLocationChange){
-                track = true
-                mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(currentLocation, 100f))
-                firstLocationChange = false
-                return
-            }
             if(track)
                 mMap.animateCamera(CameraUpdateFactory.newLatLng(currentLocation))
         }
