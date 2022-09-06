@@ -105,7 +105,7 @@ class TravelerActivity : AppCompatActivity(), OnMapReadyCallback,
                 //ここはバグが起きた時用に一応置いてる
                 createMarker()
                 track = true
-                mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(currentLocation, 15f))
+                mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(currentLocation, 100f))
             }
         }
 
@@ -145,7 +145,7 @@ class TravelerActivity : AppCompatActivity(), OnMapReadyCallback,
             locationManager.requestLocationUpdates(
                 GPS_PROVIDER,
                 1000,
-                25f,
+                4f,
                 this)
     }
 
