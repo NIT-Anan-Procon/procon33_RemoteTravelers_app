@@ -1,6 +1,6 @@
 package com.example.procon33_remotetravelers_app.services
 
-import com.example.procon33_remotetravelers_app.models.apis.startTravelData.StartTravelResponse
+import com.example.procon33_remotetravelers_app.models.apis.StartTravelResponse
 import retrofit2.Call
 import retrofit2.http.*
 import retrofit2.http.Field
