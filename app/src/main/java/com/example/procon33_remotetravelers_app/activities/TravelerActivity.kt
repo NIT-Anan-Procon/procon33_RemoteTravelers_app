@@ -145,7 +145,7 @@ class TravelerActivity : AppCompatActivity(), OnMapReadyCallback,
             locationManager.requestLocationUpdates(
                 GPS_PROVIDER,
                 1000,
-                4f,
+                3f,
                 this)
     }
 
