@@ -45,6 +45,7 @@ class TravelerActivity : AppCompatActivity(), OnMapReadyCallback, LocationListen
     private lateinit var binding: ActivityTravelerBinding
     private lateinit var locationManager: LocationManager
     private lateinit var currentLocation: LatLng
+    private var firstLocationChange: Boolean = true
     private var currentLocationMarker: Marker? = null
     private val requestPermissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestPermission()
@@ -82,7 +83,7 @@ class TravelerActivity : AppCompatActivity(), OnMapReadyCallback, LocationListen
             if(::mMap.isInitialized && ::currentLocation.isInitialized){
                 currentLocationMarker?.remove()
                 currentLocationMarker = mMap.addMarker(MarkerOptions().position(currentLocation).title("現在地"))
-                mMap.animateCamera(CameraUpdateFactory.newLatLng(currentLocation))
+                mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(currentLocation, 13f))
             }
         }
 
@@ -131,7 +132,10 @@ class TravelerActivity : AppCompatActivity(), OnMapReadyCallback, LocationListen
         if(::mMap.isInitialized){
             currentLocationMarker?.remove()
             currentLocationMarker = mMap.addMarker(MarkerOptions().position(currentLocation).title("現在地"))
-            mMap.animateCamera(CameraUpdateFactory.newLatLng(currentLocation))
+            if(firstLocationChange){
+                mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(currentLocation, 13f))
+                firstLocationChange = false
+            }
         }
     }
 
@@ -145,7 +149,7 @@ class TravelerActivity : AppCompatActivity(), OnMapReadyCallback, LocationListen
 
     override fun onMapReady(googleMap: GoogleMap) {
         mMap = googleMap
-        mMap.setMinZoomPreference(8f)
+        mMap.setMinZoomPreference(9f)
     }
 
     private val resultLauncher = registerForActivityResult(
