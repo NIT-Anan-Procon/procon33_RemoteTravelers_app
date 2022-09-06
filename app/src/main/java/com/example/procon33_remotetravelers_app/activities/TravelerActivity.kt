@@ -24,6 +24,7 @@ import androidx.activity.result.contract.ActivityResultContracts.StartActivityFo
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.core.content.ContextCompat.startActivity
 import com.example.procon33_remotetravelers_app.BuildConfig
 import com.example.procon33_remotetravelers_app.R
 import com.example.procon33_remotetravelers_app.databinding.ActivityTravelerBinding
@@ -65,6 +66,7 @@ class TravelerActivity : AppCompatActivity(), OnMapReadyCallback,
     private lateinit var currentLocation: LatLng
     private var userId by Delegates.notNull<Int>()
     private var track = true
+    private var firstLocationChange = true
     private var currentLocationMarker: Marker? = null
     private val requestPermissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestPermission()
@@ -105,7 +107,7 @@ class TravelerActivity : AppCompatActivity(), OnMapReadyCallback,
                 //ここはバグが起きた時用に一応置いてる
                 createMarker()
                 track = true
-                mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(currentLocation, 100f))
+                mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(currentLocation, 15f))
             }
         }
 
@@ -145,7 +147,7 @@ class TravelerActivity : AppCompatActivity(), OnMapReadyCallback,
             locationManager.requestLocationUpdates(
                 GPS_PROVIDER,
                 1000,
-                3f,
+                20f,
                 this)
     }
 
@@ -154,6 +156,10 @@ class TravelerActivity : AppCompatActivity(), OnMapReadyCallback,
         saveCurrentLocation()
         if(::mMap.isInitialized){
             createMarker()
+            if(firstLocationChange){
+                mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(currentLocation, 15f))
+                return
+            }
             if(track)
                 mMap.animateCamera(CameraUpdateFactory.newLatLng(currentLocation))
         }
