@@ -43,6 +43,10 @@ class CreateReportActivity : AppCompatActivity() {
         val intent = intent
         val photo = intent.getParcelableExtra<Bitmap>("data")
 
+        //位置情報のデータの受け取り
+        val lat = intent.getDoubleExtra("lat", 0.0)
+        val lon = intent.getDoubleExtra("lon", 0.0)
+
         // 受け取った写真データを表示
         val imageView = findViewById<ImageView>(R.id.report_image)
         imageView.setImageBitmap(photo)
@@ -65,7 +69,7 @@ class CreateReportActivity : AppCompatActivity() {
         }
 
         //保存したファイルを取得
-        val image = File("/data/com.example.procon33_remotetravelers_app/app_image", "image_name.jpg")
+        val image = File("data/data/com.example.procon33_remotetravelers_app/app_image", "image_name.jpg")
         Log.d("image", image.toString())
 
         //ユーザーIDを取得
@@ -79,7 +83,7 @@ class CreateReportActivity : AppCompatActivity() {
 
         keepButton.setOnClickListener {
             val comment = commentText.text.toString()
-            saveData(userId, imageMulti, comment)
+            saveData(userId, imageMulti, comment, lat, lon)
             finish()
         }
 
@@ -89,13 +93,13 @@ class CreateReportActivity : AppCompatActivity() {
     }
 
     //DBにレポートの内容を保存する(ネストが深くなりそうだったので関数にする)
-    private fun saveData(userId: Int, imageMulti:  MultipartBody?, comment: String){
+    private fun saveData(userId: Int, imageMulti:  MultipartBody?, comment: String, lat: Double, lon: Double){
         thread {
             try {
                 val service: CreateReportService =
                     retrofit.create(CreateReportService::class.java)
                 val createReportResponse = service.createReport(
-                    user_id = userId, image = imageMulti, comment = comment, excitement = 1, lat = 1.0, lon = 1.0
+                    user_id = userId, image = imageMulti, comment = comment, excitement = 1, lat = lat, lon = lon
                 ).execute().body()
                     ?: throw IllegalStateException("body is null")
 
