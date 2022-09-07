@@ -47,8 +47,8 @@
             android:text="@string/comment"
             android:textColor="@color/black"
             android:textSize="24sp"
-            android:background="@color/comment_open_button"
-            app:backgroundTint="@color/comment_open_button" />
+            android:background="@drawable/comment_button_design"
+            app:backgroundTint="@null" />
 
         <LinearLayout
             android:id="@+id/ll"
@@ -63,7 +63,8 @@
                 android:layout_height="50dp"
                 android:text=""
                 android:textColor="@color/black"
-                android:backgroundTint="@drawable/participants_input_design"
+                android:background="@drawable/comment_design"
+                app:backgroundTint="@null"
                 />
 
             <Button
@@ -72,7 +73,8 @@
                 android:layout_height="50dp"
                 android:text=""
                 android:textColor="@color/black"
-                android:backgroundTint="@drawable/participants_input_design"
+                android:background="@drawable/comment_design"
+                app:backgroundTint="@null"
                 />
 
             <Button
@@ -81,7 +83,8 @@
                 android:layout_height="50dp"
                 android:text=""
                 android:textColor="@color/black"
-                android:backgroundTint="@drawable/participants_input_design"
+                android:background="@drawable/comment_design"
+                app:backgroundTint="@null"
                 />
 
         </LinearLayout>
