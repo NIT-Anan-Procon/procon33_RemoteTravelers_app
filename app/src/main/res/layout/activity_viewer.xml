@@ -91,26 +91,30 @@
 
         <EditText
             android:id="@+id/comment_text"
-            android:layout_width="450dp"
+            android:layout_width="330dp"
             android:layout_height="50dp"
             android:layout_marginTop="200dp"
+            android:autofillHints=""
             android:background="@drawable/participants_input_design"
             android:ems="10"
-            android:gravity="center"
+            android:gravity="left|center"
             android:hint="@string/report_comment_hint"
             android:inputType=""
-            android:textColorHint="@color/gray"
-            android:autofillHints="" />
+            android:paddingStart="10dp"
+            android:textColorHint="@color/gray" />
 
         <Button
             android:id="@+id/comment_submit"
             android:layout_width="80dp"
             android:layout_height="50dp"
-            android:layout_marginTop="200dp"
             android:layout_gravity="right"
-            android:background="#FFA0A0"
+            android:layout_marginTop="200dp"
+            android:background="@drawable/comment_submit_design"
+            android:paddingStart="10dp"
             android:text="@string/comment_submit_button"
-            android:textColor="@color/black" />
+            android:textColor="@color/black"
+            android:textSize="20sp"
+            app:backgroundTint="@null" />
 
     </FrameLayout>
 
