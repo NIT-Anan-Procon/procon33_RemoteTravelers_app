@@ -62,8 +62,9 @@
                 android:layout_width="match_parent"
                 android:layout_height="50dp"
                 android:text=""
-                android:textColor="#000000"
-                android:backgroundTint="@color/white" />
+                android:textColor="@color/black"
+                android:backgroundTint="@drawable/participants_input_design"
+                />
 
             <Button
                 android:id="@+id/button2"
@@ -71,7 +72,8 @@
                 android:layout_height="50dp"
                 android:text=""
                 android:textColor="@color/black"
-                android:backgroundTint="@color/white" />
+                android:backgroundTint="@drawable/participants_input_design"
+                />
 
             <Button
                 android:id="@+id/button3"
@@ -79,7 +81,8 @@
                 android:layout_height="50dp"
                 android:text=""
                 android:textColor="@color/black"
-                android:backgroundTint="@color/white" />
+                android:backgroundTint="@drawable/participants_input_design"
+                />
 
         </LinearLayout>
 

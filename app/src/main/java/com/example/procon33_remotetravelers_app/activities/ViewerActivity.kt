@@ -1,8 +1,11 @@
 package com.example.procon33_remotetravelers_app.activities
+import android.animation.ObjectAnimator
 import android.content.Intent
 import android.os.Bundle
+import android.view.View
 import android.widget.Button
 import androidx.appcompat.app.AppCompatActivity
+import com.example.procon33_remotetravelers_app.R
 import com.example.procon33_remotetravelers_app.databinding.ActivityViewerBinding
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
@@ -35,7 +38,7 @@ class ViewerActivity : AppCompatActivity(), OnMapReadyCallback {
             finish()
         }
 
-        val button_comment = findViewById<Button>(com.example.procon33_remotetravelers_app.R.id.comment_button)
+        val button_comment = findViewById<Button>(com.example.procon33_remotetravelers_app.R.id.comment_open_button)
         button_comment.setOnClickListener { openComment() }
     }
 
@@ -58,6 +61,10 @@ class ViewerActivity : AppCompatActivity(), OnMapReadyCallback {
     }
 
     private fun openComment() {
-
+        val target: View = findViewById(R.id.comments) // 対象となるオブジェクト
+        ObjectAnimator.ofFloat(target, "translationY", 0f, -550f).apply {
+            duration = 200 // ミリ秒
+            start() // アニメーション開始
+        }
     }
 }
