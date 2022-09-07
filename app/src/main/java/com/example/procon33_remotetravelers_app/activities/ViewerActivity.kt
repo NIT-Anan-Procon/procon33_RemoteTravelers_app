@@ -18,6 +18,7 @@ import com.google.android.gms.maps.model.MarkerOptions
 import com.example.procon33_remotetravelers_app.databinding.ActivityViewerBinding
 import com.example.procon33_remotetravelers_app.models.apis.GetInfoResponse
 import com.example.procon33_remotetravelers_app.services.GetInfoService
+import com.google.android.gms.maps.model.Marker
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import retrofit2.Retrofit
@@ -40,12 +41,20 @@ class ViewerActivity : AppCompatActivity(), OnMapReadyCallback {
     private lateinit var mMap: GoogleMap
     private lateinit var binding: ActivityViewerBinding
     private lateinit var info: GetInfoResponse
+    private var track = true
+    private var firstTrack = true
+    private var currentLocationMarker: Marker? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val userId = intent.getIntExtra("userId", 0)
         Timer().scheduleAtFixedRate(0, 2000){
             getInfo(userId)
+            Handler(Looper.getMainLooper()).post {
+                if (::info.isInitialized && ::mMap.isInitialized) {
+                    displayCurrentLocation()
+                }
+            }
         }
 
         binding = ActivityViewerBinding.inflate(layoutInflater)
@@ -66,11 +75,8 @@ class ViewerActivity : AppCompatActivity(), OnMapReadyCallback {
 
     override fun onMapReady(googleMap: GoogleMap) {
         mMap = googleMap
-
-        // Add a marker in Sydney and move the camera
-        val sydney = LatLng(-34.0, 151.0)
-        mMap.addMarker(MarkerOptions().position(sydney).title("Marker in Sydney"))
-        mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney))
+        val tokyo = LatLng(35.90684931, 139.68896404)
+        mMap.moveCamera(CameraUpdateFactory.newLatLng(tokyo))
     }
 
     private fun getInfo(userId: Int){
@@ -96,5 +102,18 @@ class ViewerActivity : AppCompatActivity(), OnMapReadyCallback {
                 }
             }
         }
+    }
+
+    private fun displayCurrentLocation(){
+        val currentLocation = LatLng(info.current_location.lat, info.current_location.lon)
+        currentLocationMarker?.remove()
+        currentLocationMarker = mMap.addMarker(MarkerOptions().position(currentLocation).title("現在地"))
+        if(firstTrack) {
+            mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(currentLocation, 15f))
+            mMap.setMinZoomPreference(9f)
+            return
+        }
+        if(track)
+            mMap.animateCamera(CameraUpdateFactory.newLatLng(currentLocation))
     }
 }
