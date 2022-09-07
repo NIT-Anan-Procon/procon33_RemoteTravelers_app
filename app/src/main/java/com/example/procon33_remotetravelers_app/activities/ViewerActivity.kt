@@ -77,7 +77,7 @@ class ViewerActivity : AppCompatActivity(), OnMapReadyCallback {
 
     override fun onMapReady(googleMap: GoogleMap) {
         mMap = googleMap
-        val tokyo = LatLng(35.90684931, 139.68896404)
+        val tokyo = LatLng(35.90684931, 180 - 139.68896404)
         mMap.moveCamera(CameraUpdateFactory.newLatLng(tokyo))
     }
 
@@ -114,9 +114,13 @@ class ViewerActivity : AppCompatActivity(), OnMapReadyCallback {
         currentLocationMarker?.remove()
         currentLocationMarker = mMap.addMarker(MarkerOptions().position(currentLocation).title("現在地"))
         if(firstTrack) {
-            mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(currentLocation, 15f))
+            mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(LatLng(35.90684931, 139.68896404), 4f))
             thread {
-                Thread.sleep(1000)
+                Thread.sleep(1500)
+                Handler(Looper.getMainLooper()).post {
+                    mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(currentLocation, 15f))
+                }
+                Thread.sleep(2000)
                 Handler(Looper.getMainLooper()).post {
                     mMap.setMinZoomPreference(7f)
                 }
