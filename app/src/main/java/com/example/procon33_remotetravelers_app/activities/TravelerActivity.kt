@@ -43,7 +43,8 @@ import kotlin.concurrent.thread
 import kotlin.properties.Delegates
 
 
-class TravelerActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener {
+class TravelerActivity : AppCompatActivity(), OnMapReadyCallback,
+    LocationListener, GoogleMap.OnMapClickListener {
 
     companion object {
         const val CAMERA_REQUEST_CODE = 1
@@ -63,7 +64,8 @@ class TravelerActivity : AppCompatActivity(), OnMapReadyCallback, LocationListen
     private lateinit var locationManager: LocationManager
     private lateinit var currentLocation: LatLng
     private var userId by Delegates.notNull<Int>()
-    private var firstLocationChange: Boolean = true
+    private var track = true
+    private var firstLocationChange = true
     private var currentLocationMarker: Marker? = null
     private val requestPermissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestPermission()
@@ -98,11 +100,12 @@ class TravelerActivity : AppCompatActivity(), OnMapReadyCallback, LocationListen
             resultLauncher.launch(intent)
         }
 
-        val testButton = findViewById<Button>(R.id.current_location_button)
-        testButton.setOnClickListener {
+        val currentLocationButton = findViewById<Button>(R.id.current_location_button)
+        currentLocationButton.setOnClickListener {
             if(::mMap.isInitialized && ::currentLocation.isInitialized){
-                currentLocationMarker?.remove()
-                currentLocationMarker = mMap.addMarker(MarkerOptions().position(currentLocation).title("現在地"))
+                //ここはバグが起きた時用に一応置いてる
+                createMarker()
+                track = true
                 mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(currentLocation, 15f))
             }
         }
@@ -143,7 +146,7 @@ class TravelerActivity : AppCompatActivity(), OnMapReadyCallback, LocationListen
             locationManager.requestLocationUpdates(
                 GPS_PROVIDER,
                 1000,
-                25f,
+                20f,
                 this)
     }
 
@@ -151,12 +154,14 @@ class TravelerActivity : AppCompatActivity(), OnMapReadyCallback, LocationListen
         currentLocation = LatLng(location.latitude, location.longitude)
         saveCurrentLocation()
         if(::mMap.isInitialized){
-            currentLocationMarker?.remove()
-            currentLocationMarker = mMap.addMarker(MarkerOptions().position(currentLocation).title("現在地"))
+            createMarker()
             if(firstLocationChange){
                 mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(currentLocation, 15f))
                 firstLocationChange = false
+                return
             }
+            if(track)
+                mMap.animateCamera(CameraUpdateFactory.newLatLng(currentLocation))
         }
     }
 
@@ -171,6 +176,15 @@ class TravelerActivity : AppCompatActivity(), OnMapReadyCallback, LocationListen
     override fun onMapReady(googleMap: GoogleMap) {
         mMap = googleMap
         mMap.setMinZoomPreference(9f)
+    }
+
+    override fun onMapClick(point: LatLng) {
+        track = false
+    }
+
+    private fun createMarker(){
+        currentLocationMarker?.remove()
+        currentLocationMarker = mMap.addMarker(MarkerOptions().position(currentLocation).title("現在地"))
     }
 
     private fun saveCurrentLocation(){
@@ -194,11 +208,6 @@ class TravelerActivity : AppCompatActivity(), OnMapReadyCallback, LocationListen
                 Handler(Looper.getMainLooper()).post {
                     // エラー内容を出力
                     Log.e("error", e.message.toString())
-
-                    // 通信に失敗したことを通知
-                    val toast =
-                        Toast.makeText(this, "通信に失敗しました", Toast.LENGTH_SHORT)
-                    toast.show()
                 }
             }
         }
@@ -218,7 +227,7 @@ class TravelerActivity : AppCompatActivity(), OnMapReadyCallback, LocationListen
                     // CreateReportActivityに写真データを持って遷移する
                     val photo = data.getParcelableExtra<Bitmap>("data")
                     val intent = Intent(this,CreateReportActivity::class.java)
-                    intent.putExtra("data",photo)
+                    intent.putExtra("data", photo)
                     startActivity(intent)
                 }
             }
