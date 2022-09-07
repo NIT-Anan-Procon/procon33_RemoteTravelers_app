@@ -115,6 +115,12 @@ class ViewerActivity : AppCompatActivity(), OnMapReadyCallback {
         currentLocationMarker = mMap.addMarker(MarkerOptions().position(currentLocation).title("現在地"))
         if(firstTrack) {
             mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(currentLocation, 15f))
+            thread {
+                Thread.sleep(1000)
+                Handler(Looper.getMainLooper()).post {
+                    mMap.setMinZoomPreference(7f)
+                }
+            }
             return
         }
         if(track)
