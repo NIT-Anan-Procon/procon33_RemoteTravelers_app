@@ -1,4 +1,5 @@
 package com.example.procon33_remotetravelers_app.activities
+
 import android.animation.ObjectAnimator
 import android.content.Intent
 import android.os.Bundle
@@ -6,6 +7,7 @@ import android.view.View
 import android.widget.Button
 import androidx.appcompat.app.AppCompatActivity
 import com.example.procon33_remotetravelers_app.R
+
 import com.example.procon33_remotetravelers_app.databinding.ActivityViewerBinding
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
@@ -14,7 +16,6 @@ import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MarkerOptions
 
-
 class ViewerActivity : AppCompatActivity(), OnMapReadyCallback {
 
     private lateinit var mMap: GoogleMap
@@ -22,6 +23,7 @@ class ViewerActivity : AppCompatActivity(), OnMapReadyCallback {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        val userId = intent.getIntExtra("userId", 0)
 
         binding = ActivityViewerBinding.inflate(layoutInflater)
         setContentView(binding.root)
@@ -34,8 +36,8 @@ class ViewerActivity : AppCompatActivity(), OnMapReadyCallback {
         val button = findViewById<Button>(R.id.pin_button)
         button.setOnClickListener {
             val intent = Intent(this, SuggestDestinationActivity::class.java)
+            intent.putExtra("userId", userId)
             startActivity(intent)
-            finish()
         }
 
         var fragment = false
@@ -46,15 +48,6 @@ class ViewerActivity : AppCompatActivity(), OnMapReadyCallback {
         }
     }
 
-    /**
-     * Manipulates the map once available.
-     * This callback is triggered when the map is ready to be used.
-     * This is where we can add markers or lines, add listeners or move the camera. In this case,
-     * we just add a marker near Sydney, Australia.
-     * If Google Play services is not installed on the device, the user will be prompted to install
-     * it inside the SupportMapFragment. This method will only be triggered once the user has
-     * installed Google Play services and returned to the app.
-     */
     override fun onMapReady(googleMap: GoogleMap) {
         mMap = googleMap
 
