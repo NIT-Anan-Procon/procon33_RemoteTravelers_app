@@ -14,6 +14,7 @@
     <string name="cancel_button_text">取り消す</string>
     <string name="report_title_hint">タイトルを入力</string>
     <string name="report_image">Report_image</string>
+    <string name="current_location_button">現在地</string>
     <string name="decide_suggestion_button">ピンを決定する</string>
     <string name="cancel_suggestion_button">ピンの設置をキャンセル</string>
 </resources>
