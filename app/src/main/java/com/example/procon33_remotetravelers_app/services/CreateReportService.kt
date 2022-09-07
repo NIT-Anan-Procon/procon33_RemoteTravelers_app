@@ -6,14 +6,15 @@ import okhttp3.MultipartBody
 import retrofit2.Call
 import retrofit2.http.*
 
-interface CreateReportService {
+sealed interface CreateReportService{
+    @Multipart
     @POST("/api/traveler/add-report")
     fun createReport(
-        @Header("user_id")user_id: Int,
-        @Body image: MultipartBody?,
-        @Header("comment")comment: String,
-        @Header("excitement")excitement: Int,
-        @Header("lat")lat: Double,
-        @Header("lon")lon: Double
+        @Part("user_id")user_id: Int,
+        @Part("image")image: MultipartBody?,
+        @Part("comment")comment: String,
+        @Part("excitement")excitement: Int,
+        @Part("lat")lat: Double,
+        @Part("lon")lon: Double
     ): Call<CreateReportResponse>
 }

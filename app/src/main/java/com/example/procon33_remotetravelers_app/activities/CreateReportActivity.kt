@@ -9,6 +9,7 @@ import android.os.Handler
 import android.os.Looper
 import android.util.Log
 import android.widget.Button
+import android.widget.EditText
 import android.widget.ImageView
 import com.example.procon33_remotetravelers_app.BuildConfig
 import com.example.procon33_remotetravelers_app.R
@@ -22,7 +23,6 @@ import retrofit2.Retrofit
 import retrofit2.converter.moshi.MoshiConverterFactory
 import java.io.File
 import java.io.FileOutputStream
-import java.util.*
 import kotlin.concurrent.thread
 
 class CreateReportActivity : AppCompatActivity() {
@@ -56,7 +56,7 @@ class CreateReportActivity : AppCompatActivity() {
             Context.MODE_PRIVATE
         )
 
-        val file = File(directory, "image_name")
+        val file = File(directory, "image_name.jpg")
 
         if(photo != null) {
             FileOutputStream(file).use { stream ->
@@ -65,18 +65,21 @@ class CreateReportActivity : AppCompatActivity() {
         }
 
         //保存したファイルを取得
-        val image = File("/data/data/com.example.procon33_remotetravelers_app/app_image", "image_name")
+        val image = File("/data/com.example.procon33_remotetravelers_app/app_image", "image_name.jpg")
+        Log.d("image", image.toString())
 
         //ユーザーIDを取得
         val userId = getUserId().toInt()
 
-        val imageMulti :MultipartBody? = fixImage(photo, image)
+        val imageMulti :MultipartBody? = fixImage(image)
 
         val keepButton = findViewById<Button>(R.id.keep_button)
         val backButton = findViewById<Button>(R.id.back_button)
+        val commentText = findViewById<EditText>(R.id.comment)
 
         keepButton.setOnClickListener {
-            saveData(userId, imageMulti)
+            val comment = commentText.text.toString()
+            saveData(userId, imageMulti, comment)
             finish()
         }
 
@@ -86,13 +89,13 @@ class CreateReportActivity : AppCompatActivity() {
     }
 
     //DBにレポートの内容を保存する(ネストが深くなりそうだったので関数にする)
-    private fun saveData(userId: Int, imageMulti:  MultipartBody?){
+    private fun saveData(userId: Int, imageMulti:  MultipartBody?, comment: String){
         thread {
             try {
                 val service: CreateReportService =
                     retrofit.create(CreateReportService::class.java)
                 val createReportResponse = service.createReport(
-                    user_id = userId, image = imageMulti, comment = "a", excitement = 1, lat = 1.0, lon = 1.0
+                    user_id = userId, image = imageMulti, comment = comment, excitement = 1, lat = 1.0, lon = 1.0
                 ).execute().body()
                     ?: throw IllegalStateException("body is null")
 
@@ -116,22 +119,16 @@ class CreateReportActivity : AppCompatActivity() {
     }
 
     //DBに送るための画像データに変換
-    private fun fixImage(photo: Bitmap?, file: File): MultipartBody?{
-        //photoがnullでなければDBに送る画像データを適切な方に変換し作成する
-        if(photo != null) {
-            val requestBody = RequestBody.create(MediaType.parse("app_image?*"), file)
+    private fun fixImage(file: File): MultipartBody?{
+        val requestBody = RequestBody.create(MediaType.parse("/data/data/com.example.procon33_remotetravelers_app/app_image"), file)
 
-            //ランダムな値の生成
-            val boundary = UUID.randomUUID().toString()
-            val imageMulti = MultipartBody.Builder("--" + boundary)
-                .setType(MultipartBody.FORM)
-                .addFormDataPart("image", file.name, requestBody)
-                .build()
+        //ランダムな値の生成
+//        val boundary = UUID.randomUUID().toString()
+        val imageMulti = MultipartBody.Builder()
+            .setType(MultipartBody.FORM)
+            .addFormDataPart("image", "image_name.jpg", requestBody)
+            .build()
 
-            return imageMulti
-        }
-        else {
-            return null
-        }
+        return imageMulti
     }
 }
