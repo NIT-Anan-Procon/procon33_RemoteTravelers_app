@@ -16,4 +16,5 @@
     <string name="report_image">Report_image</string>
     <string name="determine_pin_button">ピンを決定する</string>
     <string name="comment">コメントを開く</string>
+    <string name="comment_submit_button">送信</string>
 </resources>
