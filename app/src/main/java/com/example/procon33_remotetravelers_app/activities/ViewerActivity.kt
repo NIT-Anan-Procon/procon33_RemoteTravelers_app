@@ -41,12 +41,14 @@ class ViewerActivity : AppCompatActivity(), OnMapReadyCallback {
     private lateinit var mMap: GoogleMap
     private lateinit var binding: ActivityViewerBinding
     private lateinit var info: GetInfoResponse
+    private lateinit var lastLocation: LatLng
     private var track = true
     private var firstTrack = true
     private var currentLocationMarker: Marker? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        lastLocation = LatLng(0.0, 0.0)
         val userId = intent.getIntExtra("userId", 0)
         Timer().scheduleAtFixedRate(0, 2000){
             getInfo(userId)
@@ -106,11 +108,13 @@ class ViewerActivity : AppCompatActivity(), OnMapReadyCallback {
 
     private fun displayCurrentLocation(){
         val currentLocation = LatLng(info.current_location.lat, info.current_location.lon)
+        if(lastLocation == currentLocation)
+            return
+        lastLocation = currentLocation
         currentLocationMarker?.remove()
         currentLocationMarker = mMap.addMarker(MarkerOptions().position(currentLocation).title("現在地"))
         if(firstTrack) {
             mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(currentLocation, 15f))
-            mMap.setMinZoomPreference(9f)
             return
         }
         if(track)
