@@ -28,10 +28,10 @@ class ViewerActivity : AppCompatActivity(), OnMapReadyCallback {
 
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         val mapFragment = supportFragmentManager
-            .findFragmentById(com.example.procon33_remotetravelers_app.R.id.map) as SupportMapFragment
+            .findFragmentById(R.id.map) as SupportMapFragment
         mapFragment.getMapAsync(this)
 
-        val button = findViewById<Button>(com.example.procon33_remotetravelers_app.R.id.pin_button)
+        val button = findViewById<Button>(R.id.pin_button)
         button.setOnClickListener {
             val intent = Intent(this, SuggestDestinationActivity::class.java)
             startActivity(intent)
@@ -39,7 +39,7 @@ class ViewerActivity : AppCompatActivity(), OnMapReadyCallback {
         }
 
         var fragment = false
-        val button_comment = findViewById<Button>(com.example.procon33_remotetravelers_app.R.id.comment_door_button)
+        val button_comment = findViewById<Button>(R.id.comment_door_button)
         button_comment.setOnClickListener {
             fragment = !fragment
             openComment(fragment)
