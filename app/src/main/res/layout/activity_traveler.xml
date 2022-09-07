@@ -39,4 +39,85 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/camera_button"
         tools:ignore="TextContrastCheck" />
+    <FrameLayout
+        android:id="@+id/comments"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="-50dp"
+        app:layout_constraintTop_toBottomOf="@+id/map">
+
+        <Button
+            android:id="@+id/comment_door_button"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:text="@string/comment"
+            android:textColor="@color/black"
+            android:textSize="24sp"
+            android:background="@drawable/comment_button_design"
+            app:backgroundTint="@null" />
+
+        <LinearLayout
+            android:id="@+id/ll"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="50dp"
+            android:orientation="vertical">
+
+            <Button
+                android:id="@+id/button"
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:text=""
+                android:textColor="@color/black"
+                android:background="@drawable/comment_design"
+                app:backgroundTint="@null"
+                />
+
+            <Button
+                android:id="@+id/button2"
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:text=""
+                android:textColor="@color/black"
+                android:background="@drawable/comment_design"
+                app:backgroundTint="@null"
+                />
+
+            <Button
+                android:id="@+id/button3"
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:text=""
+                android:textColor="@color/black"
+                android:background="@drawable/comment_design"
+                app:backgroundTint="@null"
+                />
+
+        </LinearLayout>
+
+        <EditText
+            android:id="@+id/comment_text"
+            android:layout_width="450dp"
+            android:layout_height="50dp"
+            android:layout_marginTop="200dp"
+            android:background="@drawable/participants_input_design"
+            android:ems="10"
+            android:gravity="center"
+            android:hint="@string/report_comment_hint"
+            android:inputType=""
+            android:textColorHint="@color/gray"
+            android:autofillHints="" />
+
+        <Button
+            android:id="@+id/comment_submit"
+            android:layout_width="80dp"
+            android:layout_height="50dp"
+            android:layout_marginTop="200dp"
+            android:layout_gravity="right"
+            android:background="#FFA0A0"
+            android:text="@string/comment_submit_button"
+            android:textColor="@color/black" />
+
+    </FrameLayout>
+
 </androidx.constraintlayout.widget.ConstraintLayout>

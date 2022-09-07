@@ -44,7 +44,7 @@ class ViewerActivity : AppCompatActivity(), OnMapReadyCallback {
         val button_comment = findViewById<Button>(R.id.comment_door_button)
         button_comment.setOnClickListener {
             fragment = !fragment
-            openComment(fragment)
+            moveComment(fragment)
         }
     }
 
@@ -57,7 +57,7 @@ class ViewerActivity : AppCompatActivity(), OnMapReadyCallback {
         mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney))
     }
 
-    private fun openComment(fragment: Boolean) {
+    private fun moveComment(fragment: Boolean) {
         val target: View = findViewById(R.id.comments) // 対象となるオブジェクト
         val destination = if (fragment) -550f else 0f
         ObjectAnimator.ofFloat(target, "translationY", destination).apply {
