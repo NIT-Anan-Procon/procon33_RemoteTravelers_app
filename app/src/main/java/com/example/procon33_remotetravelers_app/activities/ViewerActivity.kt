@@ -38,8 +38,12 @@ class ViewerActivity : AppCompatActivity(), OnMapReadyCallback {
             finish()
         }
 
-        val button_comment = findViewById<Button>(com.example.procon33_remotetravelers_app.R.id.comment_open_button)
-        button_comment.setOnClickListener { openComment() }
+        var fragment = false
+        val button_comment = findViewById<Button>(com.example.procon33_remotetravelers_app.R.id.comment_door_button)
+        button_comment.setOnClickListener {
+            fragment = !fragment
+            openComment(fragment)
+        }
     }
 
     /**
@@ -60,9 +64,10 @@ class ViewerActivity : AppCompatActivity(), OnMapReadyCallback {
         mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney))
     }
 
-    private fun openComment() {
+    private fun openComment(fragment: Boolean) {
         val target: View = findViewById(R.id.comments) // 対象となるオブジェクト
-        ObjectAnimator.ofFloat(target, "translationY", 0f, -550f).apply {
+        val destination = if (fragment) -550f else 0f
+        ObjectAnimator.ofFloat(target, "translationY", destination).apply {
             duration = 200 // ミリ秒
             start() // アニメーション開始
         }
