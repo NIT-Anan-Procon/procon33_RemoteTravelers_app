@@ -161,17 +161,20 @@ class ViewerActivity : AppCompatActivity(), OnMapReadyCallback {
         }
     }
 
-    private fun displayCurrentLocation(){
+    private fun displayCurrentLocation() {
         val currentLocation = LatLng(info.current_location.lat, info.current_location.lon)
-        if(lastLocation != currentLocation) {
-            lastLocation = currentLocation
+        if (lastLocation != currentLocation) {
             currentLocationMarker?.remove()
             currentLocationMarker =
                 mMap.addMarker(MarkerOptions().position(currentLocation).title("現在地"))
+            if (track) {
+                mMap.animateCamera(CameraUpdateFactory.newLatLng(currentLocation))
+            }
+            lastLocation = currentLocation
         }
-        if(firstTrack) {
+        if (firstTrack) {
             mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(currentLocation, 15f))
-            if(setUpped) {
+            if (setUpped) {
                 thread {
                     Thread.sleep(2000)
                     Handler(Looper.getMainLooper()).post {
@@ -181,10 +184,7 @@ class ViewerActivity : AppCompatActivity(), OnMapReadyCallback {
                 setUpped = false
             }
             firstTrack = false
-            return
         }
-        if(lastLocation != currentLocation && track)
-            mMap.animateCamera(CameraUpdateFactory.newLatLng(currentLocation))
     }
 
     private fun moveComment(fragment: Boolean) {
