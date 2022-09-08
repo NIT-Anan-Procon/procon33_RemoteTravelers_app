@@ -52,6 +52,15 @@ class ViewerActivity : AppCompatActivity(), OnMapReadyCallback {
         super.onCreate(savedInstanceState)
         lastLocation = LatLng(0.0, 0.0)
         val userId = intent.getIntExtra("userId", 0)
+        thread {
+            Thread.sleep(2000)
+            getInfo(userId)
+            Handler(Looper.getMainLooper()).post {
+                if (::info.isInitialized && ::mMap.isInitialized) {
+                    displayCurrentLocation()
+                }
+            }
+        }
         Timer().scheduleAtFixedRate(0, 5000){
             getInfo(userId)
             Handler(Looper.getMainLooper()).post {
@@ -77,8 +86,8 @@ class ViewerActivity : AppCompatActivity(), OnMapReadyCallback {
         }
 
         var fragment = false
-        val button_comment = findViewById<Button>(R.id.comment_door_button)
-        button_comment.setOnClickListener {
+        val buttonComment = findViewById<Button>(R.id.comment_door_button)
+        buttonComment.setOnClickListener {
             fragment = !fragment
             moveComment(fragment)
         }
@@ -89,7 +98,7 @@ class ViewerActivity : AppCompatActivity(), OnMapReadyCallback {
         val tokyo = LatLng(35.90684931, 139.68896404)
         mMap.moveCamera(CameraUpdateFactory.newLatLng(LatLng(tokyo.latitude, 180 - tokyo.longitude)))
         thread {
-            Thread.sleep(500)
+            Thread.sleep(300)
             Handler(Looper.getMainLooper()).post {
                 mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(tokyo, 4f))
             }
