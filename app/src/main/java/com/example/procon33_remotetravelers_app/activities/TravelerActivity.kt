@@ -1,6 +1,7 @@
 package com.example.procon33_remotetravelers_app.activities
 
 import android.Manifest
+import android.animation.ObjectAnimator
 import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
@@ -16,6 +17,7 @@ import android.os.Looper
 import android.provider.MediaStore
 import android.provider.Settings
 import android.util.Log
+import android.view.View
 import android.widget.Button
 import android.widget.Toast
 import androidx.activity.result.ActivityResult
@@ -115,6 +117,13 @@ class TravelerActivity : AppCompatActivity(), OnMapReadyCallback,
             requestPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
         } else {
             locationStart()
+        }
+
+        var fragment = false
+        val button_comment = findViewById<Button>(R.id.comment_door_button)
+        button_comment.setOnClickListener {
+            fragment = !fragment
+            moveComment(fragment)
         }
     }
 
@@ -236,6 +245,15 @@ class TravelerActivity : AppCompatActivity(), OnMapReadyCallback,
                     startActivity(intent)
                 }
             }
+        }
+    }
+
+    private fun moveComment(fragment: Boolean) {
+        val target: View = findViewById(R.id.comments) // 対象となるオブジェクト
+        val destination = if (fragment) -550f else 0f
+        ObjectAnimator.ofFloat(target, "translationY", destination).apply {
+            duration = 200 // ミリ秒
+            start() // アニメーション開始
         }
     }
 }

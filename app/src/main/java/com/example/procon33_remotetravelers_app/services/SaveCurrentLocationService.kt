@@ -1,6 +1,6 @@
 package com.example.procon33_remotetravelers_app.services
 
-import com.example.procon33_remotetravelers_app.models.apis.SaveCurrentLocationResponce
+import com.example.procon33_remotetravelers_app.models.apis.SaveCurrentLocationResponse
 import retrofit2.Call
 import retrofit2.http.Field
 import retrofit2.http.FormUrlEncoded
@@ -14,5 +14,5 @@ sealed interface SaveCurrentLocationService {
         @Field("lat") lat: Double,
         @Field("lon") lon: Double,
         @Field("suggestion_flag") suggestion_flag: Int,
-    ): Call<SaveCurrentLocationResponce>
+    ): Call<SaveCurrentLocationResponse>
 }
