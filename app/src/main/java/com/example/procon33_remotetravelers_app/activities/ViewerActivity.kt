@@ -12,6 +12,7 @@ import android.widget.EditText
 import androidx.appcompat.app.AppCompatActivity
 import com.example.procon33_remotetravelers_app.BuildConfig
 import com.example.procon33_remotetravelers_app.R
+
 import com.example.procon33_remotetravelers_app.databinding.ActivityViewerBinding
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
@@ -22,6 +23,7 @@ import com.google.android.gms.maps.model.MarkerOptions
 import com.example.procon33_remotetravelers_app.models.apis.GetInfoResponse
 import com.example.procon33_remotetravelers_app.services.GetInfoService
 import com.example.procon33_remotetravelers_app.services.AddCommentService
+import com.google.android.gms.maps.model.Marker
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import retrofit2.Retrofit
@@ -44,12 +46,31 @@ class ViewerActivity : AppCompatActivity(), OnMapReadyCallback {
     private lateinit var mMap: GoogleMap
     private lateinit var binding: ActivityViewerBinding
     private lateinit var info: GetInfoResponse
+    private lateinit var lastLocation: LatLng
+    private var track = true
+    private var firstTrack = true
+    private var currentLocationMarker: Marker? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        lastLocation = LatLng(0.0, 0.0)
         val userId = intent.getIntExtra("userId", 0)
-        Timer().scheduleAtFixedRate(0, 2000){
+        thread {
+            Thread.sleep(2000)
             getInfo(userId)
+            Handler(Looper.getMainLooper()).post {
+                if (::info.isInitialized && ::mMap.isInitialized) {
+                    displayCurrentLocation()
+                }
+            }
+        }
+        Timer().scheduleAtFixedRate(0, 5000){
+            getInfo(userId)
+            Handler(Looper.getMainLooper()).post {
+                if (::info.isInitialized && ::mMap.isInitialized) {
+                    displayCurrentLocation()
+                }
+            }
         }
 
         binding = ActivityViewerBinding.inflate(layoutInflater)
@@ -84,11 +105,14 @@ class ViewerActivity : AppCompatActivity(), OnMapReadyCallback {
 
     override fun onMapReady(googleMap: GoogleMap) {
         mMap = googleMap
-
-        // Add a marker in Sydney and move the camera
-        val sydney = LatLng(-34.0, 151.0)
-        mMap.addMarker(MarkerOptions().position(sydney).title("Marker in Sydney"))
-        mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney))
+        val tokyo = LatLng(35.90684931, 139.68896404)
+        mMap.moveCamera(CameraUpdateFactory.newLatLng(LatLng(tokyo.latitude, 180 - tokyo.longitude)))
+        thread {
+            Thread.sleep(300)
+            Handler(Looper.getMainLooper()).post {
+                mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(tokyo, 4f))
+            }
+        }
     }
 
     private fun getInfo(userId: Int){
@@ -114,6 +138,28 @@ class ViewerActivity : AppCompatActivity(), OnMapReadyCallback {
                 }
             }
         }
+    }
+
+    private fun displayCurrentLocation(){
+        val currentLocation = LatLng(info.current_location.lat, info.current_location.lon)
+        if(lastLocation == currentLocation)
+            return
+        lastLocation = currentLocation
+        currentLocationMarker?.remove()
+        currentLocationMarker = mMap.addMarker(MarkerOptions().position(currentLocation).title("現在地"))
+        if(firstTrack) {
+            mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(LatLng(35.90684931, 139.68896404), 4f))
+            mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(currentLocation, 15f))
+            thread {
+                Thread.sleep(2000)
+                Handler(Looper.getMainLooper()).post {
+                    mMap.setMinZoomPreference(7f)
+                }
+            }
+            return
+        }
+        if(track)
+            mMap.animateCamera(CameraUpdateFactory.newLatLng(currentLocation))
     }
 
     private fun moveComment(fragment: Boolean) {
