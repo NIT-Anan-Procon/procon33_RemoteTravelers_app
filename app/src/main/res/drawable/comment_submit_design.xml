@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item>
+        <shape android:shape="rectangle">
+            <corners
+                android:topRightRadius="0dp"
+                android:bottomRightRadius="0dp"
+                android:bottomLeftRadius="0dp"
+                android:topLeftRadius="0dp"
+                />
+            <padding
+                android:bottom="0dp"
+                android:top="0dp"
+                android:left="0dp"
+                android:right="0dp" />
+            <solid android:color="@color/comment_submit_button"/>
+            <stroke
+                android:color="@color/black"
+                android:width="1dp" />
+        </shape>
+    </item>
+</selector>

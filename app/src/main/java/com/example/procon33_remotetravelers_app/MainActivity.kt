@@ -50,12 +50,16 @@ class MainActivity : AppCompatActivity() {
         val travelButton = findViewById<Button>(R.id.travel_button)
         travelButton.setOnClickListener {
             startTravel()
+            val intent = Intent(this, TravelerActivity::class.java)
+            intent.putExtra("userId", getUserId().toInt())
+            startActivity(intent)
         }
 
         // デバッグ用ボタンが押されるとViewerActivityに遷移する
         val debugButton = findViewById<Button>(R.id.debug_button)
         debugButton.setOnClickListener {
             val intent = Intent(this, ViewerActivity::class.java)
+            intent.putExtra("userId", getUserId().toInt())
             startActivity(intent)
         }
     }
@@ -116,10 +120,6 @@ class MainActivity : AppCompatActivity() {
                 Handler(Looper.getMainLooper()).post {
                     // 実行結果を出力
                     Log.d("startTravelResponse", startTravelResponse.toString())
-
-                    // 旅行者画面に遷移
-                    val intent = Intent(this, TravelerActivity::class.java)
-                    startActivity(intent)
                 }
             } catch (e: Exception) {
                 Handler(Looper.getMainLooper()).post {
