@@ -2,6 +2,7 @@ package com.example.procon33_remotetravelers_app.activities
 
 import android.animation.ObjectAnimator
 import android.content.Intent
+import android.graphics.Color
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -21,6 +22,7 @@ import com.google.android.gms.maps.model.MarkerOptions
 import com.example.procon33_remotetravelers_app.models.apis.GetInfoResponse
 import com.example.procon33_remotetravelers_app.services.GetInfoService
 import com.google.android.gms.maps.model.Marker
+import com.google.android.gms.maps.model.PolylineOptions
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import retrofit2.Retrofit
@@ -48,6 +50,8 @@ class ViewerActivity : AppCompatActivity(), OnMapReadyCallback {
     private var firstTrack = true
     private var currentLocationMarker: Marker? = null
 
+    private val INITIAL_STROKE_WIDTH_PX = 5
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         lastLocation = LatLng(0.0, 0.0)
@@ -61,11 +65,13 @@ class ViewerActivity : AppCompatActivity(), OnMapReadyCallback {
                 }
             }
         }
+
         Timer().scheduleAtFixedRate(0, 5000){
             getInfo(userId)
             Handler(Looper.getMainLooper()).post {
                 if (::info.isInitialized && ::mMap.isInitialized) {
                     displayCurrentLocation()
+                    drawRoot()
                 }
             }
         }
@@ -159,5 +165,17 @@ class ViewerActivity : AppCompatActivity(), OnMapReadyCallback {
             duration = 200 // ミリ秒
             start() // アニメーション開始
         }
+    }
+
+    private fun drawRoot(){
+        val currentLatLng = LatLng(info.current_location.lat, info.current_location.lon)
+        val beforeLocation = info.route[info.route.size - 1] ?: return
+        val beforeLatLng = LatLng(beforeLocation.lat, beforeLocation.lon)
+
+            mMap.addPolyline(
+            PolylineOptions()
+                .add(beforeLatLng, currentLatLng)
+                .width(INITIAL_STROKE_WIDTH_PX.toFloat()).color(Color.parseColor("#801B60FE")).geodesic(true)
+        )
     }
 }
