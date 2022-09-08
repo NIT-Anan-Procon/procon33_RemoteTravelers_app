@@ -35,12 +35,13 @@
 
     <Button
         android:id="@+id/viewer_current_location_button"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:backgroundTint="@color/current_location"
-        android:text="@string/current_location_button"
+        android:layout_width="70dp"
+        android:layout_height="65dp"
+        android:background="@drawable/track_off"
+        android:text="@string/track_off"
         android:textColor="@color/white"
-        android:textSize="20sp"
+        android:textSize="17sp"
+        app:backgroundTint="@null"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/pin_button"
         tools:ignore="TextContrastCheck" />

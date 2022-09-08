@@ -66,8 +66,10 @@ class TravelerActivity : AppCompatActivity(), OnMapReadyCallback,
     private lateinit var locationManager: LocationManager
     private lateinit var currentLocation: LatLng
     private var userId by Delegates.notNull<Int>()
-    private var track = true
-    private var firstLocationChange = true
+    private lateinit var lastLocation: LatLng
+    private var track = false
+    private var firstTrack = true
+    private var setUpped = true
     private var currentLocationMarker: Marker? = null
     private val requestPermissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestPermission()
@@ -85,8 +87,8 @@ class TravelerActivity : AppCompatActivity(), OnMapReadyCallback,
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
         userId = intent.getIntExtra("userId", 0)
+        lastLocation = LatLng(0.0, 0.0)
 
         binding = ActivityTravelerBinding.inflate(layoutInflater)
         setContentView(binding.root)
@@ -105,10 +107,23 @@ class TravelerActivity : AppCompatActivity(), OnMapReadyCallback,
         val currentLocationButton = findViewById<Button>(R.id.travel_current_location_button)
         currentLocationButton.setOnClickListener {
             if(::mMap.isInitialized && ::currentLocation.isInitialized){
-                //ここはバグが起きた時用に一応置いてる
-                createMarker()
-                track = true
-                mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(currentLocation, 15f))
+                track = !track
+                firstTrack = track
+                val text: Int
+                val color: Int
+                when(track){
+                    true -> {
+                        text = R.string.track_on
+                        color = R.drawable.track_on
+                    }
+                    else -> {
+                        text = R.string.track_off
+                        color = R.drawable.track_off
+                    }
+                }
+                currentLocationButton.setText(text)
+                currentLocationButton.setBackgroundResource(color)
+                displayCurrentLocation()
             }
         }
 
@@ -163,14 +178,7 @@ class TravelerActivity : AppCompatActivity(), OnMapReadyCallback,
         currentLocation = LatLng(location.latitude, location.longitude)
         saveCurrentLocation()
         if(::mMap.isInitialized){
-            createMarker()
-            if(firstLocationChange){
-                mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(currentLocation, 15f))
-                firstLocationChange = false
-                return
-            }
-            if(track)
-                mMap.animateCamera(CameraUpdateFactory.newLatLng(currentLocation))
+            displayCurrentLocation()
         }
     }
 
@@ -184,16 +192,18 @@ class TravelerActivity : AppCompatActivity(), OnMapReadyCallback,
 
     override fun onMapReady(googleMap: GoogleMap) {
         mMap = googleMap
-        mMap.setMinZoomPreference(7f)
+        val tokyo = LatLng(35.90684931, 139.68896404)
+        mMap.moveCamera(CameraUpdateFactory.newLatLng(LatLng(tokyo.latitude, 180 - tokyo.longitude)))
+        thread {
+            Thread.sleep(300)
+            Handler(Looper.getMainLooper()).post {
+                mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(tokyo, 4f))
+            }
+        }
     }
 
     override fun onMapClick(point: LatLng) {
         track = false
-    }
-
-    private fun createMarker(){
-        currentLocationMarker?.remove()
-        currentLocationMarker = mMap.addMarker(MarkerOptions().position(currentLocation).title("現在地"))
     }
 
     private fun saveCurrentLocation(){
@@ -220,6 +230,31 @@ class TravelerActivity : AppCompatActivity(), OnMapReadyCallback,
                 }
             }
         }
+    }
+
+    private fun displayCurrentLocation(){
+        if(lastLocation != currentLocation) {
+            lastLocation = currentLocation
+            currentLocationMarker?.remove()
+            currentLocationMarker =
+                mMap.addMarker(MarkerOptions().position(currentLocation).title("現在地"))
+        }
+        if(firstTrack) {
+            mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(currentLocation, 15f))
+            if(setUpped) {
+                thread {
+                    Thread.sleep(2000)
+                    Handler(Looper.getMainLooper()).post {
+                        mMap.setMinZoomPreference(7f)
+                    }
+                }
+                setUpped = false
+            }
+            firstTrack = false
+            return
+        }
+        if(lastLocation != currentLocation && track)
+            mMap.animateCamera(CameraUpdateFactory.newLatLng(currentLocation))
     }
 
     private val resultLauncher = registerForActivityResult(
