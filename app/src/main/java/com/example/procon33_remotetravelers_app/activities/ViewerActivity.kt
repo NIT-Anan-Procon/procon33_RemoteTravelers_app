@@ -76,7 +76,9 @@ class ViewerActivity : AppCompatActivity(), OnMapReadyCallback {
 
         val submitComment = findViewById<Button>(R.id.comment_submit)
         submitComment.setOnClickListener {
-            addComment(userId)
+            val comment = findViewById<EditText>(R.id.comment_text)
+            addComment(userId, comment.text.toString())
+            comment.setText("")
         }
     }
 
@@ -123,14 +125,14 @@ class ViewerActivity : AppCompatActivity(), OnMapReadyCallback {
         }
     }
 
-    private fun addComment(userId: Int) {
+    private fun addComment(userId: Int, comment: String) {
         thread {
             try {
                 // APIを実行
                 val service: AddCommentService =
                     retrofit.create(AddCommentService::class.java)
                 val addCommentResponse = service.addComment(
-                    user_id = userId, comment = findViewById<EditText>(R.id.comment_text).text.toString()
+                    user_id = userId, comment = comment
                 ).execute().body()
                     ?: throw IllegalStateException("body is null")
 
