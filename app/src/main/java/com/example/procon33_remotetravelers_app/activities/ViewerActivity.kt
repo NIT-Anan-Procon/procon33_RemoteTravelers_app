@@ -1,21 +1,23 @@
 package com.example.procon33_remotetravelers_app.activities
 
+import android.animation.ObjectAnimator
 import android.content.Intent
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
+import android.view.View
 import android.widget.Button
+import androidx.appcompat.app.AppCompatActivity
 import com.example.procon33_remotetravelers_app.BuildConfig
 import com.example.procon33_remotetravelers_app.R
+import com.example.procon33_remotetravelers_app.databinding.ActivityViewerBinding
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MarkerOptions
-import com.example.procon33_remotetravelers_app.databinding.ActivityViewerBinding
 import com.example.procon33_remotetravelers_app.models.apis.GetInfoResponse
 import com.example.procon33_remotetravelers_app.services.GetInfoService
 import com.google.android.gms.maps.model.Marker
@@ -72,6 +74,13 @@ class ViewerActivity : AppCompatActivity(), OnMapReadyCallback {
             val intent = Intent(this, SuggestDestinationActivity::class.java)
             intent.putExtra("userId", userId)
             startActivity(intent)
+        }
+
+        var fragment = false
+        val button_comment = findViewById<Button>(R.id.comment_door_button)
+        button_comment.setOnClickListener {
+            fragment = !fragment
+            moveComment(fragment)
         }
     }
 
@@ -132,5 +141,14 @@ class ViewerActivity : AppCompatActivity(), OnMapReadyCallback {
         }
         if(track)
             mMap.animateCamera(CameraUpdateFactory.newLatLng(currentLocation))
+    }
+
+    private fun moveComment(fragment: Boolean) {
+        val target: View = findViewById(R.id.comments) // 対象となるオブジェクト
+        val destination = if (fragment) -550f else 0f
+        ObjectAnimator.ofFloat(target, "translationY", destination).apply {
+            duration = 200 // ミリ秒
+            start() // アニメーション開始
+        }
     }
 }
