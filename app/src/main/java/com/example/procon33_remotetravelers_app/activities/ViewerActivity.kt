@@ -168,7 +168,7 @@ class ViewerActivity : AppCompatActivity(), OnMapReadyCallback {
     }
 
     private fun drawRoot(){
-        val currentLatLng = LatLng(info.current_location.lat + 0.001, info.current_location.lon + 0.001)
+        val currentLatLng = LatLng(info.current_location.lat, info.current_location.lon)
         val beforeLocation = info.route[info.route.size - 1] ?: return
         val beforeLatLng = LatLng(beforeLocation.lat, beforeLocation.lon)
 
