@@ -5,22 +5,26 @@ import android.content.ContextWrapper
 import android.graphics.Bitmap
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
 import android.util.Log
 import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageView
 import com.example.procon33_remotetravelers_app.BuildConfig
 import com.example.procon33_remotetravelers_app.R
+import com.example.procon33_remotetravelers_app.models.apis.CreateReportResponse
 import com.example.procon33_remotetravelers_app.services.CreateReportService
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import okhttp3.MediaType
 import okhttp3.MultipartBody
+import okhttp3.OkHttpClient
 import okhttp3.RequestBody
 import retrofit2.Retrofit
+import retrofit2.adapter.rxjava.RxJavaCallAdapterFactory
 import retrofit2.converter.moshi.MoshiConverterFactory
+import rx.Subscriber
+import rx.android.schedulers.AndroidSchedulers
+import rx.schedulers.Schedulers
 import java.io.File
 import java.io.FileOutputStream
 import kotlin.concurrent.thread
@@ -82,8 +86,9 @@ class CreateReportActivity : AppCompatActivity() {
         val commentText = findViewById<EditText>(R.id.comment)
 
         keepButton.setOnClickListener {
+            Log.d("user_id", userId.toString())
             val comment = commentText.text.toString()
-            saveData(userId, imageMulti, comment, lat, lon)
+            sendReport(userId, image, comment, lat, lon)
             finish()
         }
 
@@ -93,26 +98,26 @@ class CreateReportActivity : AppCompatActivity() {
     }
 
     //DBにレポートの内容を保存する(ネストが深くなりそうだったので関数にする)
-    private fun saveData(userId: Int, imageMulti:  MultipartBody?, comment: String, lat: Double, lon: Double){
-        thread {
-            try {
-                val service: CreateReportService =
-                    retrofit.create(CreateReportService::class.java)
-                val createReportResponse = service.createReport(
-                    user_id = userId, image = imageMulti, comment = comment, excitement = 1, lat = lat, lon = lon
-                ).execute().body()
-                    ?: throw IllegalStateException("body is null")
-
-                Handler(Looper.getMainLooper()).post {
-                    // 実行結果を出力
-                    Log.d("CreateReportResponse", createReportResponse.toString())
-                }
-            }catch (e: Exception){
-                // エラー内容を出力
-                Log.e("error", e.message.toString())
-            }
-        }
-    }
+//    private fun saveData(userId: Int, imageMulti:  MultipartBody?, comment: String, lat: Double, lon: Double){
+//        thread {
+//            try {
+//                val service: CreateReportService =
+//                    retrofit.create(CreateReportService::class.java)
+//                val createReportResponse = service.createReport(
+//                    user_id = userId, image = imageMulti, comment = comment, excitement = 1, lat = lat, lon = lon
+//                ).execute().body()
+//                    ?: throw IllegalStateException("body is null")
+//
+//                Handler(Looper.getMainLooper()).post {
+//                    // 実行結果を出力
+//                    Log.d("CreateReportResponse", createReportResponse.toString())
+//                }
+//            }catch (e: Exception){
+//                // エラー内容を出力
+//                Log.e("error", e.message.toString())
+//            }
+//        }
+//    }
 
     //ユーザーIDを取得する
     private fun getUserId(): String {
@@ -124,7 +129,7 @@ class CreateReportActivity : AppCompatActivity() {
 
     //DBに送るための画像データに変換
     private fun fixImage(file: File): MultipartBody?{
-        val requestBody = RequestBody.create(MediaType.parse("/data/data/com.example.procon33_remotetravelers_app/app_image"), file)
+        val requestBody = RequestBody.create(MediaType.parse("data/data/com.example.procon33_remotetravelers_app/app_image"), file)
 
         //ランダムな値の生成
 //        val boundary = UUID.randomUUID().toString()
@@ -134,5 +139,53 @@ class CreateReportActivity : AppCompatActivity() {
             .build()
 
         return imageMulti
+    }
+
+    private fun sendReport(userId: Int, image:  File, comment: String, lat: Double, lon: Double){
+        val map: MutableMap<String, RequestBody> = HashMap()
+
+        val userId = RequestBody.create(MediaType.parse("text/plain"), userId.toString())
+        val comment = RequestBody.create(MediaType.parse("text/plain"), comment)
+        val excitment = RequestBody.create(MediaType.parse("text/plain"), "1")
+        val lat = RequestBody.create(MediaType.parse("text/plain"), lat.toString())
+        val lon = RequestBody.create(MediaType.parse("text/plain"), lon.toString())
+        val image = RequestBody.create(MediaType.parse("image/jpg"), image)
+
+        map.put("user_id", userId)
+        map.put("image\"; filename=\"image.png\"", image)
+        map.put("commet", comment)
+        map.put("excitment", excitment)
+        map.put("lat", lat)
+        map.put("lon", lon)
+
+        thread {
+            createApiClient().createReport(params = map)
+                .subscribeOn(Schedulers.newThread())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(object : Subscriber<CreateReportResponse>() {
+                    override fun onNext(r: CreateReportResponse?) {  // 成功
+                        Log.d("MainActivity", r.toString())
+                    }
+
+                    override fun onError(e: Throwable?) {
+                        Log.d("error", e.toString())  // 失敗
+                    }
+
+                    override fun onCompleted() {
+                    }
+                })
+        }
+    }
+
+    fun createApiClient(): CreateReportService{
+        val okClient = OkHttpClient()
+
+        val builder = Retrofit.Builder()
+            .client(okClient)
+            .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
+            .addConverterFactory(MoshiConverterFactory.create(moshi))
+            .baseUrl(BuildConfig.API_URL)
+            .build()
+         return  builder.create(CreateReportService::class.java)
     }
 }
