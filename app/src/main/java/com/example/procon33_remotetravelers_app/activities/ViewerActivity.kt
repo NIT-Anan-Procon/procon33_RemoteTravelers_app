@@ -50,7 +50,7 @@ class ViewerActivity : AppCompatActivity(), OnMapReadyCallback {
         super.onCreate(savedInstanceState)
         lastLocation = LatLng(0.0, 0.0)
         val userId = intent.getIntExtra("userId", 0)
-        Timer().scheduleAtFixedRate(0, 2000){
+        Timer().scheduleAtFixedRate(0, 5000){
             getInfo(userId)
             Handler(Looper.getMainLooper()).post {
                 if (::info.isInitialized && ::mMap.isInitialized) {
@@ -77,8 +77,14 @@ class ViewerActivity : AppCompatActivity(), OnMapReadyCallback {
 
     override fun onMapReady(googleMap: GoogleMap) {
         mMap = googleMap
-        val tokyo = LatLng(35.90684931, 180 - 139.68896404)
-        mMap.moveCamera(CameraUpdateFactory.newLatLng(tokyo))
+        val tokyo = LatLng(35.90684931, 139.68896404)
+        mMap.moveCamera(CameraUpdateFactory.newLatLng(LatLng(tokyo.latitude, 180 - tokyo.longitude)))
+        thread {
+            Thread.sleep(500)
+            Handler(Looper.getMainLooper()).post {
+                mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(tokyo, 4f))
+            }
+        }
     }
 
     private fun getInfo(userId: Int){
@@ -115,11 +121,8 @@ class ViewerActivity : AppCompatActivity(), OnMapReadyCallback {
         currentLocationMarker = mMap.addMarker(MarkerOptions().position(currentLocation).title("現在地"))
         if(firstTrack) {
             mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(LatLng(35.90684931, 139.68896404), 4f))
+            mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(currentLocation, 15f))
             thread {
-                Thread.sleep(1500)
-                Handler(Looper.getMainLooper()).post {
-                    mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(currentLocation, 15f))
-                }
                 Thread.sleep(2000)
                 Handler(Looper.getMainLooper()).post {
                     mMap.setMinZoomPreference(7f)

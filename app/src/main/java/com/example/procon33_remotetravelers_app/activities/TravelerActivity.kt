@@ -175,7 +175,7 @@ class TravelerActivity : AppCompatActivity(), OnMapReadyCallback,
 
     override fun onMapReady(googleMap: GoogleMap) {
         mMap = googleMap
-        mMap.setMinZoomPreference(9f)
+        mMap.setMinZoomPreference(7f)
     }
 
     override fun onMapClick(point: LatLng) {
