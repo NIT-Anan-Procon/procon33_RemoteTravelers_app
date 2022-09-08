@@ -102,7 +102,7 @@ class TravelerActivity : AppCompatActivity(), OnMapReadyCallback,
             resultLauncher.launch(intent)
         }
 
-        val currentLocationButton = findViewById<Button>(R.id.current_location_button)
+        val currentLocationButton = findViewById<Button>(R.id.travel_current_location_button)
         currentLocationButton.setOnClickListener {
             if(::mMap.isInitialized && ::currentLocation.isInitialized){
                 //ここはバグが起きた時用に一応置いてる

@@ -59,11 +59,19 @@ class ViewerActivity : AppCompatActivity(), OnMapReadyCallback {
             .findFragmentById(R.id.map) as SupportMapFragment
         mapFragment.getMapAsync(this)
 
-        val button = findViewById<Button>(R.id.pin_button)
-        button.setOnClickListener {
+        val pinButton = findViewById<Button>(R.id.pin_button)
+        pinButton.setOnClickListener {
             val intent = Intent(this, SuggestDestinationActivity::class.java)
             intent.putExtra("userId", userId)
             startActivity(intent)
+        }
+
+        val currentLocationButton = findViewById<Button>(R.id.viewer_current_location_button)
+        currentLocationButton.setOnClickListener {
+            //ここはバグが起きた時用に一応置いてる
+            createMarker()
+            track = true
+            mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(currentLocation, 15f))
         }
 
         var fragment = false

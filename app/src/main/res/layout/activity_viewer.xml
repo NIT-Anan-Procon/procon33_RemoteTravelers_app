@@ -33,6 +33,18 @@
         tools:ignore="TextContrastCheck"
         tools:text="@string/pin_button" />
 
+    <Button
+        android:id="@+id/viewer_current_location_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:backgroundTint="@color/current_location"
+        android:text="@string/current_location_button"
+        android:textColor="@color/white"
+        android:textSize="20sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/pin_button"
+        tools:ignore="TextContrastCheck" />
+
     <FrameLayout
         android:id="@+id/comments"
         android:layout_width="match_parent"
