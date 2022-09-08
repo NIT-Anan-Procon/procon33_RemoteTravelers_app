@@ -50,7 +50,7 @@ class ViewerActivity : AppCompatActivity(), OnMapReadyCallback {
     private var firstTrack = true
     private var currentLocationMarker: Marker? = null
 
-    private val INITIAL_STROKE_WIDTH_PX = 5
+    private val INITIAL_STROKE_WIDTH_PX = 10
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -168,14 +168,14 @@ class ViewerActivity : AppCompatActivity(), OnMapReadyCallback {
     }
 
     private fun drawRoot(){
-        val currentLatLng = LatLng(info.current_location.lat, info.current_location.lon)
+        val currentLatLng = LatLng(info.current_location.lat + 0.001, info.current_location.lon + 0.001)
         val beforeLocation = info.route[info.route.size - 1] ?: return
         val beforeLatLng = LatLng(beforeLocation.lat, beforeLocation.lon)
 
             mMap.addPolyline(
             PolylineOptions()
                 .add(beforeLatLng, currentLatLng)
-                .width(INITIAL_STROKE_WIDTH_PX.toFloat()).color(Color.parseColor("#801B60FE")).geodesic(true)
+                .width(INITIAL_STROKE_WIDTH_PX.toFloat()).color(Color.parseColor("#766BF3FF")).geodesic(true)
         )
     }
 }
