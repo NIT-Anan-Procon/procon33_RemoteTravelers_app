@@ -131,7 +131,8 @@ class TravelerActivity : AppCompatActivity(), OnMapReadyCallback,
         val submitComment = findViewById<Button>(R.id.comment_submit)
         submitComment.setOnClickListener {
             val comment = findViewById<EditText>(R.id.comment_text)
-            addComment(userId, comment.text.toString())
+            val commentText = comment.text.toString()
+            if (commentText != "") addComment(userId, commentText)
             comment.setText("")
         }
     }
