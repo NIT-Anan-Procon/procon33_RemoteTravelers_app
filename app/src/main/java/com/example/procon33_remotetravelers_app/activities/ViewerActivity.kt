@@ -223,8 +223,8 @@ class ViewerActivity : AppCompatActivity(), OnMapReadyCallback {
         }
     }
 
-    // 線の太さを10pxに設定
-    private val INITIAL_STROKE_WIDTH_PX = 10
+    // 線の太さを15pxに設定
+    private val INITIAL_STROKE_WIDTH_PX = 15
 
     private fun drawRoot(){
         val currentLatLng = LatLng(info.current_location.lat, info.current_location.lon)
