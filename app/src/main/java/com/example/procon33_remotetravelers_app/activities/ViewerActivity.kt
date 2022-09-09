@@ -2,6 +2,7 @@ package com.example.procon33_remotetravelers_app.activities
 
 import android.animation.ObjectAnimator
 import android.content.Intent
+import android.graphics.Color
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -13,16 +14,14 @@ import androidx.appcompat.app.AppCompatActivity
 import com.example.procon33_remotetravelers_app.BuildConfig
 import com.example.procon33_remotetravelers_app.R
 import com.example.procon33_remotetravelers_app.databinding.ActivityViewerBinding
-import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.LatLng
-import com.google.android.gms.maps.model.MarkerOptions
 import com.example.procon33_remotetravelers_app.models.apis.GetInfoResponse
 import com.example.procon33_remotetravelers_app.services.GetInfoService
 import com.example.procon33_remotetravelers_app.services.AddCommentService
-import com.google.android.gms.maps.model.Marker
+import com.google.android.gms.maps.model.PolylineOptions
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import retrofit2.Retrofit
@@ -45,30 +44,25 @@ class ViewerActivity : AppCompatActivity(), OnMapReadyCallback {
     private lateinit var mMap: GoogleMap
     private lateinit var binding: ActivityViewerBinding
     private lateinit var info: GetInfoResponse
-    private lateinit var lastLocation: LatLng
-    private var track = false
-    private var firstTrack = true
-    private var setUpped = true
-    private var currentLocationMarker: Marker? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        lastLocation = LatLng(0.0, 0.0)
         val userId = intent.getIntExtra("userId", 0)
         thread {
             Thread.sleep(2500)
             getInfo(userId)
             Handler(Looper.getMainLooper()).post {
-                if (::info.isInitialized && ::mMap.isInitialized) {
-                    displayCurrentLocation()
+                if (::mMap.isInitialized && ::info.isInitialized) {
+                    CurrentLocationActivity.displayCurrentLocation(mMap, LatLng(info.current_location.lat, info.current_location.lon))
                 }
             }
         }
         Timer().scheduleAtFixedRate(0, 5000){
             getInfo(userId)
             Handler(Looper.getMainLooper()).post {
-                if (::info.isInitialized && ::mMap.isInitialized) {
-                    displayCurrentLocation()
+                if (::mMap.isInitialized && ::info.isInitialized) {
+                    CurrentLocationActivity.displayCurrentLocation(mMap, LatLng(info.current_location.lat, info.current_location.lon))
+                    drawRoot()
                 }
             }
         }
@@ -90,23 +84,12 @@ class ViewerActivity : AppCompatActivity(), OnMapReadyCallback {
 
         val currentLocationButton = findViewById<Button>(R.id.viewer_current_location_button)
         currentLocationButton.setOnClickListener {
-            track = !track
-            firstTrack = track
-            val text: Int
-            val color: Int
-            when(track){
-                true -> {
-                    text = R.string.track_on
-                    color = R.drawable.track_on
-                }
-                else -> {
-                    text = R.string.track_off
-                    color = R.drawable.track_off
-                }
+            if (::mMap.isInitialized && ::info.isInitialized) {
+                val (text, color) = CurrentLocationActivity.pressedButton()
+                currentLocationButton.setText(text)
+                currentLocationButton.setBackgroundResource(color)
+                CurrentLocationActivity.displayCurrentLocation(mMap, LatLng(info.current_location.lat, info.current_location.lon))
             }
-            currentLocationButton.setText(text)
-            currentLocationButton.setBackgroundResource(color)
-            displayCurrentLocation()
         }
 
         var fragment = false
@@ -126,14 +109,7 @@ class ViewerActivity : AppCompatActivity(), OnMapReadyCallback {
 
     override fun onMapReady(googleMap: GoogleMap) {
         mMap = googleMap
-        val tokyo = LatLng(35.90684931, 139.68896404)
-        mMap.moveCamera(CameraUpdateFactory.newLatLng(LatLng(tokyo.latitude, 180 - tokyo.longitude)))
-        thread {
-            Thread.sleep(300)
-            Handler(Looper.getMainLooper()).post {
-                mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(tokyo, 4f))
-            }
-        }
+        CurrentLocationActivity.initializeMap(mMap)
     }
 
     private fun getInfo(userId: Int){
@@ -158,32 +134,6 @@ class ViewerActivity : AppCompatActivity(), OnMapReadyCallback {
                     Log.e("error", e.message.toString())
                 }
             }
-        }
-    }
-
-    private fun displayCurrentLocation() {
-        val currentLocation = LatLng(info.current_location.lat, info.current_location.lon)
-        if (lastLocation != currentLocation) {
-            currentLocationMarker?.remove()
-            currentLocationMarker =
-                mMap.addMarker(MarkerOptions().position(currentLocation).title("現在地"))
-            if (track) {
-                mMap.animateCamera(CameraUpdateFactory.newLatLng(currentLocation))
-            }
-            lastLocation = currentLocation
-        }
-        if (firstTrack) {
-            mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(currentLocation, 15f))
-            if (setUpped) {
-                thread {
-                    Thread.sleep(2000)
-                    Handler(Looper.getMainLooper()).post {
-                        mMap.setMinZoomPreference(7f)
-                    }
-                }
-                setUpped = false
-            }
-            firstTrack = false
         }
     }
 
@@ -218,5 +168,19 @@ class ViewerActivity : AppCompatActivity(), OnMapReadyCallback {
                 }
             }
         }
+    }
+
+    // 線の太さを15pxに設定
+    private val INITIAL_STROKE_WIDTH_PX = 15
+
+    private fun drawRoot(){
+        val currentLatLng = LatLng(info.current_location.lat, info.current_location.lon)
+        val beforeLocation = info.route[info.route.size - 2] ?: return
+        val beforeLatLng = LatLng(beforeLocation.lat, beforeLocation.lon)
+        mMap.addPolyline(
+        PolylineOptions()
+            .add(beforeLatLng, currentLatLng)
+            .width(INITIAL_STROKE_WIDTH_PX.toFloat()).color(Color.parseColor("#766BF3FF")).geodesic(true)
+        )
     }
 }
