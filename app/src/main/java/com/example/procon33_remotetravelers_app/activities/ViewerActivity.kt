@@ -62,7 +62,7 @@ class ViewerActivity : AppCompatActivity(), OnMapReadyCallback {
             Handler(Looper.getMainLooper()).post {
                 if (::mMap.isInitialized && ::info.isInitialized) {
                     CurrentLocationActivity.displayCurrentLocation(mMap, LatLng(info.current_location.lat, info.current_location.lon))
-                    drawRoot()
+                    DrawRoot.drawRoot(mMap, LatLng(info.current_location.lat, info.current_location.lon))
                 }
             }
         }
@@ -168,19 +168,5 @@ class ViewerActivity : AppCompatActivity(), OnMapReadyCallback {
                 }
             }
         }
-    }
-
-    // 線の太さを15pxに設定
-    private val INITIAL_STROKE_WIDTH_PX = 15
-
-    private fun drawRoot(){
-        val currentLatLng = LatLng(info.current_location.lat, info.current_location.lon)
-        val beforeLocation = info.route[info.route.size - 2] ?: return
-        val beforeLatLng = LatLng(beforeLocation.lat, beforeLocation.lon)
-        mMap.addPolyline(
-        PolylineOptions()
-            .add(beforeLatLng, currentLatLng)
-            .width(INITIAL_STROKE_WIDTH_PX.toFloat()).color(Color.parseColor("#766BF3FF")).geodesic(true)
-        )
     }
 }
