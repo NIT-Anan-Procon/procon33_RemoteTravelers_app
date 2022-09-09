@@ -21,6 +21,7 @@ import com.google.android.gms.maps.model.LatLng
 import com.example.procon33_remotetravelers_app.models.apis.GetInfoResponse
 import com.example.procon33_remotetravelers_app.services.GetInfoService
 import com.example.procon33_remotetravelers_app.services.AddCommentService
+import com.google.android.gms.maps.model.Marker
 import com.google.android.gms.maps.model.PolylineOptions
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
@@ -81,6 +82,9 @@ class ViewerActivity : AppCompatActivity(), OnMapReadyCallback {
         pinButton.setOnClickListener {
             val intent = Intent(this, SuggestDestinationActivity::class.java)
             intent.putExtra("userId", userId)
+            intent.putExtra("lat", mMap.cameraPosition.target.latitude)
+            intent.putExtra("lon", mMap.cameraPosition.target.longitude)
+            intent.putExtra("zoom", mMap.cameraPosition.zoom)
             startActivity(intent)
         }
 
