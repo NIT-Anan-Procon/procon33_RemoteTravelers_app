@@ -12,7 +12,6 @@ import android.widget.EditText
 import androidx.appcompat.app.AppCompatActivity
 import com.example.procon33_remotetravelers_app.BuildConfig
 import com.example.procon33_remotetravelers_app.R
-
 import com.example.procon33_remotetravelers_app.databinding.ActivityViewerBinding
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
@@ -47,8 +46,9 @@ class ViewerActivity : AppCompatActivity(), OnMapReadyCallback {
     private lateinit var binding: ActivityViewerBinding
     private lateinit var info: GetInfoResponse
     private lateinit var lastLocation: LatLng
-    private var track = true
+    private var track = false
     private var firstTrack = true
+    private var setUpped = true
     private var currentLocationMarker: Marker? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -56,7 +56,7 @@ class ViewerActivity : AppCompatActivity(), OnMapReadyCallback {
         lastLocation = LatLng(0.0, 0.0)
         val userId = intent.getIntExtra("userId", 0)
         thread {
-            Thread.sleep(2000)
+            Thread.sleep(2500)
             getInfo(userId)
             Handler(Looper.getMainLooper()).post {
                 if (::info.isInitialized && ::mMap.isInitialized) {
@@ -81,11 +81,32 @@ class ViewerActivity : AppCompatActivity(), OnMapReadyCallback {
             .findFragmentById(R.id.map) as SupportMapFragment
         mapFragment.getMapAsync(this)
 
-        val button = findViewById<Button>(R.id.pin_button)
-        button.setOnClickListener {
+        val pinButton = findViewById<Button>(R.id.pin_button)
+        pinButton.setOnClickListener {
             val intent = Intent(this, SuggestDestinationActivity::class.java)
             intent.putExtra("userId", userId)
             startActivity(intent)
+        }
+
+        val currentLocationButton = findViewById<Button>(R.id.viewer_current_location_button)
+        currentLocationButton.setOnClickListener {
+            track = !track
+            firstTrack = track
+            val text: Int
+            val color: Int
+            when(track){
+                true -> {
+                    text = R.string.track_on
+                    color = R.drawable.track_on
+                }
+                else -> {
+                    text = R.string.track_off
+                    color = R.drawable.track_off
+                }
+            }
+            currentLocationButton.setText(text)
+            currentLocationButton.setBackgroundResource(color)
+            displayCurrentLocation()
         }
 
         var fragment = false
@@ -140,26 +161,30 @@ class ViewerActivity : AppCompatActivity(), OnMapReadyCallback {
         }
     }
 
-    private fun displayCurrentLocation(){
+    private fun displayCurrentLocation() {
         val currentLocation = LatLng(info.current_location.lat, info.current_location.lon)
-        if(lastLocation == currentLocation)
-            return
-        lastLocation = currentLocation
-        currentLocationMarker?.remove()
-        currentLocationMarker = mMap.addMarker(MarkerOptions().position(currentLocation).title("現在地"))
-        if(firstTrack) {
-            mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(LatLng(35.90684931, 139.68896404), 4f))
-            mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(currentLocation, 15f))
-            thread {
-                Thread.sleep(2000)
-                Handler(Looper.getMainLooper()).post {
-                    mMap.setMinZoomPreference(7f)
-                }
+        if (lastLocation != currentLocation) {
+            currentLocationMarker?.remove()
+            currentLocationMarker =
+                mMap.addMarker(MarkerOptions().position(currentLocation).title("現在地"))
+            if (track) {
+                mMap.animateCamera(CameraUpdateFactory.newLatLng(currentLocation))
             }
-            return
+            lastLocation = currentLocation
         }
-        if(track)
-            mMap.animateCamera(CameraUpdateFactory.newLatLng(currentLocation))
+        if (firstTrack) {
+            mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(currentLocation, 15f))
+            if (setUpped) {
+                thread {
+                    Thread.sleep(2000)
+                    Handler(Looper.getMainLooper()).post {
+                        mMap.setMinZoomPreference(7f)
+                    }
+                }
+                setUpped = false
+            }
+            firstTrack = false
+        }
     }
 
     private fun moveComment(fragment: Boolean) {
