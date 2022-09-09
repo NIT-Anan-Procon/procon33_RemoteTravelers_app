@@ -9,7 +9,6 @@ class DrawRoot {
     companion object{
         // 線の太さを15pxに設定
         private val INITIAL_STROKE_WIDTH_PX = 15
-        private lateinit var mMap: GoogleMap
 
         var beforeLatLng = LatLng(0.0, 0.0)
         var i = 0.0
