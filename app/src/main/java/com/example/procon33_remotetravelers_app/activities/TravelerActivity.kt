@@ -210,31 +210,6 @@ class TravelerActivity : AppCompatActivity(), OnMapReadyCallback,
         }
     }
 
-//    private fun displayCurrentLocation(){
-//        if (lastLocation != currentLocation) {
-//            currentLocationMarker?.remove()
-//            currentLocationMarker =
-//                mMap.addMarker(MarkerOptions().position(currentLocation).title("現在地"))
-//            if (track) {
-//                mMap.animateCamera(CameraUpdateFactory.newLatLng(currentLocation))
-//            }
-//            lastLocation = currentLocation
-//        }
-//        if (firstTrack) {
-//            mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(currentLocation, 15f))
-//            if (setUpped) {
-//                thread {
-//                    Thread.sleep(2000)
-//                    Handler(Looper.getMainLooper()).post {
-//                        mMap.setMinZoomPreference(7f)
-//                    }
-//                }
-//                setUpped = false
-//            }
-//            firstTrack = false
-//        }
-//    }
-
     private val resultLauncher = registerForActivityResult(
         StartActivityForResult()
     ) { result: ActivityResult ->
