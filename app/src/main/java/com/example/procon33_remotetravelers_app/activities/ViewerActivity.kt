@@ -1,5 +1,4 @@
 package com.example.procon33_remotetravelers_app.activities
-
 import android.animation.ObjectAnimator
 import android.content.Intent
 import android.os.Bundle
@@ -9,6 +8,8 @@ import android.util.Log
 import android.view.View
 import android.widget.Button
 import android.widget.EditText
+import android.widget.LinearLayout
+import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import com.example.procon33_remotetravelers_app.BuildConfig
 import com.example.procon33_remotetravelers_app.R
@@ -88,6 +89,7 @@ class ViewerActivity : AppCompatActivity(), OnMapReadyCallback {
             startActivity(intent)
         }
 
+        // コメント欄の開け閉め
         var fragment = false
         val buttonComment = findViewById<Button>(R.id.comment_door_button)
         buttonComment.setOnClickListener {
@@ -95,6 +97,7 @@ class ViewerActivity : AppCompatActivity(), OnMapReadyCallback {
             moveComment(fragment)
         }
 
+        // コメントの送信
         val submitComment = findViewById<Button>(R.id.comment_submit)
         submitComment.setOnClickListener {
             val comment = findViewById<EditText>(R.id.comment_text)
@@ -163,11 +166,31 @@ class ViewerActivity : AppCompatActivity(), OnMapReadyCallback {
     }
 
     private fun moveComment(fragment: Boolean) {
+        // コメントを取得
         val target: View = findViewById(R.id.comments) // 対象となるオブジェクト
         val destination = if (fragment) -550f else 0f
+        if (fragment) getComment()
         ObjectAnimator.ofFloat(target, "translationY", destination).apply {
             duration = 200 // ミリ秒
             start() // アニメーション開始
+        }
+    }
+
+    private fun getComment(){
+        val commentList = findViewById<LinearLayout>(R.id.comment_list)
+        val WC = LinearLayout.LayoutParams.WRAP_CONTENT
+        val MP = LinearLayout.LayoutParams.MATCH_PARENT
+        for (oneComment in info.comments){
+            if(oneComment == null){
+                Log.d("oneComment", "null")
+                continue
+            }
+            val textView = TextView(this)
+            val commentText: String = oneComment.comment
+            Log.d("oneComment", commentText)
+            textView.text = commentText
+            textView.textSize = 30f
+            commentList.addView(textView, LinearLayout.LayoutParams(MP, WC))
         }
     }
 

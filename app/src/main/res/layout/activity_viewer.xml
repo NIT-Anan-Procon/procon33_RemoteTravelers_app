@@ -51,41 +51,14 @@
             app:backgroundTint="@null" />
 
         <LinearLayout
-            android:id="@+id/ll"
+            android:id="@+id/comment_list"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="200dp"
             android:layout_marginTop="50dp"
+            android:background="@color/white"
+            app:backgroundTint="@null"
             android:orientation="vertical">
 
-            <Button
-                android:id="@+id/button"
-                android:layout_width="match_parent"
-                android:layout_height="50dp"
-                android:text=""
-                android:textColor="@color/black"
-                android:background="@drawable/comment_design"
-                app:backgroundTint="@null"
-                />
-
-            <Button
-                android:id="@+id/button2"
-                android:layout_width="match_parent"
-                android:layout_height="50dp"
-                android:text=""
-                android:textColor="@color/black"
-                android:background="@drawable/comment_design"
-                app:backgroundTint="@null"
-                />
-
-            <Button
-                android:id="@+id/button3"
-                android:layout_width="match_parent"
-                android:layout_height="50dp"
-                android:text=""
-                android:textColor="@color/black"
-                android:background="@drawable/comment_design"
-                app:backgroundTint="@null"
-                />
 
         </LinearLayout>
 
