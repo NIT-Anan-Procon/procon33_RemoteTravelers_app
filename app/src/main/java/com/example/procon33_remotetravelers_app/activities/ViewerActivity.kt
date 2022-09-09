@@ -130,7 +130,7 @@ class ViewerActivity : AppCompatActivity(), OnMapReadyCallback {
             } catch (e: Exception) {
                 Handler(Looper.getMainLooper()).post {
                     // エラー内容を出力
-                    Log.e("error", e.message.toString())
+                    Log.e("getInfoError", e.message.toString())
                 }
             }
         }
