@@ -1,6 +1,6 @@
 package com.example.procon33_remotetravelers_app.models.apis
 
-data class CheckTravellingResponse(
+data class CheckTravelingResponse(
     val ok: Boolean,
     val traveling: Boolean?,
     val traveler: Boolean?,
