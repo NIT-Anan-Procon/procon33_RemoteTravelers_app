@@ -13,15 +13,13 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.example.procon33_remotetravelers_app.activities.TravelerActivity
 import com.example.procon33_remotetravelers_app.activities.ViewerActivity
-import com.example.procon33_remotetravelers_app.services.CheckTravellingService
+import com.example.procon33_remotetravelers_app.services.CheckTravelingService
 import com.example.procon33_remotetravelers_app.services.SignupService
 import com.example.procon33_remotetravelers_app.services.StartTravelService
-import com.example.procon33_remotetravelers_app.services.SuggestDestinationService
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import retrofit2.Retrofit
 import retrofit2.converter.moshi.MoshiConverterFactory
-import java.sql.Timestamp
 import kotlin.concurrent.thread
 
 class MainActivity : AppCompatActivity() {
@@ -49,7 +47,8 @@ class MainActivity : AppCompatActivity() {
             signup(userIdText)
         }
 
-        checkTravelling()
+        //すでに旅行に参加しているかどうかの判断
+        checkTraveling()
 
         // 旅行するボタンが押されるとTravelerActivityに遷移する
         val travelButton = findViewById<Button>(R.id.travel_button)
@@ -165,34 +164,35 @@ class MainActivity : AppCompatActivity() {
         return userId
     }
 
-    private fun checkTravelling(){
+    private fun checkTraveling(){
         val userId = getUserId().toInt()
-        val lastRequest: Timestamp = Timestamp(0)
 
         //旅行をしているか、または旅行に参加しているかを判断するAPIを叩く
         thread {
             try {
-                val service: CheckTravellingService =
-                    retrofit.create(CheckTravellingService::class.java)
-                val checkTravelling = service.checkTravelling(
-                    user_id = userId, last_request = lastRequest
+                val service: CheckTravelingService =
+                    retrofit.create(CheckTravelingService::class.java)
+                val checkTraveling = service.checkTraveling(
+                    user_id = userId
                 ).execute().body()
                     ?: throw IllegalStateException("body is null")
 
                 Handler(Looper.getMainLooper()).post {
                     // 実行結果を出力
-                    Log.d("checkTravellingResponse", checkTravelling.toString())
+                    Log.d("checkTravellingResponse", checkTraveling.toString())
                 }
 
                 //旅行者ならTravelerActivityに遷移
-                if(checkTravelling.traveling == true){
-                    val intent = Intent(this, TravelerActivity::class.java)
-                    intent.putExtra("userId", getUserId().toInt())
-                    startActivity(intent)
-                }else if(checkTravelling.traveler == true){
-                    val intent = Intent(this, ViewerActivity::class.java)
-                    intent.putExtra("userId", getUserId().toInt())
-                    startActivity(intent)
+                if(checkTraveling.traveling == true){
+                    if(checkTraveling.traveler == true){
+                        val intent = Intent(this, TravelerActivity::class.java)
+                        intent.putExtra("userId", getUserId().toInt())
+                        startActivity(intent)
+                    }else {
+                        val intent = Intent(this, ViewerActivity::class.java)
+                        intent.putExtra("userId", getUserId().toInt())
+                        startActivity(intent)
+                    }
                 }
             } catch (e: Exception) {
                 Handler(Looper.getMainLooper()).post {
