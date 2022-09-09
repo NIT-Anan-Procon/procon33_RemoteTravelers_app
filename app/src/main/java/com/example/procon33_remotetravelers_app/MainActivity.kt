@@ -166,14 +166,25 @@ class MainActivity : AppCompatActivity() {
             try {
                 val service: CheckTravellingService =
                     retrofit.create(CheckTravellingService::class.java)
-                val checkTravellingService = service.checkTravelling(
+                val checkTravelling = service.checkTravelling(
                     user_id = userId, last_request = lastRequest
                 ).execute().body()
                     ?: throw IllegalStateException("body is null")
 
                 Handler(Looper.getMainLooper()).post {
                     // 実行結果を出力
-                    Log.d("suggestDestinationResponse", checkTravellingService.toString())
+                    Log.d("checkTravellingResponse", checkTravelling.toString())
+                }
+
+                //旅行者ならTravelerActivityに遷移
+                if(checkTravelling.traveling == true){
+                    val intent = Intent(this, TravelerActivity::class.java)
+                    intent.putExtra("userId", getUserId().toInt())
+                    startActivity(intent)
+                }else if(checkTravelling.traveler == true){
+                    val intent = Intent(this, ViewerActivity::class.java)
+                    intent.putExtra("userId", getUserId().toInt())
+                    startActivity(intent)
                 }
             } catch (e: Exception) {
                 Handler(Looper.getMainLooper()).post {
