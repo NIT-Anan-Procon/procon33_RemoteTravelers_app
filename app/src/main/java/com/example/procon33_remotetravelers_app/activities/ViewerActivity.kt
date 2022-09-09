@@ -2,6 +2,7 @@ package com.example.procon33_remotetravelers_app.activities
 
 import android.animation.ObjectAnimator
 import android.content.Intent
+import android.graphics.Color
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -23,6 +24,7 @@ import com.example.procon33_remotetravelers_app.models.apis.GetInfoResponse
 import com.example.procon33_remotetravelers_app.services.GetInfoService
 import com.example.procon33_remotetravelers_app.services.AddCommentService
 import com.google.android.gms.maps.model.Marker
+import com.google.android.gms.maps.model.PolylineOptions
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import retrofit2.Retrofit
@@ -69,6 +71,7 @@ class ViewerActivity : AppCompatActivity(), OnMapReadyCallback {
             Handler(Looper.getMainLooper()).post {
                 if (::info.isInitialized && ::mMap.isInitialized) {
                     displayCurrentLocation()
+                    drawRoot()
                 }
             }
         }
@@ -218,5 +221,19 @@ class ViewerActivity : AppCompatActivity(), OnMapReadyCallback {
                 }
             }
         }
+    }
+
+    // 線の太さを10pxに設定
+    private val INITIAL_STROKE_WIDTH_PX = 10
+
+    private fun drawRoot(){
+        val currentLatLng = LatLng(info.current_location.lat, info.current_location.lon)
+        val beforeLocation = info.route[info.route.size - 2] ?: return
+        val beforeLatLng = LatLng(beforeLocation.lat, beforeLocation.lon)
+        mMap.addPolyline(
+        PolylineOptions()
+            .add(beforeLatLng, currentLatLng)
+            .width(INITIAL_STROKE_WIDTH_PX.toFloat()).color(Color.parseColor("#766BF3FF")).geodesic(true)
+        )
     }
 }
