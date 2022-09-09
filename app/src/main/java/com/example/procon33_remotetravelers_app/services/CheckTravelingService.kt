@@ -5,7 +5,7 @@ import retrofit2.Call
 import retrofit2.http.*
 
 sealed interface CheckTravelingService {
-    @GET("/api/viewer/check-travel")
+    @GET("/api/common/check-traveling")
     fun checkTraveling(
         @Query("user_id")user_id: Int,
     ): Call<CheckTravelingResponse>
