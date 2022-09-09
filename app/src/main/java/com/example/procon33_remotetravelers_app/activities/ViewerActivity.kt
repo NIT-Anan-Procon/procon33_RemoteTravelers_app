@@ -2,6 +2,7 @@ package com.example.procon33_remotetravelers_app.activities
 
 import android.animation.ObjectAnimator
 import android.content.Intent
+import android.graphics.Color
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -13,7 +14,6 @@ import androidx.appcompat.app.AppCompatActivity
 import com.example.procon33_remotetravelers_app.BuildConfig
 import com.example.procon33_remotetravelers_app.R
 import com.example.procon33_remotetravelers_app.databinding.ActivityViewerBinding
-import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
@@ -21,6 +21,7 @@ import com.google.android.gms.maps.model.LatLng
 import com.example.procon33_remotetravelers_app.models.apis.GetInfoResponse
 import com.example.procon33_remotetravelers_app.services.GetInfoService
 import com.example.procon33_remotetravelers_app.services.AddCommentService
+import com.google.android.gms.maps.model.PolylineOptions
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import retrofit2.Retrofit
@@ -61,6 +62,7 @@ class ViewerActivity : AppCompatActivity(), OnMapReadyCallback {
             Handler(Looper.getMainLooper()).post {
                 if (::mMap.isInitialized && ::info.isInitialized) {
                     CurrentLocationActivity.displayCurrentLocation(mMap, LatLng(info.current_location.lat, info.current_location.lon))
+                    drawRoot()
                 }
             }
         }
@@ -166,5 +168,19 @@ class ViewerActivity : AppCompatActivity(), OnMapReadyCallback {
                 }
             }
         }
+    }
+
+    // 線の太さを15pxに設定
+    private val INITIAL_STROKE_WIDTH_PX = 15
+
+    private fun drawRoot(){
+        val currentLatLng = LatLng(info.current_location.lat, info.current_location.lon)
+        val beforeLocation = info.route[info.route.size - 2] ?: return
+        val beforeLatLng = LatLng(beforeLocation.lat, beforeLocation.lon)
+        mMap.addPolyline(
+        PolylineOptions()
+            .add(beforeLatLng, currentLatLng)
+            .width(INITIAL_STROKE_WIDTH_PX.toFloat()).color(Color.parseColor("#766BF3FF")).geodesic(true)
+        )
     }
 }
