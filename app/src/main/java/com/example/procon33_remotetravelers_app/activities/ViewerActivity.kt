@@ -169,7 +169,7 @@ class ViewerActivity : AppCompatActivity(), OnMapReadyCallback {
 
     private fun drawRoot(){
         val currentLatLng = LatLng(info.current_location.lat, info.current_location.lon)
-        val beforeLocation = info.route[info.route.size - 1] ?: return
+        val beforeLocation = info.route[info.route.size - 2] ?: return
         val beforeLatLng = LatLng(beforeLocation.lat, beforeLocation.lon)
 
             mMap.addPolyline(
