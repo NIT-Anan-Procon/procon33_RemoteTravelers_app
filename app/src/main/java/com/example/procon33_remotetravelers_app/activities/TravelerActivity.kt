@@ -168,6 +168,7 @@ class TravelerActivity : AppCompatActivity(), OnMapReadyCallback,
         saveCurrentLocation()
         if(::mMap.isInitialized){
             CurrentLocationActivity.displayCurrentLocation(mMap, currentLocation)
+            DrawRoot.drawRoot(mMap, currentLocation)
         }
     }
 
