@@ -37,8 +37,6 @@ import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.LatLng
-import com.google.android.gms.maps.model.Marker
-import com.google.android.gms.maps.model.MarkerOptions
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import retrofit2.Retrofit
@@ -48,7 +46,7 @@ import kotlin.properties.Delegates
 
 
 class TravelerActivity : AppCompatActivity(), OnMapReadyCallback,
-    LocationListener, GoogleMap.OnMapClickListener {
+    LocationListener {
 
     companion object {
         const val CAMERA_REQUEST_CODE = 1
@@ -68,11 +66,6 @@ class TravelerActivity : AppCompatActivity(), OnMapReadyCallback,
     private lateinit var locationManager: LocationManager
     private lateinit var currentLocation: LatLng
     private var userId by Delegates.notNull<Int>()
-    private lateinit var lastLocation: LatLng
-    private var track = false
-    private var firstTrack = true
-    private var setUpped = true
-    private var currentLocationMarker: Marker? = null
     private val requestPermissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestPermission()
     ) { isGranted: Boolean ->
@@ -90,7 +83,6 @@ class TravelerActivity : AppCompatActivity(), OnMapReadyCallback,
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         userId = intent.getIntExtra("userId", 0)
-        lastLocation = LatLng(0.0, 0.0)
 
         binding = ActivityTravelerBinding.inflate(layoutInflater)
         setContentView(binding.root)
@@ -109,23 +101,10 @@ class TravelerActivity : AppCompatActivity(), OnMapReadyCallback,
         val currentLocationButton = findViewById<Button>(R.id.travel_current_location_button)
         currentLocationButton.setOnClickListener {
             if(::mMap.isInitialized && ::currentLocation.isInitialized){
-                track = !track
-                firstTrack = track
-                val text: Int
-                val color: Int
-                when(track){
-                    true -> {
-                        text = R.string.track_on
-                        color = R.drawable.track_on
-                    }
-                    else -> {
-                        text = R.string.track_off
-                        color = R.drawable.track_off
-                    }
-                }
+                val (text, color) = CurrentLocationActivity.pressedButton()
                 currentLocationButton.setText(text)
                 currentLocationButton.setBackgroundResource(color)
-                displayCurrentLocation()
+                CurrentLocationActivity.displayCurrentLocation(mMap, currentLocation)
             }
         }
 
@@ -188,7 +167,7 @@ class TravelerActivity : AppCompatActivity(), OnMapReadyCallback,
         currentLocation = LatLng(location.latitude, location.longitude)
         saveCurrentLocation()
         if(::mMap.isInitialized){
-            displayCurrentLocation()
+            CurrentLocationActivity.displayCurrentLocation(mMap, currentLocation)
         }
     }
 
@@ -202,18 +181,7 @@ class TravelerActivity : AppCompatActivity(), OnMapReadyCallback,
 
     override fun onMapReady(googleMap: GoogleMap) {
         mMap = googleMap
-        val tokyo = LatLng(35.90684931, 139.68896404)
-        mMap.moveCamera(CameraUpdateFactory.newLatLng(LatLng(tokyo.latitude, 180 - tokyo.longitude)))
-        thread {
-            Thread.sleep(300)
-            Handler(Looper.getMainLooper()).post {
-                mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(tokyo, 4f))
-            }
-        }
-    }
-
-    override fun onMapClick(point: LatLng) {
-        track = false
+        CurrentLocationActivity.initializeMap(mMap)
     }
 
     private fun saveCurrentLocation(){
@@ -242,30 +210,30 @@ class TravelerActivity : AppCompatActivity(), OnMapReadyCallback,
         }
     }
 
-    private fun displayCurrentLocation(){
-        if (lastLocation != currentLocation) {
-            currentLocationMarker?.remove()
-            currentLocationMarker =
-                mMap.addMarker(MarkerOptions().position(currentLocation).title("現在地"))
-            if (track) {
-                mMap.animateCamera(CameraUpdateFactory.newLatLng(currentLocation))
-            }
-            lastLocation = currentLocation
-        }
-        if (firstTrack) {
-            mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(currentLocation, 15f))
-            if (setUpped) {
-                thread {
-                    Thread.sleep(2000)
-                    Handler(Looper.getMainLooper()).post {
-                        mMap.setMinZoomPreference(7f)
-                    }
-                }
-                setUpped = false
-            }
-            firstTrack = false
-        }
-    }
+//    private fun displayCurrentLocation(){
+//        if (lastLocation != currentLocation) {
+//            currentLocationMarker?.remove()
+//            currentLocationMarker =
+//                mMap.addMarker(MarkerOptions().position(currentLocation).title("現在地"))
+//            if (track) {
+//                mMap.animateCamera(CameraUpdateFactory.newLatLng(currentLocation))
+//            }
+//            lastLocation = currentLocation
+//        }
+//        if (firstTrack) {
+//            mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(currentLocation, 15f))
+//            if (setUpped) {
+//                thread {
+//                    Thread.sleep(2000)
+//                    Handler(Looper.getMainLooper()).post {
+//                        mMap.setMinZoomPreference(7f)
+//                    }
+//                }
+//                setUpped = false
+//            }
+//            firstTrack = false
+//        }
+//    }
 
     private val resultLauncher = registerForActivityResult(
         StartActivityForResult()
