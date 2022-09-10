@@ -102,6 +102,7 @@ class ViewerActivity : AppCompatActivity(), OnMapReadyCallback {
         submitComment.setOnClickListener {
             val comment = findViewById<EditText>(R.id.comment_text)
             addComment(userId, comment.text.toString())
+            getComment()
             comment.setText("")
         }
     }
@@ -168,7 +169,7 @@ class ViewerActivity : AppCompatActivity(), OnMapReadyCallback {
     private fun moveComment(fragment: Boolean) {
         // コメントを取得
         val target: View = findViewById(R.id.comments) // 対象となるオブジェクト
-        val destination = if (fragment) -550f else 0f
+        val destination = if (fragment) -1100f else 0f
         if (fragment) getComment()
         ObjectAnimator.ofFloat(target, "translationY", destination).apply {
             duration = 200 // ミリ秒
@@ -177,20 +178,28 @@ class ViewerActivity : AppCompatActivity(), OnMapReadyCallback {
     }
 
     private fun getComment(){
-        val commentList = findViewById<LinearLayout>(R.id.comment_list)
-        val WC = LinearLayout.LayoutParams.WRAP_CONTENT
-        val MP = LinearLayout.LayoutParams.MATCH_PARENT
-        for (oneComment in info.comments){
-            if(oneComment == null){
-                Log.d("oneComment", "null")
-                continue
+        try {
+            val commentList = findViewById<LinearLayout>(R.id.comment_list)
+            commentList.removeAllViews()
+            val WC = LinearLayout.LayoutParams.WRAP_CONTENT
+            val MP = LinearLayout.LayoutParams.MATCH_PARENT
+            for (oneComment in info.comments) {
+                if (oneComment == null) {
+                    Log.d("oneComment", "null")
+                    continue
+                }
+                val textView = TextView(this)
+                val commentText: String = oneComment.comment
+                Log.d("oneComment", commentText)
+                textView.text = commentText
+                textView.textSize = 30f
+                commentList.addView(textView, LinearLayout.LayoutParams(MP, WC))
             }
-            val textView = TextView(this)
-            val commentText: String = oneComment.comment
-            Log.d("oneComment", commentText)
-            textView.text = commentText
-            textView.textSize = 30f
-            commentList.addView(textView, LinearLayout.LayoutParams(MP, WC))
+        } catch (e: Exception) {
+            Handler(Looper.getMainLooper()).post {
+                // エラー内容を出力
+                Log.e("error", e.message.toString())
+            }
         }
     }
 
