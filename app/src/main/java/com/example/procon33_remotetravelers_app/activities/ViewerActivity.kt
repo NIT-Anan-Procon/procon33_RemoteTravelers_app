@@ -102,8 +102,8 @@ class ViewerActivity : AppCompatActivity(), OnMapReadyCallback {
         submitComment.setOnClickListener {
             val comment = findViewById<EditText>(R.id.comment_text)
             addComment(userId, comment.text.toString())
-            getComment()
             comment.setText("")
+            getComment()
         }
     }
 
@@ -192,7 +192,8 @@ class ViewerActivity : AppCompatActivity(), OnMapReadyCallback {
                 val commentText: String = oneComment.comment
                 Log.d("oneComment", commentText)
                 textView.text = commentText
-                textView.textSize = 30f
+                textView.textSize = 28f
+                textView.setBackgroundResource(R.drawable.comment_design)
                 commentList.addView(textView, LinearLayout.LayoutParams(MP, WC))
             }
         } catch (e: Exception) {
