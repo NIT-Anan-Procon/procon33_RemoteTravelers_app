@@ -192,6 +192,7 @@ class ViewerActivity : AppCompatActivity(), OnMapReadyCallback {
                 val commentText: String = oneComment.comment
                 textView.text = commentText
                 textView.textSize = 28f
+                textView.setPadding(10, 15, 10, 15)
                 textView.setBackgroundResource(R.drawable.comment_design)
                 commentList.addView(textView, 0, LinearLayout.LayoutParams(MP, WC))
             }
