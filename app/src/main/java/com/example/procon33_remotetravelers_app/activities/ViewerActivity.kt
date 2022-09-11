@@ -1,6 +1,7 @@
 package com.example.procon33_remotetravelers_app.activities
 import android.animation.ObjectAnimator
 import android.content.Intent
+import android.icu.lang.UCharacter.GraphemeClusterBreak.T
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -71,6 +72,7 @@ class ViewerActivity : AppCompatActivity(), OnMapReadyCallback {
                 if (::info.isInitialized && ::mMap.isInitialized) {
                     displayCurrentLocation()
                 }
+                displayComment()
             }
         }
 
@@ -103,7 +105,6 @@ class ViewerActivity : AppCompatActivity(), OnMapReadyCallback {
             val comment = findViewById<EditText>(R.id.comment_text)
             addComment(userId, comment.text.toString())
             comment.setText("")
-            getComment()
         }
     }
 
@@ -170,14 +171,14 @@ class ViewerActivity : AppCompatActivity(), OnMapReadyCallback {
         // コメントを取得
         val target: View = findViewById(R.id.comments) // 対象となるオブジェクト
         val destination = if (fragment) -1100f else 0f
-        if (fragment) getComment()
+        if (fragment) displayComment()
         ObjectAnimator.ofFloat(target, "translationY", destination).apply {
             duration = 200 // ミリ秒
             start() // アニメーション開始
         }
     }
 
-    private fun getComment(){
+    private fun displayComment(){
         try {
             val commentList = findViewById<LinearLayout>(R.id.comment_list)
             commentList.removeAllViews()
