@@ -62,6 +62,14 @@ class MainActivity : AppCompatActivity() {
             intent.putExtra("userId", getUserId().toInt())
             startActivity(intent)
         }
+
+        // デバッグ用ボタンが押されるとViewerActivityに遷移する
+        val debugButton2 = findViewById<Button>(R.id.debug_button2)
+        debugButton2.setOnClickListener {
+            val intent = Intent(this, TravelerActivity::class.java)
+            intent.putExtra("userId", getUserId().toInt())
+            startActivity(intent)
+        }
     }
 
     private fun signup(userIdText: TextView) {
