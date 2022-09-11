@@ -1,7 +1,6 @@
 package com.example.procon33_remotetravelers_app.activities
 import android.animation.ObjectAnimator
 import android.content.Intent
-import android.icu.lang.UCharacter.GraphemeClusterBreak.T
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -184,6 +183,13 @@ class ViewerActivity : AppCompatActivity(), OnMapReadyCallback {
             commentList.removeAllViews()
             val WC = LinearLayout.LayoutParams.WRAP_CONTENT
             val MP = LinearLayout.LayoutParams.MATCH_PARENT
+            val firstView = TextView(this)
+            val firstText = "firstComment"
+            firstView.text = firstText
+            firstView.textSize = 28f
+            firstView.setPadding(10, 15, 10, 15)
+            firstView.setBackgroundResource(R.drawable.comment_design)
+            commentList.addView(firstView, 0, LinearLayout.LayoutParams(MP, WC))
             for (oneComment in info.comments) {
                 if (oneComment == null) {
                     Log.d("oneComment", "null")
