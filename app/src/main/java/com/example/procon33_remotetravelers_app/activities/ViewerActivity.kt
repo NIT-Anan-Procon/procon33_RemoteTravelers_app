@@ -2,7 +2,6 @@ package com.example.procon33_remotetravelers_app.activities
 
 import android.animation.ObjectAnimator
 import android.content.Intent
-import android.graphics.Color
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -23,7 +22,6 @@ import com.google.android.gms.maps.model.LatLng
 import com.example.procon33_remotetravelers_app.models.apis.GetInfoResponse
 import com.example.procon33_remotetravelers_app.services.GetInfoService
 import com.example.procon33_remotetravelers_app.services.AddCommentService
-import com.google.android.gms.maps.model.PolylineOptions
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import retrofit2.Retrofit
