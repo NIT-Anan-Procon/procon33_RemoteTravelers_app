@@ -190,11 +190,10 @@ class ViewerActivity : AppCompatActivity(), OnMapReadyCallback {
                 }
                 val textView = TextView(this)
                 val commentText: String = oneComment.comment
-                Log.d("oneComment", commentText)
                 textView.text = commentText
                 textView.textSize = 28f
                 textView.setBackgroundResource(R.drawable.comment_design)
-                commentList.addView(textView, LinearLayout.LayoutParams(MP, WC))
+                commentList.addView(textView, 0, LinearLayout.LayoutParams(MP, WC))
             }
         } catch (e: Exception) {
             Handler(Looper.getMainLooper()).post {
