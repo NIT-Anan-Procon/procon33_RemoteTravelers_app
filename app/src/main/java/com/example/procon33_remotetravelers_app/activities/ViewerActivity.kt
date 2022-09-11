@@ -170,7 +170,6 @@ class ViewerActivity : AppCompatActivity(), OnMapReadyCallback {
         // コメントを取得
         val target: View = findViewById(R.id.comments) // 対象となるオブジェクト
         val destination = if (fragment) -1100f else 0f
-        if (fragment) displayComment()
         ObjectAnimator.ofFloat(target, "translationY", destination).apply {
             duration = 200 // ミリ秒
             start() // アニメーション開始
