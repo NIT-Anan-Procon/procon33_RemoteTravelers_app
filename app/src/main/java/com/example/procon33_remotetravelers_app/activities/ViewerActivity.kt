@@ -183,25 +183,15 @@ class ViewerActivity : AppCompatActivity(), OnMapReadyCallback {
             commentList.removeAllViews()
             val WC = LinearLayout.LayoutParams.WRAP_CONTENT
             val MP = LinearLayout.LayoutParams.MATCH_PARENT
-            val firstView = TextView(this)
-            val firstText = "firstComment"
-            firstView.text = firstText
-            firstView.textSize = 28f
-            firstView.setPadding(10, 15, 10, 15)
-            firstView.setBackgroundResource(R.drawable.comment_design)
-            commentList.addView(firstView, 0, LinearLayout.LayoutParams(MP, WC))
+            // 最初のコメントが見えないのでダミーコメント
+            commentList.addView(setView("firstComment"), 0, LinearLayout.LayoutParams(MP, WC))
             for (oneComment in info.comments) {
                 if (oneComment == null) {
                     Log.d("oneComment", "null")
                     continue
                 }
-                val textView = TextView(this)
                 val commentText: String = oneComment.comment
-                textView.text = commentText
-                textView.textSize = 28f
-                textView.setPadding(10, 15, 10, 15)
-                textView.setBackgroundResource(R.drawable.comment_design)
-                commentList.addView(textView, 0, LinearLayout.LayoutParams(MP, WC))
+                commentList.addView(setView(commentText), 0, LinearLayout.LayoutParams(MP, WC))
             }
         } catch (e: Exception) {
             Handler(Looper.getMainLooper()).post {
@@ -209,6 +199,16 @@ class ViewerActivity : AppCompatActivity(), OnMapReadyCallback {
                 Log.e("error", e.message.toString())
             }
         }
+    }
+
+    // コメントのviewを設定する関数
+    private fun setView (commentText: String): TextView{
+        val comment = TextView(this)
+        comment.text = commentText
+        comment.textSize = 28f
+        comment.setPadding(10, 15, 10, 15)
+        comment.setBackgroundResource(R.drawable.comment_design)
+        return comment
     }
 
     private fun addComment(userId: Int, comment: String) {
