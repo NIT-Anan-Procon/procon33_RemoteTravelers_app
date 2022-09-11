@@ -18,9 +18,7 @@ import android.provider.MediaStore
 import android.provider.Settings
 import android.util.Log
 import android.view.View
-import android.widget.Button
-import android.widget.EditText
-import android.widget.Toast
+import android.widget.*
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
@@ -30,7 +28,9 @@ import androidx.core.content.ContextCompat
 import com.example.procon33_remotetravelers_app.BuildConfig
 import com.example.procon33_remotetravelers_app.R
 import com.example.procon33_remotetravelers_app.databinding.ActivityTravelerBinding
+import com.example.procon33_remotetravelers_app.models.apis.GetInfoResponse
 import com.example.procon33_remotetravelers_app.services.AddCommentService
+import com.example.procon33_remotetravelers_app.services.GetInfoService
 import com.example.procon33_remotetravelers_app.services.SaveCurrentLocationService
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
@@ -41,6 +41,8 @@ import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import retrofit2.Retrofit
 import retrofit2.converter.moshi.MoshiConverterFactory
+import java.util.*
+import kotlin.concurrent.scheduleAtFixedRate
 import kotlin.concurrent.thread
 import kotlin.properties.Delegates
 
@@ -63,6 +65,7 @@ class TravelerActivity : AppCompatActivity(), OnMapReadyCallback,
 
     private lateinit var mMap: GoogleMap
     private lateinit var binding: ActivityTravelerBinding
+    private lateinit var info: GetInfoResponse
     private lateinit var locationManager: LocationManager
     private lateinit var currentLocation: LatLng
     private var userId by Delegates.notNull<Int>()
@@ -83,6 +86,25 @@ class TravelerActivity : AppCompatActivity(), OnMapReadyCallback,
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         userId = intent.getIntExtra("userId", 0)
+        thread {
+            Thread.sleep(2500)
+            getInfo(userId)
+            Handler(Looper.getMainLooper()).post {
+                if (::mMap.isInitialized && ::info.isInitialized) {
+                    CurrentLocationActivity.displayCurrentLocation(mMap, LatLng(info.current_location.lat, info.current_location.lon))
+                }
+            }
+        }
+        Timer().scheduleAtFixedRate(0, 5000){
+            getInfo(userId)
+            Handler(Looper.getMainLooper()).post {
+                if (::mMap.isInitialized && ::info.isInitialized) {
+                    CurrentLocationActivity.displayCurrentLocation(mMap, LatLng(info.current_location.lat, info.current_location.lon))
+                    DrawRoot.drawRoot(mMap, LatLng(info.current_location.lat, info.current_location.lon))
+                }
+                displayComment()
+            }
+        }
 
         binding = ActivityTravelerBinding.inflate(layoutInflater)
         setContentView(binding.root)
@@ -232,13 +254,73 @@ class TravelerActivity : AppCompatActivity(), OnMapReadyCallback,
         }
     }
 
+    private fun getInfo(userId: Int){
+        thread {
+            try {
+                // APIを実行
+                val service: GetInfoService =
+                    retrofit.create(GetInfoService::class.java)
+                val getInfoResponse = service.getInfo(
+                    user_id = userId
+                ).execute().body()
+                    ?: throw IllegalStateException("body is null")
+
+                Handler(Looper.getMainLooper()).post {
+                    // 実行結果を出力
+                    Log.d("getInfoResponse", getInfoResponse.toString())
+                }
+                info = getInfoResponse
+            } catch (e: Exception) {
+                Handler(Looper.getMainLooper()).post {
+                    // エラー内容を出力
+                    Log.e("error", e.message.toString())
+                }
+            }
+        }
+    }
+
     private fun moveComment(fragment: Boolean) {
+        // コメントを取得
         val target: View = findViewById(R.id.comments) // 対象となるオブジェクト
-        val destination = if (fragment) -550f else 0f
+        val destination = if (fragment) -1100f else 0f
         ObjectAnimator.ofFloat(target, "translationY", destination).apply {
             duration = 200 // ミリ秒
             start() // アニメーション開始
         }
+    }
+
+    private fun displayComment(){
+        try {
+            val commentList = findViewById<LinearLayout>(R.id.comment_list)
+            commentList.removeAllViews()
+            val WC = LinearLayout.LayoutParams.WRAP_CONTENT
+            val MP = LinearLayout.LayoutParams.MATCH_PARENT
+            // 最初のコメントが見えないのでダミーコメント
+            commentList.addView(setView("firstComment"), 0, LinearLayout.LayoutParams(MP, WC))
+            for (oneComment in info.comments) {
+                if (oneComment == null) {
+                    Log.d("oneComment", "null")
+                    continue
+                }
+                val commentText: String = oneComment.comment
+                commentList.addView(setView(commentText), 0, LinearLayout.LayoutParams(MP, WC))
+            }
+        } catch (e: Exception) {
+            Handler(Looper.getMainLooper()).post {
+                // エラー内容を出力
+                Log.e("error", e.message.toString())
+            }
+        }
+    }
+
+    // コメントのviewを設定する関数
+    private fun setView (commentText: String): TextView {
+        val comment = TextView(this)
+        comment.text = commentText
+        comment.textSize = 28f
+        comment.setPadding(10, 15, 10, 15)
+        comment.setBackgroundResource(R.drawable.comment_design)
+        return comment
     }
 
     private fun addComment(userId: Int, comment: String) {
