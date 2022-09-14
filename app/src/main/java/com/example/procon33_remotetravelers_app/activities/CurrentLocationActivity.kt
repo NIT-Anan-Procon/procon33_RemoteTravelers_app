@@ -17,6 +17,7 @@ class CurrentLocationActivity {
         private var setUpped: Boolean = false
         private var lastLocation = LatLng(0.0, 0.0)
         private var currentLocationMarker: Marker? = null
+        lateinit var currentLocation: LatLng
 
         fun initializeMap(mMap: GoogleMap){
             val tokyo = LatLng(35.90684931, 139.68896404)
@@ -47,7 +48,8 @@ class CurrentLocationActivity {
             return Pair(text, color)
         }
 
-        fun displayCurrentLocation(mMap: GoogleMap, currentLocation: LatLng){
+        fun displayCurrentLocation(mMap: GoogleMap, location: LatLng){
+            currentLocation = location
             if (lastLocation != currentLocation) {
                 currentLocationMarker?.remove()
                 currentLocationMarker =
@@ -58,6 +60,9 @@ class CurrentLocationActivity {
                 lastLocation = currentLocation
             }
             if (firstTrack) {
+                currentLocationMarker?.remove()
+                currentLocationMarker =
+                    mMap.addMarker(MarkerOptions().position(currentLocation).title("現在地"))
                 mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(currentLocation, 15f))
                 if (!setUpped) {
                     thread {

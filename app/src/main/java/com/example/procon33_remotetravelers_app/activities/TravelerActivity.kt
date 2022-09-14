@@ -28,6 +28,7 @@ import androidx.core.content.ContextCompat
 import com.example.procon33_remotetravelers_app.BuildConfig
 import com.example.procon33_remotetravelers_app.R
 import com.example.procon33_remotetravelers_app.databinding.ActivityTravelerBinding
+import com.example.procon33_remotetravelers_app.models.apis.DisplayPinActivity
 import com.example.procon33_remotetravelers_app.models.apis.GetInfoResponse
 import com.example.procon33_remotetravelers_app.services.AddCommentService
 import com.example.procon33_remotetravelers_app.services.GetInfoService
@@ -100,6 +101,7 @@ class TravelerActivity : AppCompatActivity(), OnMapReadyCallback,
                 if (::mMap.isInitialized && ::info.isInitialized) {
                     CurrentLocationActivity.displayCurrentLocation(mMap, LatLng(info.current_location.lat, info.current_location.lon))
                     DrawRoot.drawRoot(mMap, LatLng(info.current_location.lat, info.current_location.lon))
+                    DisplayPinActivity.displayPin(mMap, info.destination)
                 }
                 displayComment()
             }
@@ -295,7 +297,7 @@ class TravelerActivity : AppCompatActivity(), OnMapReadyCallback,
             val WC = LinearLayout.LayoutParams.WRAP_CONTENT
             val MP = LinearLayout.LayoutParams.MATCH_PARENT
             // 最初のコメントが見えないのでダミーコメント
-            commentList.addView(setView("firstComment"), 0, LinearLayout.LayoutParams(MP, WC))
+            commentList.addView(setView("↑コメントが表示されます↑"), 0, LinearLayout.LayoutParams(MP, WC))
             for (oneComment in info.comments) {
                 if (oneComment == null) {
                     Log.d("oneComment", "null")
