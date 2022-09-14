@@ -2,7 +2,6 @@ package com.example.procon33_remotetravelers_app.activities
 
 import android.animation.ObjectAnimator
 import android.content.Intent
-import android.graphics.Color
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -14,6 +13,7 @@ import androidx.appcompat.app.AppCompatActivity
 import com.example.procon33_remotetravelers_app.BuildConfig
 import com.example.procon33_remotetravelers_app.R
 import com.example.procon33_remotetravelers_app.databinding.ActivityViewerBinding
+import com.example.procon33_remotetravelers_app.models.apis.DisplayPinActivity
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
@@ -21,6 +21,7 @@ import com.google.android.gms.maps.model.LatLng
 import com.example.procon33_remotetravelers_app.models.apis.GetInfoResponse
 import com.example.procon33_remotetravelers_app.services.GetInfoService
 import com.example.procon33_remotetravelers_app.services.AddCommentService
+import com.google.android.gms.maps.model.Marker
 import com.google.android.gms.maps.model.PolylineOptions
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
@@ -54,6 +55,7 @@ class ViewerActivity : AppCompatActivity(), OnMapReadyCallback {
             Handler(Looper.getMainLooper()).post {
                 if (::mMap.isInitialized && ::info.isInitialized) {
                     CurrentLocationActivity.displayCurrentLocation(mMap, LatLng(info.current_location.lat, info.current_location.lon))
+                    DisplayPinActivity.displayPin(mMap, info.destination)
                 }
             }
         }
@@ -62,6 +64,7 @@ class ViewerActivity : AppCompatActivity(), OnMapReadyCallback {
             Handler(Looper.getMainLooper()).post {
                 if (::mMap.isInitialized && ::info.isInitialized) {
                     CurrentLocationActivity.displayCurrentLocation(mMap, LatLng(info.current_location.lat, info.current_location.lon))
+                    DisplayPinActivity.displayPin(mMap, info.destination)
                     DrawRoot.drawRoot(mMap, LatLng(info.current_location.lat, info.current_location.lon))
                 }
             }
@@ -79,6 +82,9 @@ class ViewerActivity : AppCompatActivity(), OnMapReadyCallback {
         pinButton.setOnClickListener {
             val intent = Intent(this, SuggestDestinationActivity::class.java)
             intent.putExtra("userId", userId)
+            intent.putExtra("lat", mMap.cameraPosition.target.latitude)
+            intent.putExtra("lon", mMap.cameraPosition.target.longitude)
+            intent.putExtra("zoom", mMap.cameraPosition.zoom)
             startActivity(intent)
         }
 

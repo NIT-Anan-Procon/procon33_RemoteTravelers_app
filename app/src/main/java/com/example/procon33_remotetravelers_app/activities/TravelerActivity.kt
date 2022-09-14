@@ -30,9 +30,11 @@ import androidx.core.content.ContextCompat
 import com.example.procon33_remotetravelers_app.BuildConfig
 import com.example.procon33_remotetravelers_app.R
 import com.example.procon33_remotetravelers_app.databinding.ActivityTravelerBinding
+import com.example.procon33_remotetravelers_app.models.apis.DisplayPinActivity
+import com.example.procon33_remotetravelers_app.models.apis.GetInfoResponse
 import com.example.procon33_remotetravelers_app.services.AddCommentService
+import com.example.procon33_remotetravelers_app.services.GetInfoService
 import com.example.procon33_remotetravelers_app.services.SaveCurrentLocationService
-import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
@@ -41,6 +43,8 @@ import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import retrofit2.Retrofit
 import retrofit2.converter.moshi.MoshiConverterFactory
+import java.util.*
+import kotlin.concurrent.scheduleAtFixedRate
 import kotlin.concurrent.thread
 import kotlin.properties.Delegates
 
@@ -65,6 +69,7 @@ class TravelerActivity : AppCompatActivity(), OnMapReadyCallback,
     private lateinit var binding: ActivityTravelerBinding
     private lateinit var locationManager: LocationManager
     private lateinit var currentLocation: LatLng
+    private lateinit var info: GetInfoResponse
     private var userId by Delegates.notNull<Int>()
     private val requestPermissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestPermission()
@@ -83,7 +88,14 @@ class TravelerActivity : AppCompatActivity(), OnMapReadyCallback,
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         userId = intent.getIntExtra("userId", 0)
-
+        Timer().scheduleAtFixedRate(0, 5000){
+            getInfo(userId)
+            Handler(Looper.getMainLooper()).post {
+                if (::mMap.isInitialized && ::info.isInitialized) {
+                    DisplayPinActivity.displayPin(mMap, info.destination)
+                }
+            }
+        }
         binding = ActivityTravelerBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
@@ -256,6 +268,31 @@ class TravelerActivity : AppCompatActivity(), OnMapReadyCallback,
                     // 実行結果を出力
                     Log.d("addCommentResponse", addCommentResponse.toString())
                 }
+            } catch (e: Exception) {
+                Handler(Looper.getMainLooper()).post {
+                    // エラー内容を出力
+                    Log.e("error", e.message.toString())
+                }
+            }
+        }
+    }
+
+    private fun getInfo(userId: Int){
+        thread {
+            try {
+                // APIを実行
+                val service: GetInfoService =
+                    retrofit.create(GetInfoService::class.java)
+                val getInfoResponse = service.getInfo(
+                    user_id = userId
+                ).execute().body()
+                    ?: throw IllegalStateException("body is null")
+
+                Handler(Looper.getMainLooper()).post {
+                    // 実行結果を出力
+                    Log.d("getInfoResponse", getInfoResponse.toString())
+                }
+                info = getInfoResponse
             } catch (e: Exception) {
                 Handler(Looper.getMainLooper()).post {
                     // エラー内容を出力

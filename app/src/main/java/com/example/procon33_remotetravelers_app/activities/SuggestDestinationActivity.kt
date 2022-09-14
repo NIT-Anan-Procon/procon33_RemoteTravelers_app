@@ -9,7 +9,6 @@ import android.widget.Button
 import android.widget.Toast
 import com.example.procon33_remotetravelers_app.BuildConfig
 import com.example.procon33_remotetravelers_app.R
-
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
@@ -24,6 +23,8 @@ import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import retrofit2.Retrofit
 import retrofit2.converter.moshi.MoshiConverterFactory
+import java.util.*
+import kotlin.concurrent.scheduleAtFixedRate
 import kotlin.concurrent.thread
 
 class SuggestDestinationActivity : AppCompatActivity(), OnMapReadyCallback,
@@ -42,9 +43,17 @@ class SuggestDestinationActivity : AppCompatActivity(), OnMapReadyCallback,
     private lateinit var binding: ActivitySuggestDestinationBinding
     private lateinit var suggestDestination: LatLng
     private var suggestMarker: Marker? = null
+    private var currentLocationMarker: Marker? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        Timer().scheduleAtFixedRate(0, 5000) {
+            Handler(Looper.getMainLooper()).post {
+                if (::mMap.isInitialized) {
+                    displayCurrentLocation()
+                }
+            }
+        }
 
         val userId = intent.getIntExtra("userId", 0)
 
@@ -72,12 +81,10 @@ class SuggestDestinationActivity : AppCompatActivity(), OnMapReadyCallback,
 
     override fun onMapReady(googleMap: GoogleMap) {
         mMap = googleMap
-
-        // Add a marker in Sydney and move the camera
-        val sydney = LatLng(-34.0, 151.0)
-        mMap.addMarker(MarkerOptions().position(sydney).title("Marker in Sydney"))
-        mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney))
-
+        val cameraPosition = LatLng(intent.getDoubleExtra("lat", 0.0), intent.getDoubleExtra("lon", 0.0))
+        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(cameraPosition, intent.getFloatExtra("zoom", 15f)))
+        mMap.setMinZoomPreference(7f)
+        displayCurrentLocation()
         mMap.setOnMapClickListener(this)
     }
 
@@ -88,6 +95,12 @@ class SuggestDestinationActivity : AppCompatActivity(), OnMapReadyCallback,
             MarkerOptions().position(point)
                 .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN))
         )
+    }
+
+    private fun displayCurrentLocation(){
+        currentLocationMarker?.remove()
+        currentLocationMarker =
+            mMap.addMarker(MarkerOptions().position(CurrentLocationActivity.currentLocation).title("現在地"))
     }
 
     private fun decidePin(userId: Int){
