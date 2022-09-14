@@ -15,6 +15,8 @@ import com.example.procon33_remotetravelers_app.models.apis.CreateReportResponse
 import com.example.procon33_remotetravelers_app.services.CreateReportService
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.schedulers.Schedulers;
 import okhttp3.MediaType
 import okhttp3.MultipartBody
 import okhttp3.OkHttpClient
@@ -23,8 +25,7 @@ import retrofit2.Retrofit
 import retrofit2.adapter.rxjava.RxJavaCallAdapterFactory
 import retrofit2.converter.moshi.MoshiConverterFactory
 import rx.Subscriber
-import rx.android.schedulers.AndroidSchedulers
-import rx.schedulers.Schedulers
+//import rx.schedulers.Schedulers
 import java.io.File
 import java.io.FileOutputStream
 import kotlin.concurrent.thread
@@ -152,7 +153,7 @@ class CreateReportActivity : AppCompatActivity() {
         val image = RequestBody.create(MediaType.parse("image/jpg"), image)
 
         map.put("user_id", userId)
-        map.put("image\"; filename=\"image.png\"", image)
+        map.put("image", image)
         map.put("commet", comment)
         map.put("excitment", excitment)
         map.put("lat", lat)
@@ -177,7 +178,7 @@ class CreateReportActivity : AppCompatActivity() {
         }
     }
 
-    fun createApiClient(): CreateReportService{
+    private fun createApiClient(): CreateReportService{
         val okClient = OkHttpClient()
 
         val builder = Retrofit.Builder()
