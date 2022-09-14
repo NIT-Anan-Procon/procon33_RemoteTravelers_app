@@ -19,6 +19,7 @@ import android.provider.Settings
 import android.util.Log
 import android.view.View
 import android.widget.Button
+import android.widget.EditText
 import android.widget.Toast
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -29,24 +30,27 @@ import androidx.core.content.ContextCompat
 import com.example.procon33_remotetravelers_app.BuildConfig
 import com.example.procon33_remotetravelers_app.R
 import com.example.procon33_remotetravelers_app.databinding.ActivityTravelerBinding
+import com.example.procon33_remotetravelers_app.models.apis.DisplayPinActivity
+import com.example.procon33_remotetravelers_app.models.apis.GetInfoResponse
+import com.example.procon33_remotetravelers_app.services.AddCommentService
+import com.example.procon33_remotetravelers_app.services.GetInfoService
 import com.example.procon33_remotetravelers_app.services.SaveCurrentLocationService
-import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.LatLng
-import com.google.android.gms.maps.model.Marker
-import com.google.android.gms.maps.model.MarkerOptions
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import retrofit2.Retrofit
 import retrofit2.converter.moshi.MoshiConverterFactory
+import java.util.*
+import kotlin.concurrent.scheduleAtFixedRate
 import kotlin.concurrent.thread
 import kotlin.properties.Delegates
 
 
 class TravelerActivity : AppCompatActivity(), OnMapReadyCallback,
-    LocationListener, GoogleMap.OnMapClickListener {
+    LocationListener {
 
     companion object {
         const val CAMERA_REQUEST_CODE = 1
@@ -65,10 +69,8 @@ class TravelerActivity : AppCompatActivity(), OnMapReadyCallback,
     private lateinit var binding: ActivityTravelerBinding
     private lateinit var locationManager: LocationManager
     private lateinit var currentLocation: LatLng
+    private lateinit var info: GetInfoResponse
     private var userId by Delegates.notNull<Int>()
-    private var track = true
-    private var firstLocationChange = true
-    private var currentLocationMarker: Marker? = null
     private val requestPermissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestPermission()
     ) { isGranted: Boolean ->
@@ -85,9 +87,15 @@ class TravelerActivity : AppCompatActivity(), OnMapReadyCallback,
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
         userId = intent.getIntExtra("userId", 0)
-
+        Timer().scheduleAtFixedRate(0, 5000){
+            getInfo(userId)
+            Handler(Looper.getMainLooper()).post {
+                if (::mMap.isInitialized && ::info.isInitialized) {
+                    DisplayPinActivity.displayPin(mMap, info.destination)
+                }
+            }
+        }
         binding = ActivityTravelerBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
@@ -102,13 +110,13 @@ class TravelerActivity : AppCompatActivity(), OnMapReadyCallback,
             resultLauncher.launch(intent)
         }
 
-        val currentLocationButton = findViewById<Button>(R.id.current_location_button)
+        val currentLocationButton = findViewById<Button>(R.id.travel_current_location_button)
         currentLocationButton.setOnClickListener {
             if(::mMap.isInitialized && ::currentLocation.isInitialized){
-                //ここはバグが起きた時用に一応置いてる
-                createMarker()
-                track = true
-                mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(currentLocation, 15f))
+                val (text, color) = CurrentLocationActivity.pressedButton()
+                currentLocationButton.setText(text)
+                currentLocationButton.setBackgroundResource(color)
+                CurrentLocationActivity.displayCurrentLocation(mMap, currentLocation)
             }
         }
 
@@ -120,10 +128,18 @@ class TravelerActivity : AppCompatActivity(), OnMapReadyCallback,
         }
 
         var fragment = false
-        val button_comment = findViewById<Button>(R.id.comment_door_button)
-        button_comment.setOnClickListener {
+        val buttonComment = findViewById<Button>(R.id.comment_door_button)
+        buttonComment.setOnClickListener {
             fragment = !fragment
             moveComment(fragment)
+        }
+
+        val submitComment = findViewById<Button>(R.id.comment_submit)
+        submitComment.setOnClickListener {
+            val comment = findViewById<EditText>(R.id.comment_text)
+            val commentText = comment.text.toString()
+            if (commentText != "") addComment(userId, commentText)
+            comment.setText("")
         }
     }
 
@@ -163,14 +179,8 @@ class TravelerActivity : AppCompatActivity(), OnMapReadyCallback,
         currentLocation = LatLng(location.latitude, location.longitude)
         saveCurrentLocation()
         if(::mMap.isInitialized){
-            createMarker()
-            if(firstLocationChange){
-                mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(currentLocation, 15f))
-                firstLocationChange = false
-                return
-            }
-            if(track)
-                mMap.animateCamera(CameraUpdateFactory.newLatLng(currentLocation))
+            CurrentLocationActivity.displayCurrentLocation(mMap, currentLocation)
+            DrawRoot.drawRoot(mMap, currentLocation)
         }
     }
 
@@ -184,16 +194,7 @@ class TravelerActivity : AppCompatActivity(), OnMapReadyCallback,
 
     override fun onMapReady(googleMap: GoogleMap) {
         mMap = googleMap
-        mMap.setMinZoomPreference(9f)
-    }
-
-    override fun onMapClick(point: LatLng) {
-        track = false
-    }
-
-    private fun createMarker(){
-        currentLocationMarker?.remove()
-        currentLocationMarker = mMap.addMarker(MarkerOptions().position(currentLocation).title("現在地"))
+        CurrentLocationActivity.initializeMap(mMap)
     }
 
     private fun saveCurrentLocation(){
@@ -249,6 +250,55 @@ class TravelerActivity : AppCompatActivity(), OnMapReadyCallback,
         ObjectAnimator.ofFloat(target, "translationY", destination).apply {
             duration = 200 // ミリ秒
             start() // アニメーション開始
+        }
+    }
+
+    private fun addComment(userId: Int, comment: String) {
+        thread {
+            try {
+                // APIを実行
+                val service: AddCommentService =
+                    retrofit.create(AddCommentService::class.java)
+                val addCommentResponse = service.addComment(
+                    user_id = userId, comment = comment
+                ).execute().body()
+                    ?: throw IllegalStateException("body is null")
+
+                Handler(Looper.getMainLooper()).post {
+                    // 実行結果を出力
+                    Log.d("addCommentResponse", addCommentResponse.toString())
+                }
+            } catch (e: Exception) {
+                Handler(Looper.getMainLooper()).post {
+                    // エラー内容を出力
+                    Log.e("error", e.message.toString())
+                }
+            }
+        }
+    }
+
+    private fun getInfo(userId: Int){
+        thread {
+            try {
+                // APIを実行
+                val service: GetInfoService =
+                    retrofit.create(GetInfoService::class.java)
+                val getInfoResponse = service.getInfo(
+                    user_id = userId
+                ).execute().body()
+                    ?: throw IllegalStateException("body is null")
+
+                Handler(Looper.getMainLooper()).post {
+                    // 実行結果を出力
+                    Log.d("getInfoResponse", getInfoResponse.toString())
+                }
+                info = getInfoResponse
+            } catch (e: Exception) {
+                Handler(Looper.getMainLooper()).post {
+                    // エラー内容を出力
+                    Log.e("error", e.message.toString())
+                }
+            }
         }
     }
 }
