@@ -157,7 +157,7 @@ class ViewerActivity : AppCompatActivity(), OnMapReadyCallback {
             val WC = LinearLayout.LayoutParams.WRAP_CONTENT
             val MP = LinearLayout.LayoutParams.MATCH_PARENT
             // 最初のコメントが見えないのでダミーコメント
-            commentList.addView(setView("firstComment"), 0, LinearLayout.LayoutParams(MP, WC))
+            commentList.addView(setView("↑コメントが表示されます↑"), 0, LinearLayout.LayoutParams(MP, WC))
             for (oneComment in info.comments) {
                 if (oneComment == null) {
                     Log.d("oneComment", "null")
