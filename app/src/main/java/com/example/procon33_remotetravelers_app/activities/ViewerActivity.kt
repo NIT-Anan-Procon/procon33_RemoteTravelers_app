@@ -7,10 +7,7 @@ import android.os.Handler
 import android.os.Looper
 import android.util.Log
 import android.view.View
-import android.widget.Button
-import android.widget.EditText
-import android.widget.LinearLayout
-import android.widget.TextView
+import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import com.example.procon33_remotetravelers_app.BuildConfig
 import com.example.procon33_remotetravelers_app.R
@@ -68,6 +65,7 @@ class ViewerActivity : AppCompatActivity(), OnMapReadyCallback {
                     DrawRoot.drawRoot(mMap, LatLng(info.current_location.lat, info.current_location.lon))
                 }
                 displayComment()
+                changeSituation()
             }
         }
 
@@ -144,6 +142,32 @@ class ViewerActivity : AppCompatActivity(), OnMapReadyCallback {
                 }
             }
         }
+    }
+
+    private fun changeSituation(){
+        try {
+            val travelerIcon = findViewById<ImageView>(R.id.traveler_situation_icon)
+            if (info.situation == "食事中"){
+                travelerIcon.setImageResource(R.drawable.eatting)
+            }else if(info.situation == "観光中（建物）"){
+                travelerIcon.setImageResource(R.drawable.building)
+            }else if(info.situation == "観光中（風景）"){
+                travelerIcon.setImageResource(R.drawable.nature)
+            }else if(info.situation == "動物と触れ合い中"){
+                travelerIcon.setImageResource(R.drawable.animals)
+            }else if(info.situation == "自撮り中、又は他人を撮影中"){
+                travelerIcon.setImageResource(R.drawable.human)
+            }else{
+                travelerIcon.setImageResource(R.drawable.walking)
+            }
+
+        } catch (e: Exception) {
+            Handler(Looper.getMainLooper()).post {
+                // エラー内容を出力
+                Log.e("situation_error", e.message.toString())
+            }
+        }
+
     }
 
     private fun moveComment(fragment: Boolean) {

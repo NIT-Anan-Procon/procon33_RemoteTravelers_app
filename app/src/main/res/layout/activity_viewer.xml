@@ -64,7 +64,7 @@
         android:layout_height="100dp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/traveler_situation_text"
-        app:srcCompat="@drawable/walking"
+        android:src="@drawable/walking"
         android:padding="10dp"
         android:background="@drawable/traveler_situation_design"
         android:contentDescription="@string/traveler_icon_image" />
