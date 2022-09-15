@@ -13,7 +13,7 @@
         android:layout_height="match_parent"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="1.0"
+        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.0"
@@ -45,6 +45,29 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/pin_button"
         tools:ignore="TextContrastCheck" />
+
+    <TextView
+        android:id="@+id/traveler_situation_text"
+        android:layout_width="120dp"
+        android:layout_height="wrap_content"
+        android:text="@string/traveler_situation"
+        android:textSize="20sp"
+        android:textColor="@color/black"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        android:background="@drawable/traveler_situation_design"
+        android:gravity="center"/>
+
+    <ImageView
+        android:id="@+id/traveler_situation_icon"
+        android:layout_width="120dp"
+        android:layout_height="100dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/traveler_situation_text"
+        app:srcCompat="@drawable/walking"
+        android:padding="10dp"
+        android:background="@drawable/traveler_situation_design"
+        android:contentDescription="@string/traveler_icon_image" />
 
     <FrameLayout
         android:id="@+id/comments"
