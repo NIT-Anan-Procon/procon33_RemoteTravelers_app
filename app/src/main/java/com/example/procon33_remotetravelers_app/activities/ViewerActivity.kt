@@ -144,6 +144,7 @@ class ViewerActivity : AppCompatActivity(), OnMapReadyCallback {
         }
     }
 
+    // 状況把握の画像を変更
     private fun changeSituation(){
         try {
             val travelerIcon = findViewById<ImageView>(R.id.traveler_situation_icon)
@@ -160,14 +161,12 @@ class ViewerActivity : AppCompatActivity(), OnMapReadyCallback {
             }else{
                 travelerIcon.setImageResource(R.drawable.walking)
             }
-
         } catch (e: Exception) {
             Handler(Looper.getMainLooper()).post {
                 // エラー内容を出力
                 Log.e("situation_error", e.message.toString())
             }
         }
-
     }
 
     private fun moveComment(fragment: Boolean) {
