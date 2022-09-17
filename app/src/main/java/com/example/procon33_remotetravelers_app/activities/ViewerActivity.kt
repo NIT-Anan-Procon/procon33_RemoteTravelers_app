@@ -154,7 +154,7 @@ class ViewerActivity : AppCompatActivity(), OnMapReadyCallback {
                 travelerIcon.setImageResource(R.drawable.building)
             }else if(info.situation == "観光中（風景）"){
                 travelerIcon.setImageResource(R.drawable.nature)
-            }else if(true){
+            }else if(info.situation == "動物と触れ合い中"){
                 travelerIcon.setImageResource(R.drawable.animal)
             }else if(info.situation == "自撮り中、又は他人を撮影中"){
                 travelerIcon.setImageResource(R.drawable.human)
