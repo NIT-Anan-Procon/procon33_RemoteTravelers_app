@@ -1,11 +1,9 @@
 package com.example.procon33_remotetravelers_app.services
 
 import com.example.procon33_remotetravelers_app.models.apis.CreateReportResponse
+import io.reactivex.Observable
 import okhttp3.RequestBody
-import retrofit2.Call
 import retrofit2.http.*
-import rx.Observable
-import java.util.*
 
 interface CreateReportService{
     @JvmSuppressWildcards

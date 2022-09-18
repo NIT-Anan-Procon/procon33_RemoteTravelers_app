@@ -5,6 +5,7 @@ import android.content.ContextWrapper
 import android.graphics.Bitmap
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.util.Base64
 import android.util.Log
 import android.widget.Button
 import android.widget.EditText
@@ -15,17 +16,18 @@ import com.example.procon33_remotetravelers_app.models.apis.CreateReportResponse
 import com.example.procon33_remotetravelers_app.services.CreateReportService
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
-import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.schedulers.Schedulers;
+import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.schedulers.Schedulers
 import okhttp3.MediaType
 import okhttp3.MultipartBody
 import okhttp3.OkHttpClient
 import okhttp3.RequestBody
 import retrofit2.Retrofit
-import retrofit2.adapter.rxjava.RxJavaCallAdapterFactory
+import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory
 import retrofit2.converter.moshi.MoshiConverterFactory
-import rx.Subscriber
-//import rx.schedulers.Schedulers
+import io.reactivex.Observer
+import io.reactivex.disposables.Disposable
+import java.io.ByteArrayOutputStream
 import java.io.File
 import java.io.FileOutputStream
 import kotlin.concurrent.thread
@@ -65,6 +67,7 @@ class CreateReportActivity : AppCompatActivity() {
             Context.MODE_PRIVATE
         )
 
+        //File形式で保存した画像を取得
         val file = File(directory, "image_name.jpg")
 
         if(photo != null) {
@@ -74,7 +77,7 @@ class CreateReportActivity : AppCompatActivity() {
         }
 
         //保存したファイルを取得
-        val image = File("data/data/com.example.procon33_remotetravelers_app/app_image", "image_name.jpg")
+        val image = File("data/data/com.example.procon33_remotetravelers_app/app_image/image_name.jpg")
         Log.d("image", image.toString())
 
         //ユーザーIDを取得
@@ -89,6 +92,8 @@ class CreateReportActivity : AppCompatActivity() {
         keepButton.setOnClickListener {
             Log.d("user_id", userId.toString())
             val comment = commentText.text.toString()
+            //base64をエンコーディングしたものを取得
+            val image2 = encodeImage(photo)
             sendReport(userId, image, comment, lat, lon)
             finish()
         }
@@ -145,34 +150,37 @@ class CreateReportActivity : AppCompatActivity() {
     private fun sendReport(userId: Int, image:  File, comment: String, lat: Double, lon: Double){
         val map: MutableMap<String, RequestBody> = HashMap()
 
-        val userId = RequestBody.create(MediaType.parse("text/plain"), userId.toString())
-        val comment = RequestBody.create(MediaType.parse("text/plain"), comment)
-        val excitment = RequestBody.create(MediaType.parse("text/plain"), "1")
-        val lat = RequestBody.create(MediaType.parse("text/plain"), lat.toString())
-        val lon = RequestBody.create(MediaType.parse("text/plain"), lon.toString())
-        val image = RequestBody.create(MediaType.parse("image/jpg"), image)
+        val userIdFix = RequestBody.create(MediaType.parse("text/plain"), userId.toString())
+        val commentFix = RequestBody.create(MediaType.parse("text/plain"), comment)
+        val excitementFix = RequestBody.create(MediaType.parse("text/plain"), "1")
+        val latFix = RequestBody.create(MediaType.parse("text/plain"), lat.toString())
+        val lonFix = RequestBody.create(MediaType.parse("text/plain"), lon.toString())
+        val imageFix = RequestBody.create(MediaType.parse("image/jpg"), image)
 
-        map.put("user_id", userId)
-        map.put("image", image)
-        map.put("commet", comment)
-        map.put("excitment", excitment)
-        map.put("lat", lat)
-        map.put("lon", lon)
+        map.put("user_id", userIdFix)
+        map.put("image", imageFix)
+        map.put("comment", commentFix)
+        map.put("excitement", excitementFix)
+        map.put("lat", latFix)
+        map.put("lon", lonFix)
 
         thread {
             createApiClient().createReport(params = map)
                 .subscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(object : Subscriber<CreateReportResponse>() {
-                    override fun onNext(r: CreateReportResponse?) {  // 成功
+                .subscribe(object : Observer<CreateReportResponse> {
+                    override fun onNext(r: CreateReportResponse) {  // 成功
                         Log.d("MainActivity", r.toString())
                     }
 
-                    override fun onError(e: Throwable?) {
+                    override fun onError(e: Throwable) {
                         Log.d("error", e.toString())  // 失敗
                     }
 
-                    override fun onCompleted() {
+                    override fun onSubscribe(d: Disposable) {
+                    }
+
+                    override fun onComplete() {
                     }
                 })
         }
@@ -183,10 +191,22 @@ class CreateReportActivity : AppCompatActivity() {
 
         val builder = Retrofit.Builder()
             .client(okClient)
-            .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
+            .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
             .addConverterFactory(MoshiConverterFactory.create(moshi))
             .baseUrl(BuildConfig.API_URL)
             .build()
          return  builder.create(CreateReportService::class.java)
+    }
+
+    //Bitmapをbase64に変換
+    private fun encodeImage(photo: Bitmap?): String?{
+        if(photo == null){
+            return ""
+        }else{
+            val baos = ByteArrayOutputStream()
+            photo.compress(Bitmap.CompressFormat.JPEG, 100, baos)
+            val b = baos.toByteArray()
+            return Base64.encodeToString(b, Base64.DEFAULT)
+        }
     }
 }
