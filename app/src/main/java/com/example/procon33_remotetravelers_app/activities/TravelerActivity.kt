@@ -28,7 +28,6 @@ import androidx.core.content.ContextCompat
 import com.example.procon33_remotetravelers_app.BuildConfig
 import com.example.procon33_remotetravelers_app.R
 import com.example.procon33_remotetravelers_app.databinding.ActivityTravelerBinding
-import com.example.procon33_remotetravelers_app.models.apis.DisplayPinActivity
 import com.example.procon33_remotetravelers_app.models.apis.GetInfoResponse
 import com.example.procon33_remotetravelers_app.services.AddCommentService
 import com.example.procon33_remotetravelers_app.services.GetInfoService
@@ -37,8 +36,10 @@ import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.maps.model.Marker
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
+import com.google.android.gms.maps.GoogleMap.OnMarkerClickListener
 import retrofit2.Retrofit
 import retrofit2.converter.moshi.MoshiConverterFactory
 import java.util.*
@@ -46,9 +47,8 @@ import kotlin.concurrent.scheduleAtFixedRate
 import kotlin.concurrent.thread
 import kotlin.properties.Delegates
 
-
-class TravelerActivity : AppCompatActivity(), OnMapReadyCallback,
-    LocationListener {
+class TravelerActivity : AppCompatActivity(), OnMapReadyCallback, OnMarkerClickListener,
+    LocationListener{
 
     companion object {
         const val CAMERA_REQUEST_CODE = 1
@@ -68,7 +68,9 @@ class TravelerActivity : AppCompatActivity(), OnMapReadyCallback,
     private lateinit var info: GetInfoResponse
     private lateinit var locationManager: LocationManager
     private lateinit var currentLocation: LatLng
+    private lateinit var suggestLocation: LatLng
     private var userId by Delegates.notNull<Int>()
+    private var suggestTouchFrag: Boolean = false
     private val requestPermissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestPermission()
     ) { isGranted: Boolean ->
@@ -192,6 +194,8 @@ class TravelerActivity : AppCompatActivity(), OnMapReadyCallback,
         if(::mMap.isInitialized){
             CurrentLocationActivity.displayCurrentLocation(mMap, currentLocation)
             DrawRoot.drawRoot(mMap, currentLocation)
+            // ルートの更新
+            DisplayPinActivity.displayRoot(mMap, currentLocation, suggestLocation, suggestTouchFrag)
         }
     }
 
@@ -206,6 +210,16 @@ class TravelerActivity : AppCompatActivity(), OnMapReadyCallback,
     override fun onMapReady(googleMap: GoogleMap) {
         mMap = googleMap
         CurrentLocationActivity.initializeMap(mMap)
+        mMap.setOnMarkerClickListener(this)
+    }
+
+    // マーカーをクリック
+    override fun onMarkerClick(marker: Marker): Boolean{
+        val markerPosition = marker.position
+        suggestLocation = LatLng(markerPosition.latitude, markerPosition.longitude)
+        suggestTouchFrag = !suggestTouchFrag
+        DisplayPinActivity.displayRoot(mMap, currentLocation, suggestLocation, suggestTouchFrag)
+        return false
     }
 
     private fun saveCurrentLocation(){
@@ -279,6 +293,8 @@ class TravelerActivity : AppCompatActivity(), OnMapReadyCallback,
             }
         }
     }
+
+
 
     private fun moveComment(fragment: Boolean) {
         // コメントを取得
