@@ -31,6 +31,7 @@ import com.example.procon33_remotetravelers_app.databinding.ActivityTravelerBind
 import com.example.procon33_remotetravelers_app.models.apis.DisplayPinActivity
 import com.example.procon33_remotetravelers_app.models.apis.GetInfoResponse
 import com.example.procon33_remotetravelers_app.services.AddCommentService
+import com.example.procon33_remotetravelers_app.services.ExitTravelService
 import com.example.procon33_remotetravelers_app.services.GetInfoService
 import com.example.procon33_remotetravelers_app.services.SaveCurrentLocationService
 import com.google.android.gms.maps.GoogleMap
@@ -151,6 +152,12 @@ class TravelerActivity : AppCompatActivity(), OnMapReadyCallback,
             val commentText = comment.text.toString()
             if (commentText != "") addComment(userId, commentText)
             comment.setText("")
+        }
+
+        val exitTravelButton = findViewById<Button>(R.id.travel_exit_button)
+        exitTravelButton.setOnClickListener {
+            exitTravel(userId)
+            finish()
         }
     }
 
@@ -332,6 +339,31 @@ class TravelerActivity : AppCompatActivity(), OnMapReadyCallback,
                     retrofit.create(AddCommentService::class.java)
                 val addCommentResponse = service.addComment(
                     user_id = userId, comment = comment
+                ).execute().body()
+                    ?: throw IllegalStateException("body is null")
+
+                Handler(Looper.getMainLooper()).post {
+                    // 実行結果を出力
+                    Log.d("addCommentResponse", addCommentResponse.toString())
+                }
+            } catch (e: Exception) {
+                Handler(Looper.getMainLooper()).post {
+                    // エラー内容を出力
+                    Log.e("error", e.message.toString())
+                }
+            }
+        }
+    }
+
+    //旅行を抜けるAPIを叩く
+    private fun exitTravel(userId: Int){
+        thread {
+            try {
+                // APIを実行
+                val service: ExitTravelService =
+                    retrofit.create(ExitTravelService::class.java)
+                val addCommentResponse = service.exitTravel(
+                    user_id = userId
                 ).execute().body()
                     ?: throw IllegalStateException("body is null")
 
