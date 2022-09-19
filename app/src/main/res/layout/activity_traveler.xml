@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:backgroundTint="@color/current_location"
+    android:backgroundTint="@color/track_on"
     tools:context=".activities.TravelerActivity">
 
     <androidx.fragment.app.FragmentContainerView
@@ -29,16 +29,18 @@
         app:layout_constraintTop_toTopOf="@+id/map" />
 
     <Button
-        android:id="@+id/current_location_button"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:backgroundTint="@color/current_location"
-        android:text="@string/current_location_button"
+        android:id="@+id/travel_current_location_button"
+        android:layout_width="70dp"
+        android:layout_height="65dp"
+        android:background="@drawable/track_off"
+        android:text="@string/track_off"
         android:textColor="@color/white"
-        android:textSize="20sp"
+        android:textSize="17sp"
+        app:backgroundTint="@null"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/camera_button"
         tools:ignore="TextContrastCheck" />
+
     <FrameLayout
         android:id="@+id/comments"
         android:layout_width="match_parent"
@@ -56,50 +58,36 @@
             android:background="@drawable/comment_button_design"
             app:backgroundTint="@null" />
 
-        <LinearLayout
-            android:id="@+id/ll"
+        <ScrollView
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="50dp"
-            android:orientation="vertical">
+            android:layout_height="400dp"
+            android:isScrollContainer="false"
+            android:fadingEdge="none"
+            android:background="@color/white"
+            >
 
-            <Button
-                android:id="@+id/button"
+            <LinearLayout
+                android:id="@+id/comment_list"
                 android:layout_width="match_parent"
-                android:layout_height="50dp"
-                android:text=""
-                android:textColor="@color/black"
-                android:background="@drawable/comment_design"
+                android:layout_height="350dp"
+                android:layout_marginTop="50dp"
+                android:background="@color/white"
+                android:orientation="vertical"
+                android:scrollbarAlwaysDrawHorizontalTrack="false"
+                android:scrollbarAlwaysDrawVerticalTrack="false"
+                android:scrollbarStyle="outsideInset"
                 app:backgroundTint="@null"
-                />
+                android:clipToPadding="false">
 
-            <Button
-                android:id="@+id/button2"
-                android:layout_width="match_parent"
-                android:layout_height="50dp"
-                android:text=""
-                android:textColor="@color/black"
-                android:background="@drawable/comment_design"
-                app:backgroundTint="@null"
-                />
+            </LinearLayout>
 
-            <Button
-                android:id="@+id/button3"
-                android:layout_width="match_parent"
-                android:layout_height="50dp"
-                android:text=""
-                android:textColor="@color/black"
-                android:background="@drawable/comment_design"
-                app:backgroundTint="@null"
-                />
-
-        </LinearLayout>
+        </ScrollView>
 
         <EditText
             android:id="@+id/comment_text"
             android:layout_width="330dp"
             android:layout_height="50dp"
-            android:layout_marginTop="200dp"
+            android:layout_marginTop="400dp"
             android:autofillHints=""
             android:background="@drawable/participants_input_design"
             android:ems="10"
@@ -114,7 +102,7 @@
             android:layout_width="80dp"
             android:layout_height="50dp"
             android:layout_gravity="right"
-            android:layout_marginTop="200dp"
+            android:layout_marginTop="400dp"
             android:background="@drawable/comment_submit_design"
             android:paddingStart="10dp"
             android:text="@string/comment_submit_button"

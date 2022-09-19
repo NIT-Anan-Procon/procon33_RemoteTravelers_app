@@ -13,10 +13,7 @@
                 android:top="0dp"
                 android:left="0dp"
                 android:right="0dp" />
-            <solid android:color="@color/white"/>
-            <stroke
-                android:color="@color/black"
-                android:width="0.5dp" />
+            <solid android:color="@color/track_off" />
         </shape>
     </item>
 </selector>
