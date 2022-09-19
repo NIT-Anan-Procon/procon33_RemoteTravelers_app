@@ -62,7 +62,10 @@ class CreateReportActivity : AppCompatActivity() {
 
         keepButton.setOnClickListener {
             Log.d("user_id", userId.toString())
-            val comment = commentText.text.toString()
+            var comment = commentText.text.toString()
+            if(comment == ""){
+                comment = "コメントは入力されていません"
+            }
             sendReport(userId, image, comment, lat, lon)
             finish()
         }
