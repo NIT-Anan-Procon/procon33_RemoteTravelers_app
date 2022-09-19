@@ -22,6 +22,7 @@ import com.google.android.gms.maps.model.LatLng
 import com.example.procon33_remotetravelers_app.models.apis.GetInfoResponse
 import com.example.procon33_remotetravelers_app.services.GetInfoService
 import com.example.procon33_remotetravelers_app.services.AddCommentService
+import com.google.android.gms.maps.model.Marker
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import retrofit2.Retrofit
@@ -29,8 +30,9 @@ import retrofit2.converter.moshi.MoshiConverterFactory
 import java.util.*
 import kotlin.concurrent.thread
 import kotlin.concurrent.scheduleAtFixedRate
+import com.google.android.gms.maps.GoogleMap.OnMarkerClickListener
 
-class ViewerActivity : AppCompatActivity(), OnMapReadyCallback {
+class ViewerActivity : AppCompatActivity(), OnMapReadyCallback, OnMarkerClickListener {
 
     private val moshi = Moshi.Builder()
         .add(KotlinJsonAdapterFactory())
@@ -44,6 +46,8 @@ class ViewerActivity : AppCompatActivity(), OnMapReadyCallback {
     private lateinit var mMap: GoogleMap
     private lateinit var binding: ActivityViewerBinding
     private lateinit var info: GetInfoResponse
+    private lateinit var suggestLocation: LatLng
+    private var markerTouchFrag: Boolean = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -65,6 +69,11 @@ class ViewerActivity : AppCompatActivity(), OnMapReadyCallback {
                     CurrentLocationActivity.displayCurrentLocation(mMap, LatLng(info.current_location.lat, info.current_location.lon))
                     DisplayPinActivity.displayPin(mMap, info.destination)
                     DrawRoot.drawRoot(mMap, LatLng(info.current_location.lat, info.current_location.lon))
+                    if(markerTouchFrag){
+                        DisplayPinActivity.displayRoot(mMap, LatLng(info.current_location.lat, info.current_location.lon), suggestLocation)
+                    }else{
+                        DisplayPinActivity.clearRoot()
+                    }
                 }
                 displayComment()
             }
@@ -118,6 +127,20 @@ class ViewerActivity : AppCompatActivity(), OnMapReadyCallback {
     override fun onMapReady(googleMap: GoogleMap) {
         mMap = googleMap
         CurrentLocationActivity.initializeMap(mMap)
+        mMap.setOnMarkerClickListener(this)
+    }
+
+    // マーカーをクリック
+    override fun onMarkerClick(marker: Marker): Boolean{
+        val markerPosition = marker.position
+        suggestLocation = LatLng(markerPosition.latitude, markerPosition.longitude)
+        markerTouchFrag = !markerTouchFrag
+        if(markerTouchFrag) {
+            DisplayPinActivity.displayRoot(mMap, LatLng(info.current_location.lat, info.current_location.lon), suggestLocation)
+        }else{
+            DisplayPinActivity.clearRoot()
+        }
+        return false
     }
 
     private fun getInfo(userId: Int){

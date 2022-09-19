@@ -50,39 +50,28 @@ class DisplayPinActivity {
             lastPins.clear()
         }
 
-        fun displayRoot(mMap: GoogleMap ,currentLocation: LatLng, suggestLocation: LatLng, flag: Boolean) {
-            //アプリは今までのポリラインを消去する。
-            if (polylines != null) {
-                polylines!!.forEach {
-                    it.remove()
-                }
-            }
-
-            if(flag){
-                val path: MutableList<LatLng> = ArrayList()
-                val routes = getRoot(currentLocation, suggestLocation) ?: return
-
-                val legs = routes.Legs
-                for(location in legs){
-                    val point = LatLng(location.end_location.lat , location.end_location.lng)
+        fun displayRoot(mMap: GoogleMap ,currentLocation: LatLng, suggestLocation: LatLng) {
+            val path: MutableList<LatLng> = ArrayList()
+            val routes = getRoot(currentLocation, suggestLocation) ?: return
+            val route = routes[0]
+            for (location in route.Legs) {
+                    val point = LatLng(location.end_location.lat, location.end_location.lng)
                     path.add(point)
                 }
-
-                polylines = arrayListOf()
-                for (i in 1 until path.size) {
-                    polyline = mMap.addPolyline(
-                        PolylineOptions()
-                            .add(path[i - 1], path[i])
-                            .color(Color.CYAN)
-                            .width(20F)
-                    )
-                    polylines!!.add(polyline!!)
-                }
+            polylines = arrayListOf()
+            for (i in 1 until path.size) {
+                polyline = mMap.addPolyline(
+                    PolylineOptions()
+                        .add(path[i - 1], path[i])
+                        .color(Color.CYAN)
+                        .width(20F)
+                )
+                polylines!!.add(polyline!!)
             }
         }
 
-        private fun getRoot(current: LatLng, suggest: LatLng): Route?{
-            var routes: Route? = null
+        private fun getRoot(current: LatLng, suggest: LatLng): List<Route>?{
+            var routes: List<Route>? = arrayListOf()
             thread {
                 try {
                     // マーカの表示処理
@@ -103,11 +92,21 @@ class DisplayPinActivity {
                 } catch (e: Exception) {
                     Handler(Looper.getMainLooper()).post {
                         // エラー内容を出力
-                        Log.e("error", e.message.toString())
+                        Log.e("getRootError", e.message.toString())
                     }
                 }
             }
             return routes
+        }
+
+        fun clearRoot(){
+            //アプリは今までのポリラインを消去する。
+            if (polylines != null) {
+                polylines!!.forEach {
+                    it.remove()
+                }
+            }
+            Log.e("Root", "clearRoot")
         }
     }
 }

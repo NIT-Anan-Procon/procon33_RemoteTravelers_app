@@ -1,7 +1,7 @@
 package com.example.procon33_remotetravelers_app.models.apis
 
 data class GetRootResponse(
-    val routes: Route,
+    val routes: List<Route>?,
     val error_message: String,
 )
 

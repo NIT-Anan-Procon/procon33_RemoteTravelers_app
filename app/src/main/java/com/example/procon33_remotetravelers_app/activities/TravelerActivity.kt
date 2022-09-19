@@ -70,7 +70,7 @@ class TravelerActivity : AppCompatActivity(), OnMapReadyCallback, OnMarkerClickL
     private lateinit var currentLocation: LatLng
     private lateinit var suggestLocation: LatLng
     private var userId by Delegates.notNull<Int>()
-    private var suggestTouchFrag: Boolean = false
+    private var markerTouchFrag: Boolean = false
     private val requestPermissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestPermission()
     ) { isGranted: Boolean ->
@@ -195,7 +195,11 @@ class TravelerActivity : AppCompatActivity(), OnMapReadyCallback, OnMarkerClickL
             CurrentLocationActivity.displayCurrentLocation(mMap, currentLocation)
             DrawRoot.drawRoot(mMap, currentLocation)
             // ルートの更新
-            DisplayPinActivity.displayRoot(mMap, currentLocation, suggestLocation, suggestTouchFrag)
+            if(markerTouchFrag){
+                DisplayPinActivity.displayRoot(mMap, currentLocation, suggestLocation)
+            }else{
+                DisplayPinActivity.clearRoot()
+            }
         }
     }
 
@@ -217,8 +221,12 @@ class TravelerActivity : AppCompatActivity(), OnMapReadyCallback, OnMarkerClickL
     override fun onMarkerClick(marker: Marker): Boolean{
         val markerPosition = marker.position
         suggestLocation = LatLng(markerPosition.latitude, markerPosition.longitude)
-        suggestTouchFrag = !suggestTouchFrag
-        DisplayPinActivity.displayRoot(mMap, currentLocation, suggestLocation, suggestTouchFrag)
+        markerTouchFrag = !markerTouchFrag
+        if(markerTouchFrag) {
+            DisplayPinActivity.displayRoot(mMap, currentLocation, suggestLocation)
+        }else{
+            DisplayPinActivity.clearRoot()
+        }
         return false
     }
 
