@@ -19,7 +19,6 @@ import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
 import okhttp3.MediaType
-import okhttp3.MultipartBody
 import okhttp3.OkHttpClient
 import okhttp3.RequestBody
 import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory
@@ -135,19 +134,19 @@ class CreateReportActivity : AppCompatActivity() {
         return userId
     }
 
-    //DBに送るための画像データに変換
-    private fun fixImage(file: File): MultipartBody?{
-        val requestBody = RequestBody.create(MediaType.parse("data/data/com.example.procon33_remotetravelers_app/app_image"), file)
-
-        //ランダムな値の生成
-//        val boundary = UUID.randomUUID().toString()
-        val imageMulti = MultipartBody.Builder()
-            .setType(MultipartBody.FORM)
-            .addFormDataPart("image", "image_name.jpg", requestBody)
-            .build()
-
-        return imageMulti
-    }
+//    //DBに送るための画像データに変換
+//    private fun fixImage(file: File): MultipartBody?{
+//        val requestBody = RequestBody.create(MediaType.parse("data/data/com.example.procon33_remotetravelers_app/app_image"), file)
+//
+//        //ランダムな値の生成
+////        val boundary = UUID.randomUUID().toString()
+//        val imageMulti = MultipartBody.Builder()
+//            .setType(MultipartBody.FORM)
+//            .addFormDataPart("image", "image_name.jpg", requestBody)
+//            .build()
+//
+//        return imageMulti
+//    }
 
     private fun sendReport(userId: Int, image:  String, comment: String, lat: Double, lon: Double){
         val map: MutableMap<String, RequestBody> = HashMap()
