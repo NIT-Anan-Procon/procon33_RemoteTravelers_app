@@ -22,14 +22,15 @@ import okhttp3.MediaType
 import okhttp3.MultipartBody
 import okhttp3.OkHttpClient
 import okhttp3.RequestBody
-import retrofit2.Retrofit
 import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory
 import retrofit2.converter.moshi.MoshiConverterFactory
 import io.reactivex.Observer
 import io.reactivex.disposables.Disposable
+import retrofit2.Retrofit
 import java.io.ByteArrayOutputStream
 import java.io.File
 import java.io.FileOutputStream
+import java.util.concurrent.TimeUnit
 import kotlin.concurrent.thread
 
 class CreateReportActivity : AppCompatActivity() {
@@ -77,23 +78,24 @@ class CreateReportActivity : AppCompatActivity() {
         }
 
         //保存したファイルを取得
-        val image = File("data/data/com.example.procon33_remotetravelers_app/app_image/image_name.jpg")
-        Log.d("image", image.toString())
+//        val image = File("data/data/com.example.procon33_remotetravelers_app/app_image/image_name.jpg")
+//        Log.d("image", image.toString())
 
         //ユーザーIDを取得
         val userId = getUserId().toInt()
 
-        val imageMulti :MultipartBody? = fixImage(image)
+//        val imageMulti :MultipartBody? = fixImage(image)
 
         val keepButton = findViewById<Button>(R.id.keep_button)
         val backButton = findViewById<Button>(R.id.back_button)
         val commentText = findViewById<EditText>(R.id.comment)
 
+        //base64をエンコーディングしたものを取得
+        val image = encodeImage(photo) ?: ""
+
         keepButton.setOnClickListener {
             Log.d("user_id", userId.toString())
             val comment = commentText.text.toString()
-            //base64をエンコーディングしたものを取得
-            val image2 = encodeImage(photo)
             sendReport(userId, image, comment, lat, lon)
             finish()
         }
@@ -103,14 +105,14 @@ class CreateReportActivity : AppCompatActivity() {
         }
     }
 
-    //DBにレポートの内容を保存する(ネストが深くなりそうだったので関数にする)
-//    private fun saveData(userId: Int, imageMulti:  MultipartBody?, comment: String, lat: Double, lon: Double){
+//    //DBにレポートの内容を保存する(ネストが深くなりそうだったので関数にする)
+//    private fun saveData(userId: Int, image:  String, comment: String, lat: Double, lon: Double){
 //        thread {
 //            try {
 //                val service: CreateReportService =
 //                    retrofit.create(CreateReportService::class.java)
 //                val createReportResponse = service.createReport(
-//                    user_id = userId, image = imageMulti, comment = comment, excitement = 1, lat = lat, lon = lon
+//                    user_id = userId, image = image, comment = comment, excitement = 1, lat = lat, lon = lon
 //                ).execute().body()
 //                    ?: throw IllegalStateException("body is null")
 //
@@ -147,7 +149,7 @@ class CreateReportActivity : AppCompatActivity() {
         return imageMulti
     }
 
-    private fun sendReport(userId: Int, image:  File, comment: String, lat: Double, lon: Double){
+    private fun sendReport(userId: Int, image:  String, comment: String, lat: Double, lon: Double){
         val map: MutableMap<String, RequestBody> = HashMap()
 
         val userIdFix = RequestBody.create(MediaType.parse("text/plain"), userId.toString())
@@ -155,7 +157,7 @@ class CreateReportActivity : AppCompatActivity() {
         val excitementFix = RequestBody.create(MediaType.parse("text/plain"), "1")
         val latFix = RequestBody.create(MediaType.parse("text/plain"), lat.toString())
         val lonFix = RequestBody.create(MediaType.parse("text/plain"), lon.toString())
-        val imageFix = RequestBody.create(MediaType.parse("image/jpg"), image)
+        val imageFix = RequestBody.create(MediaType.parse("text/plain"), image)
 
         map.put("user_id", userIdFix)
         map.put("image", imageFix)
@@ -170,11 +172,11 @@ class CreateReportActivity : AppCompatActivity() {
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(object : Observer<CreateReportResponse> {
                     override fun onNext(r: CreateReportResponse) {  // 成功
-                        Log.d("MainActivity", r.toString())
+                        Log.d("CreateReport", r.toString())
                     }
 
                     override fun onError(e: Throwable) {
-                        Log.d("error", e.toString())  // 失敗
+                        Log.d("CreateReportError", e.toString())  // 失敗
                     }
 
                     override fun onSubscribe(d: Disposable) {
@@ -187,14 +189,18 @@ class CreateReportActivity : AppCompatActivity() {
     }
 
     private fun createApiClient(): CreateReportService{
-        val okClient = OkHttpClient()
+        val okClient = OkHttpClient.Builder()
+            .connectTimeout(30, TimeUnit.SECONDS)
+            .readTimeout(30, TimeUnit.SECONDS)
+            .writeTimeout(30, TimeUnit.SECONDS)
+            .build()
 
         val builder = Retrofit.Builder()
             .client(okClient)
             .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
             .addConverterFactory(MoshiConverterFactory.create(moshi))
             .baseUrl(BuildConfig.API_URL)
-            .build()
+        .build()
          return  builder.create(CreateReportService::class.java)
     }
 
