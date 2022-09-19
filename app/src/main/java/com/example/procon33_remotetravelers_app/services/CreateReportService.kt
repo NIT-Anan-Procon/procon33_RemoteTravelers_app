@@ -10,12 +10,6 @@ interface CreateReportService{
     @Multipart
     @POST("/api/traveler/add-report")
     fun createReport(
-//        @Part("user_id")user_id: Int,
-//        @Part("image")image: MultipartBody?,
-//        @Part("comment")comment: String,
-//        @Part("excitement")excitement: Int,
-//        @Part("lat")lat: Double,
-//        @Part("lon")lon: Double
         @PartMap params: Map<String, RequestBody>
     ): Observable<CreateReportResponse>
 }
