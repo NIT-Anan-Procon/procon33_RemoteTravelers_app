@@ -148,13 +148,14 @@ class ViewerActivity : AppCompatActivity(), OnMapReadyCallback {
     }
 
     private fun moveComment(fragment: Boolean) {
-        // コメントを取得
-        val target: View = findViewById(R.id.comments) // 対象となるオブジェクト
+        val commentList: View = findViewById(R.id.comments) // 対象となるオブジェクト
+        val commentBottom = findViewById<Button>(R.id.comment_door_button)
         val destination = if (fragment) -1100f else 0f
-        ObjectAnimator.ofFloat(target, "translationY", destination).apply {
+        ObjectAnimator.ofFloat(commentList, "translationY", destination).apply {
             duration = 200 // ミリ秒
             start() // アニメーション開始
         }
+        commentBottom.text = if (fragment) "コメントを閉じる" else "コメントを開く"
     }
 
     private fun displayComment(){
