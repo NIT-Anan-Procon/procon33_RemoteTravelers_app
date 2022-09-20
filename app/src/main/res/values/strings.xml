@@ -24,6 +24,7 @@
     <string name="debug_button">デバッグ用参加者画面に遷移するボタン</string>
     <string name="traveler_situation">移動中</string>
     <string name="traveler_icon_image">Icon</string>
-    <string name="excitement_title">感動数値</string>
-    <string name="excitement_initial">0</string>
+    <string name="excitement_title">おすすめ度</string>
+    <string name="excitement_initial">0%</string>
+    <string name="percentage">%d%%</string>
 </resources>

@@ -68,7 +68,8 @@ class CreateReportActivity : AppCompatActivity() {
                     fromUser: Boolean
                 ) {
                     //つまみがドラッグされると呼び出される
-                    displayNumber.text = progress.toString()
+                    val str: String = getString(R.string.percentage, progress)
+                    displayNumber.text = str
                 }
 
                 override fun onStartTrackingTouch(seekBar: SeekBar?) {
@@ -92,7 +93,7 @@ class CreateReportActivity : AppCompatActivity() {
                 comment = "コメントは入力されていません"
             }
             //感動パラメータの取得
-            val excitement = displayNumber.text.toString().toInt()
+            val excitement = displayNumber.text.toString().removeSuffix("%").toInt()
             sendReport(userId, image, comment, lat, lon, excitement)
             finish()
         }
