@@ -16,7 +16,7 @@ data class Location(
 )
 
 data class Comment(
-    val user_id: Int,
+    val traveler: Int,
     val comment: String,
 )
 

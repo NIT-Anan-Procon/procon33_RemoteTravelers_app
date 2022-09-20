@@ -7,6 +7,7 @@ import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
 import android.content.pm.PackageManager
+import android.graphics.Color
 import android.location.Location
 import android.location.LocationListener
 import android.location.LocationManager
@@ -297,28 +298,30 @@ class TravelerActivity : AppCompatActivity(), OnMapReadyCallback,
             val WC = LinearLayout.LayoutParams.WRAP_CONTENT
             val MP = LinearLayout.LayoutParams.MATCH_PARENT
             // 最初のコメントが見えないのでダミーコメント
-            commentList.addView(setView("↑コメントが表示されます↑"), 0, LinearLayout.LayoutParams(MP, WC))
+            commentList.addView(setView("↑コメントが表示されます↑", "#D4D4D4"), 0, LinearLayout.LayoutParams(MP, WC))
             for (oneComment in info.comments) {
                 if (oneComment == null) {
                     Log.d("oneComment", "null")
                     continue
                 }
                 val commentText: String = oneComment.comment
-                commentList.addView(setView(commentText), 0, LinearLayout.LayoutParams(MP, WC))
+                val commentColor: String = if(oneComment.traveler == 0) "#FFA800" else "#4B4B4B"
+                commentList.addView(setView(commentText, commentColor), 0, LinearLayout.LayoutParams(MP, WC))
             }
         } catch (e: Exception) {
             Handler(Looper.getMainLooper()).post {
                 // エラー内容を出力
-                Log.e("error", e.message.toString())
+                Log.e("getCommentError", e.message.toString())
             }
         }
     }
 
     // コメントのviewを設定する関数
-    private fun setView (commentText: String): TextView {
+    private fun setView (commentText: String, commentColor: String): TextView{
         val comment = TextView(this)
         comment.text = commentText
         comment.textSize = 28f
+        comment.setTextColor(Color.parseColor(commentColor))
         comment.setPadding(10, 15, 10, 15)
         comment.setBackgroundResource(R.drawable.comment_design)
         return comment
