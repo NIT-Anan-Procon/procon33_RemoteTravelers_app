@@ -150,7 +150,7 @@ class ViewerActivity : AppCompatActivity(), OnMapReadyCallback {
     private fun moveComment(fragment: Boolean) {
         val commentList: View = findViewById(R.id.comments) // 対象となるオブジェクト
         val commentBottom = findViewById<Button>(R.id.comment_door_button)
-        val destination = if (fragment) -1100f else 0f
+        val destination = if (fragment) -1230f else 0f
         ObjectAnimator.ofFloat(commentList, "translationY", destination).apply {
             duration = 200 // ミリ秒
             start() // アニメーション開始
@@ -164,8 +164,6 @@ class ViewerActivity : AppCompatActivity(), OnMapReadyCallback {
             commentList.removeAllViews()
             val WC = LinearLayout.LayoutParams.WRAP_CONTENT
             val MP = LinearLayout.LayoutParams.MATCH_PARENT
-            // 最初のコメントが見えないのでダミーコメント
-            commentList.addView(setView("↑コメントが表示されます↑", "#D4D4D4"), 0, LinearLayout.LayoutParams(MP, WC))
             for (oneComment in info.comments) {
                 if (oneComment == null) {
                     Log.d("oneComment", "null")
