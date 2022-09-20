@@ -24,4 +24,6 @@
     <string name="debug_button">デバッグ用参加者画面に遷移するボタン</string>
     <string name="traveler_situation">移動中</string>
     <string name="traveler_icon_image">Icon</string>
+    <string name="album_button">旅のアルバム</string>
+    <string name="view_album_title">旅レポート一覧</string>
 </resources>
