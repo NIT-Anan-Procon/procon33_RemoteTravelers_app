@@ -86,36 +86,11 @@
             android:background="@drawable/comment_button_design"
             app:backgroundTint="@null" />
 
-        <ScrollView
-            android:layout_width="match_parent"
-            android:layout_height="400dp"
-            android:isScrollContainer="false"
-            android:fadingEdge="none"
-            android:background="@color/white"
-            >
-
-            <LinearLayout
-                android:id="@+id/comment_list"
-                android:layout_width="match_parent"
-                android:layout_height="350dp"
-                android:layout_marginTop="50dp"
-                android:background="@color/white"
-                android:orientation="vertical"
-                android:scrollbarAlwaysDrawHorizontalTrack="false"
-                android:scrollbarAlwaysDrawVerticalTrack="false"
-                android:scrollbarStyle="outsideInset"
-                app:backgroundTint="@null"
-                android:clipToPadding="false">
-
-            </LinearLayout>
-
-        </ScrollView>
-
         <EditText
             android:id="@+id/comment_text"
-            android:layout_width="330dp"
+            android:layout_width="340dp"
             android:layout_height="50dp"
-            android:layout_marginTop="400dp"
+            android:layout_marginTop="50dp"
             android:autofillHints=""
             android:background="@drawable/participants_input_design"
             android:ems="10"
@@ -127,16 +102,39 @@
 
         <Button
             android:id="@+id/comment_submit"
-            android:layout_width="80dp"
+            android:layout_width="70dp"
             android:layout_height="50dp"
             android:layout_gravity="right"
-            android:layout_marginTop="400dp"
+            android:layout_marginTop="50dp"
             android:background="@drawable/comment_submit_design"
-            android:paddingStart="10dp"
             android:text="@string/comment_submit_button"
             android:textColor="@color/black"
-            android:textSize="20sp"
+            android:textSize="17sp"
             app:backgroundTint="@null" />
+
+        <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="400dp"
+            android:layout_marginTop="100dp"
+            android:isScrollContainer="false"
+            android:fadingEdge="none"
+            android:background="@color/white">
+
+            <LinearLayout
+                android:id="@+id/comment_list"
+                android:layout_width="match_parent"
+                android:layout_height="350dp"
+                android:background="@color/white"
+                android:orientation="vertical"
+                android:scrollbarAlwaysDrawHorizontalTrack="false"
+                android:scrollbarAlwaysDrawVerticalTrack="false"
+                android:scrollbarStyle="outsideInset"
+                app:backgroundTint="@null"
+                android:clipToPadding="false">
+
+            </LinearLayout>
+
+        </ScrollView>
 
     </FrameLayout>
 
