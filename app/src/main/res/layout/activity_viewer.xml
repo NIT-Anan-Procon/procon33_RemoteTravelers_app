@@ -95,8 +95,7 @@
             android:layout_marginTop="100dp"
             android:isScrollContainer="false"
             android:fadingEdge="none"
-            android:background="@color/white"
-            >
+            android:background="@color/white">
 
             <LinearLayout
                 android:id="@+id/comment_list"
