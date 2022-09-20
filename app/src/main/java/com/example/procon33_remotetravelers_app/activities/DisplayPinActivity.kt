@@ -1,5 +1,6 @@
-package com.example.procon33_remotetravelers_app.models.apis
+package com.example.procon33_remotetravelers_app.activities
 
+import com.example.procon33_remotetravelers_app.models.apis.Location
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.LatLng
