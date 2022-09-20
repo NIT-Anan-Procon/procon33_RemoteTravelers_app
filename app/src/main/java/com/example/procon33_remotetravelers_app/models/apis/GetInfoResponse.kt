@@ -7,6 +7,7 @@ data class GetInfoResponse(
     val destination: List<Location?>,
     val route: List<Location?>,
     val comments: List<Comment?>,
+    val situation: String?,
     val reports: List<Report?>,
 )
 
@@ -16,7 +17,7 @@ data class Location(
 )
 
 data class Comment(
-    val user_id: Int,
+    val traveler: Int,
     val comment: String,
 )
 

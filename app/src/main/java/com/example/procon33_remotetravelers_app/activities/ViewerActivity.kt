@@ -2,15 +2,13 @@ package com.example.procon33_remotetravelers_app.activities
 
 import android.animation.ObjectAnimator
 import android.content.Intent
+import android.graphics.Color
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
 import android.view.View
-import android.widget.Button
-import android.widget.EditText
-import android.widget.LinearLayout
-import android.widget.TextView
+import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import com.example.procon33_remotetravelers_app.BuildConfig
 import com.example.procon33_remotetravelers_app.R
@@ -71,6 +69,7 @@ class ViewerActivity : AppCompatActivity(), OnMapReadyCallback, OnMarkerClickLis
                     DrawRoot.drawRoot(mMap, LatLng(info.current_location.lat, info.current_location.lon))
                 }
                 displayComment()
+                changeSituation()
             }
         }
 
@@ -163,14 +162,42 @@ class ViewerActivity : AppCompatActivity(), OnMapReadyCallback, OnMarkerClickLis
         }
     }
 
+    // 状況把握の画像・テキストを変更
+    private fun changeSituation(){
+        try {
+            val travelerText = findViewById<TextView>(R.id.traveler_situation_text)
+            val travelerIcon = findViewById<ImageView>(R.id.traveler_situation_icon)
+            travelerText.text= info.situation
+            if (info.situation == "食事中"){
+                travelerIcon.setImageResource(R.drawable.eatting)
+            }else if(info.situation == "観光中(建物)"){
+                travelerIcon.setImageResource(R.drawable.building)
+            }else if(info.situation == "観光中(風景)"){
+                travelerIcon.setImageResource(R.drawable.nature)
+            }else if(info.situation == "動物に癒され中"){
+                travelerIcon.setImageResource(R.drawable.animal)
+            }else if(info.situation == "人と交流中"){
+                travelerIcon.setImageResource(R.drawable.human)
+            }else{
+                travelerIcon.setImageResource(R.drawable.walking)
+            }
+        } catch (e: Exception) {
+            Handler(Looper.getMainLooper()).post {
+                // エラー内容を出力
+                Log.e("situation_error", e.message.toString())
+            }
+        }
+    }
+
     private fun moveComment(fragment: Boolean) {
-        // コメントを取得
-        val target: View = findViewById(R.id.comments) // 対象となるオブジェクト
-        val destination = if (fragment) -1100f else 0f
-        ObjectAnimator.ofFloat(target, "translationY", destination).apply {
+        val commentList: View = findViewById(R.id.comments) // 対象となるオブジェクト
+        val commentBottom = findViewById<Button>(R.id.comment_door_button)
+        val destination = if (fragment) -1230f else 0f
+        ObjectAnimator.ofFloat(commentList, "translationY", destination).apply {
             duration = 200 // ミリ秒
             start() // アニメーション開始
         }
+        commentBottom.text = if (fragment) "コメントを閉じる" else "コメントを開く"
     }
 
     private fun displayComment(){
@@ -179,29 +206,29 @@ class ViewerActivity : AppCompatActivity(), OnMapReadyCallback, OnMarkerClickLis
             commentList.removeAllViews()
             val WC = LinearLayout.LayoutParams.WRAP_CONTENT
             val MP = LinearLayout.LayoutParams.MATCH_PARENT
-            // 最初のコメントが見えないのでダミーコメント
-            commentList.addView(setView("↑コメントが表示されます↑"), 0, LinearLayout.LayoutParams(MP, WC))
             for (oneComment in info.comments) {
                 if (oneComment == null) {
                     Log.d("oneComment", "null")
                     continue
                 }
                 val commentText: String = oneComment.comment
-                commentList.addView(setView(commentText), 0, LinearLayout.LayoutParams(MP, WC))
+                val commentColor: String = if(oneComment.traveler == 0) "#FFA800" else "#4B4B4B"
+                commentList.addView(setView(commentText, commentColor), 0, LinearLayout.LayoutParams(MP, WC))
             }
         } catch (e: Exception) {
             Handler(Looper.getMainLooper()).post {
                 // エラー内容を出力
-                Log.e("error", e.message.toString())
+                Log.e("getCommentError", e.message.toString())
             }
         }
     }
 
     // コメントのviewを設定する関数
-    private fun setView (commentText: String): TextView{
+    private fun setView (commentText: String, commentColor: String): TextView{
         val comment = TextView(this)
         comment.text = commentText
         comment.textSize = 28f
+        comment.setTextColor(Color.parseColor(commentColor))
         comment.setPadding(10, 15, 10, 15)
         comment.setBackgroundResource(R.drawable.comment_design)
         return comment
