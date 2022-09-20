@@ -8,10 +8,7 @@ import android.os.Handler
 import android.os.Looper
 import android.util.Log
 import android.view.View
-import android.widget.Button
-import android.widget.EditText
-import android.widget.LinearLayout
-import android.widget.TextView
+import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import com.example.procon33_remotetravelers_app.BuildConfig
 import com.example.procon33_remotetravelers_app.R
@@ -69,6 +66,7 @@ class ViewerActivity : AppCompatActivity(), OnMapReadyCallback {
                     DrawRoot.drawRoot(mMap, LatLng(info.current_location.lat, info.current_location.lon))
                 }
                 displayComment()
+                changeSituation()
             }
         }
 
@@ -143,6 +141,33 @@ class ViewerActivity : AppCompatActivity(), OnMapReadyCallback {
                     // エラー内容を出力
                     Log.e("error", e.message.toString())
                 }
+            }
+        }
+    }
+
+    // 状況把握の画像・テキストを変更
+    private fun changeSituation(){
+        try {
+            val travelerText = findViewById<TextView>(R.id.traveler_situation_text)
+            val travelerIcon = findViewById<ImageView>(R.id.traveler_situation_icon)
+            travelerText.text= info.situation
+            if (info.situation == "食事中"){
+                travelerIcon.setImageResource(R.drawable.eatting)
+            }else if(info.situation == "観光中(建物)"){
+                travelerIcon.setImageResource(R.drawable.building)
+            }else if(info.situation == "観光中(風景)"){
+                travelerIcon.setImageResource(R.drawable.nature)
+            }else if(info.situation == "動物に癒され中"){
+                travelerIcon.setImageResource(R.drawable.animal)
+            }else if(info.situation == "人と交流中"){
+                travelerIcon.setImageResource(R.drawable.human)
+            }else{
+                travelerIcon.setImageResource(R.drawable.walking)
+            }
+        } catch (e: Exception) {
+            Handler(Looper.getMainLooper()).post {
+                // エラー内容を出力
+                Log.e("situation_error", e.message.toString())
             }
         }
     }

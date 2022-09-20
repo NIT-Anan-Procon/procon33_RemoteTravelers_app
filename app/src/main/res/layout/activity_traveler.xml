@@ -41,6 +41,29 @@
         app:layout_constraintTop_toBottomOf="@+id/camera_button"
         tools:ignore="TextContrastCheck" />
 
+    <TextView
+        android:id="@+id/traveler_situation_text"
+        android:layout_width="150dp"
+        android:layout_height="wrap_content"
+        android:text="@string/traveler_situation"
+        android:textSize="18sp"
+        android:textColor="@color/black"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        android:background="@drawable/traveler_situation_design"
+        android:gravity="center"/>
+
+    <ImageView
+        android:id="@+id/traveler_situation_icon"
+        android:layout_width="150dp"
+        android:layout_height="120dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/traveler_situation_text"
+        android:src="@drawable/walking"
+        android:padding="10dp"
+        android:background="@drawable/traveler_situation_design"
+        android:contentDescription="@string/traveler_icon_image" />
+
     <FrameLayout
         android:id="@+id/comments"
         android:layout_width="match_parent"

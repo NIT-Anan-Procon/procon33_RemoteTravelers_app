@@ -3,9 +3,8 @@
     package="com.example.procon33_remotetravelers_app">
 
     <uses-permission android:name="android.permission.INTERNET" />
-
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
-    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
 
     <queries>
         <intent>
@@ -21,6 +20,9 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Procon33_RemoteTravelers_app"
         android:usesCleartextTraffic="true">
+        <activity
+            android:name=".activities.ViewAlbumActivity"
+            android:exported="false" />
         <activity
             android:name=".activities.ViewReportActivity"
             android:exported="false" />
@@ -49,12 +51,11 @@
         <activity
             android:name=".activities.ViewerActivity"
             android:exported="false"
-            android:label="ViewerActivity"/>
+            android:label="ViewerActivity" />
         <activity
             android:name=".activities.SuggestDestinationActivity"
             android:exported="false"
-            android:label="SuggestDestinationActivity"/>
-
+            android:label="SuggestDestinationActivity" />
         <activity
             android:name=".MainActivity"
             android:exported="true">
@@ -72,7 +73,7 @@
             android:grantUriPermissions="true">
             <meta-data
                 android:name="android.support.FILE_PROVIDER_PATHS"
-                android:resource="@xml/file_paths"/>
+                android:resource="@xml/file_paths" />
         </provider>
     </application>
 
