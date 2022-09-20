@@ -12,6 +12,7 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.example.procon33_remotetravelers_app.activities.TravelerActivity
+import com.example.procon33_remotetravelers_app.activities.ViewAlbumActivity
 import com.example.procon33_remotetravelers_app.activities.ViewerActivity
 import com.example.procon33_remotetravelers_app.services.SignupService
 import com.example.procon33_remotetravelers_app.services.StartTravelService
@@ -67,6 +68,14 @@ class MainActivity : AppCompatActivity() {
         val debugButton2 = findViewById<Button>(R.id.debug_button2)
         debugButton2.setOnClickListener {
             val intent = Intent(this, TravelerActivity::class.java)
+            intent.putExtra("userId", getUserId().toInt())
+            startActivity(intent)
+        }
+
+        //旅アルバムの画面に遷移
+        val albumButton = findViewById<Button>(R.id.album_button)
+        albumButton.setOnClickListener {
+            val intent = Intent(this, ViewAlbumActivity::class.java)
             intent.putExtra("userId", getUserId().toInt())
             startActivity(intent)
         }
