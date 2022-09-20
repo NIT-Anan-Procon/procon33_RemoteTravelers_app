@@ -12,7 +12,7 @@
     <string name="keep_button_text">レポートを保存</string>
     <string name="report_comment_hint">コメントを入力</string>
     <string name="cancel_button_text">取り消す</string>
-    <string name="report_title_hint">タイトルを入力</string>
+    <string name="report_excitement_hint">感動を0~99の数値で表す</string>
     <string name="report_image">Report_image</string>
     <string name="determine_pin_button">ピンを決定する</string>
     <string name="comment">コメントを開く</string>
@@ -24,4 +24,6 @@
     <string name="debug_button">デバッグ用参加者画面に遷移するボタン</string>
     <string name="traveler_situation">移動中</string>
     <string name="traveler_icon_image">Icon</string>
+    <string name="excitement_title">感動数値</string>
+    <string name="excitement_initial">0</string>
 </resources>

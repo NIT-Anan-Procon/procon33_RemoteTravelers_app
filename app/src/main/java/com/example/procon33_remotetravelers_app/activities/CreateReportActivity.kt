@@ -6,9 +6,7 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Base64
 import android.util.Log
-import android.widget.Button
-import android.widget.EditText
-import android.widget.ImageView
+import android.widget.*
 import com.example.procon33_remotetravelers_app.BuildConfig
 import com.example.procon33_remotetravelers_app.R
 import com.example.procon33_remotetravelers_app.models.apis.CreateReportResponse
@@ -56,17 +54,46 @@ class CreateReportActivity : AppCompatActivity() {
         val keepButton = findViewById<Button>(R.id.keep_button)
         val backButton = findViewById<Button>(R.id.back_button)
         val commentText = findViewById<EditText>(R.id.comment)
+        val excitementSeekBar = findViewById<SeekBar>(R.id.excitement_seekBar)
+        val displayNumber = findViewById<TextView>(R.id.display_number)
+
+        excitementSeekBar.progress = 0
+        excitementSeekBar.max = 100
+
+        excitementSeekBar.setOnSeekBarChangeListener(
+            object: SeekBar.OnSeekBarChangeListener{
+                override fun onProgressChanged(
+                    seekBar: SeekBar?,
+                    progress: Int,
+                    fromUser: Boolean
+                ) {
+                    //つまみがドラッグされると呼び出される
+                    displayNumber.text = progress.toString()
+                }
+
+                override fun onStartTrackingTouch(seekBar: SeekBar?) {
+                    //つまみがタッチされたときに呼ばれる
+                }
+
+                override fun onStopTrackingTouch(seekBar: SeekBar?) {
+                    //つまみがリリースされたときに呼び出される
+                }
+            }
+        )
 
         //base64をエンコーディングしたものを取得
         val image = encodeImage(photo) ?: ""
 
         keepButton.setOnClickListener {
             Log.d("user_id", userId.toString())
+            //コメント内容の取得
             var comment = commentText.text.toString()
             if(comment == ""){
                 comment = "コメントは入力されていません"
             }
-            sendReport(userId, image, comment, lat, lon)
+            //感動パラメータの取得
+            val excitement = displayNumber.text.toString().toInt()
+            sendReport(userId, image, comment, lat, lon, excitement)
             finish()
         }
 
@@ -83,12 +110,12 @@ class CreateReportActivity : AppCompatActivity() {
         return pref.getString("userId", "").toString()
     }
 
-    private fun sendReport(userId: Int, image:  String, comment: String, lat: Double, lon: Double){
+    private fun sendReport(userId: Int, image:  String, comment: String, lat: Double, lon: Double, excitement: Int){
         val map: MutableMap<String, RequestBody> = HashMap()
 
         val userIdFix = RequestBody.create(MediaType.parse("text/plain"), userId.toString())
         val commentFix = RequestBody.create(MediaType.parse("text/plain"), comment)
-        val excitementFix = RequestBody.create(MediaType.parse("text/plain"), "1")
+        val excitementFix = RequestBody.create(MediaType.parse("text/plain"), excitement.toString())
         val latFix = RequestBody.create(MediaType.parse("text/plain"), lat.toString())
         val lonFix = RequestBody.create(MediaType.parse("text/plain"), lon.toString())
         val imageFix = RequestBody.create(MediaType.parse("text/plain"), image)
