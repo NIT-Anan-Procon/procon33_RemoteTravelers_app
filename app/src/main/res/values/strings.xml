@@ -26,4 +26,7 @@
     <string name="traveler_icon_image">Icon</string>
     <string name="album_button">旅のアルバム</string>
     <string name="view_album_title">旅レポート一覧</string>
+    <string name="excitement_title">おすすめ度</string>
+    <string name="excitement_initial">0%</string>
+    <string name="percentage">%d%%</string>
 </resources>
