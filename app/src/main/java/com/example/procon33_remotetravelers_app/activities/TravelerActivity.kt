@@ -245,10 +245,15 @@ class TravelerActivity : AppCompatActivity(), OnMapReadyCallback,
                     return@registerForActivityResult
                 }
                 else{
+                    //位置情報の所得
+                    val lat: Double = currentLocation.latitude
+                    val lon: Double = currentLocation.longitude
                     // CreateReportActivityに写真データを持って遷移する
                     val photo = data.getParcelableExtra<Bitmap>("data")
                     val intent = Intent(this,CreateReportActivity::class.java)
                     intent.putExtra("data", photo)
+                    intent.putExtra("lat", lat)
+                    intent.putExtra("lon", lon)
                     startActivity(intent)
                 }
             }
