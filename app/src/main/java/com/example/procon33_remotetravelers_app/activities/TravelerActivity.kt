@@ -104,6 +104,7 @@ class TravelerActivity : AppCompatActivity(), OnMapReadyCallback,
                     DisplayPinActivity.displayPin(mMap, info.destination)
                 }
                 displayComment()
+                changeSituation()
             }
         }
 
@@ -281,6 +282,33 @@ class TravelerActivity : AppCompatActivity(), OnMapReadyCallback,
                     // エラー内容を出力
                     Log.e("error", e.message.toString())
                 }
+            }
+        }
+    }
+
+    // 状況把握の画像・テキストを変更
+    private fun changeSituation(){
+        try {
+            val travelerText = findViewById<TextView>(R.id.traveler_situation_text)
+            val travelerIcon = findViewById<ImageView>(R.id.traveler_situation_icon)
+            travelerText.text= info.situation
+            if (info.situation == "食事中"){
+                travelerIcon.setImageResource(R.drawable.eatting)
+            }else if(info.situation == "観光中(建物)"){
+                travelerIcon.setImageResource(R.drawable.building)
+            }else if(info.situation == "観光中(風景)"){
+                travelerIcon.setImageResource(R.drawable.nature)
+            }else if(info.situation == "動物に癒され中"){
+                travelerIcon.setImageResource(R.drawable.animal)
+            }else if(info.situation == "人と交流中"){
+                travelerIcon.setImageResource(R.drawable.human)
+            }else{
+                travelerIcon.setImageResource(R.drawable.walking)
+            }
+        } catch (e: Exception) {
+            Handler(Looper.getMainLooper()).post {
+                // エラー内容を出力
+                Log.e("situation_error", e.message.toString())
             }
         }
     }
