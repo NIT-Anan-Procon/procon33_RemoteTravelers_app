@@ -51,22 +51,26 @@ class DisplayPinActivity {
         }
 
         fun displayRoot(mMap: GoogleMap ,currentLocation: LatLng, suggestLocation: LatLng) {
-            val path: MutableList<LatLng> = ArrayList()
-            val routes = getRoot(currentLocation, suggestLocation) ?: return
-            val route = routes[0]
-            for (location in route.Legs) {
+            try {
+                val path: MutableList<LatLng> = ArrayList()
+                val routes = getRoot(currentLocation, suggestLocation) ?: return
+                val route = routes[0]
+                for (location in route.Legs) {
                     val point = LatLng(location.end_location.lat, location.end_location.lng)
                     path.add(point)
                 }
-            polylines = arrayListOf()
-            for (i in 1 until path.size) {
-                polyline = mMap.addPolyline(
-                    PolylineOptions()
-                        .add(path[i - 1], path[i])
-                        .color(Color.CYAN)
-                        .width(20F)
-                )
-                polylines!!.add(polyline!!)
+                polylines = arrayListOf()
+                for (i in 1 until path.size) {
+                    polyline = mMap.addPolyline(
+                        PolylineOptions()
+                            .add(path[i - 1], path[i])
+                            .color(Color.CYAN)
+                            .width(20F)
+                    )
+                    polylines!!.add(polyline!!)
+                }
+            }catch (e: Exception){
+                Log.e("displayRootError", e.message.toString())
             }
         }
 

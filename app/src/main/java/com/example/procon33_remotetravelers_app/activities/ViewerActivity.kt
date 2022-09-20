@@ -69,11 +69,6 @@ class ViewerActivity : AppCompatActivity(), OnMapReadyCallback, OnMarkerClickLis
                     CurrentLocationActivity.displayCurrentLocation(mMap, LatLng(info.current_location.lat, info.current_location.lon))
                     DisplayPinActivity.displayPin(mMap, info.destination)
                     DrawRoot.drawRoot(mMap, LatLng(info.current_location.lat, info.current_location.lon))
-                    if(markerTouchFrag){
-                        DisplayPinActivity.displayRoot(mMap, LatLng(info.current_location.lat, info.current_location.lon), suggestLocation)
-                    }else{
-                        DisplayPinActivity.clearRoot()
-                    }
                 }
                 displayComment()
             }
