@@ -30,13 +30,14 @@ class DisplayReportActivity {
                 report!!
                 val image = Base64.getDecoder().decode(report.image)
                 val bitmap = BitmapFactory.decodeByteArray(image, 0, image.size)
-                bitmaps.add(Bitmap.createScaledBitmap(bitmap, 500, 500, true))
+                bitmaps.add(bitmap)
                 markers.add(
                     mMap.addMarker(
                         MarkerOptions()
                         .position(LatLng(report.lat, report.lon))
                         .infoWindowAnchor(0.5f, 0.5f)
                         .icon(BitmapDescriptorFactory.fromBitmap(Bitmap.createScaledBitmap(bitmap, 150, 150, true)))
+                        .snippet(report.comment + "/" + report.excitement)
                     )!!
                 )
             }
@@ -59,7 +60,7 @@ class CustomInfoWindow(private val context: Context) : GoogleMap.InfoWindowAdapt
         }
         val bitmap = bitmaps[markers.indexOf(marker)]
         return LayoutInflater.from(context).inflate(R.layout.info_window, null, false).apply {
-            findViewById<ImageView>(R.id.imageView).setImageBitmap(bitmap)
+            findViewById<ImageView>(R.id.imageView).setImageBitmap(Bitmap.createScaledBitmap(bitmap, 500, 500, true))
         }
     }
 }

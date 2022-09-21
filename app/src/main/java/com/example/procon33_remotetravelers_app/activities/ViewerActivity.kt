@@ -124,12 +124,15 @@ class ViewerActivity : AppCompatActivity(), OnMapReadyCallback,
         mMap = googleMap
         CurrentLocationActivity.initializeMap(mMap)
         mMap.setInfoWindowAdapter(CustomInfoWindow(this))
+        mMap.setOnInfoWindowClickListener(this)
         mMap.setOnInfoWindowCloseListener(CustomInfoWindow(this))
         mMap.setOnMarkerClickListener(this)
     }
 
     override fun onMarkerClick(marker: Marker): Boolean {
         //マーカーを透明に設定
+        if(!DisplayReportActivity.markers.contains(marker))
+            return false
         marker.alpha = 0f
         marker.showInfoWindow()
         return true
@@ -137,6 +140,7 @@ class ViewerActivity : AppCompatActivity(), OnMapReadyCallback,
 
     override fun onInfoWindowClick(marker: Marker) {
         val intent = Intent(this, ViewReportActivity::class.java)
+        intent.putExtra("index", DisplayReportActivity.markers.indexOf(marker))
         startActivity(intent)
     }
 
