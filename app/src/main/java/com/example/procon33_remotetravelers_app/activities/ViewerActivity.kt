@@ -3,17 +3,18 @@ package com.example.procon33_remotetravelers_app.activities
 import android.animation.ObjectAnimator
 import android.content.Intent
 import android.graphics.Color
+import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
 import android.view.View
 import android.widget.*
+import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import com.example.procon33_remotetravelers_app.BuildConfig
 import com.example.procon33_remotetravelers_app.R
 import com.example.procon33_remotetravelers_app.databinding.ActivityViewerBinding
-import com.example.procon33_remotetravelers_app.models.apis.DisplayPinActivity
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
@@ -21,6 +22,7 @@ import com.google.android.gms.maps.model.LatLng
 import com.example.procon33_remotetravelers_app.models.apis.GetInfoResponse
 import com.example.procon33_remotetravelers_app.services.GetInfoService
 import com.example.procon33_remotetravelers_app.services.AddCommentService
+import com.google.android.gms.maps.model.Marker
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import retrofit2.Retrofit
@@ -29,7 +31,8 @@ import java.util.*
 import kotlin.concurrent.thread
 import kotlin.concurrent.scheduleAtFixedRate
 
-class ViewerActivity : AppCompatActivity(), OnMapReadyCallback {
+class ViewerActivity : AppCompatActivity(), OnMapReadyCallback,
+    GoogleMap.OnMarkerClickListener, GoogleMap.OnInfoWindowClickListener {
 
     private val moshi = Moshi.Builder()
         .add(KotlinJsonAdapterFactory())
@@ -44,6 +47,7 @@ class ViewerActivity : AppCompatActivity(), OnMapReadyCallback {
     private lateinit var binding: ActivityViewerBinding
     private lateinit var info: GetInfoResponse
 
+    @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val userId = intent.getIntExtra("userId", 0)
@@ -54,6 +58,7 @@ class ViewerActivity : AppCompatActivity(), OnMapReadyCallback {
                 if (::mMap.isInitialized && ::info.isInitialized) {
                     CurrentLocationActivity.displayCurrentLocation(mMap, LatLng(info.current_location.lat, info.current_location.lon))
                     DisplayPinActivity.displayPin(mMap, info.destination)
+                    DisplayReportActivity.displayReport(mMap, info.reports)
                 }
             }
         }
@@ -118,6 +123,25 @@ class ViewerActivity : AppCompatActivity(), OnMapReadyCallback {
     override fun onMapReady(googleMap: GoogleMap) {
         mMap = googleMap
         CurrentLocationActivity.initializeMap(mMap)
+        mMap.setInfoWindowAdapter(CustomInfoWindow(this))
+        mMap.setOnInfoWindowClickListener(this)
+        mMap.setOnInfoWindowCloseListener(CustomInfoWindow(this))
+        mMap.setOnMarkerClickListener(this)
+    }
+
+    override fun onMarkerClick(marker: Marker): Boolean {
+        if(!DisplayReportActivity.markers.contains(marker))
+            return false
+        //マーカーを透明に設定
+        marker.alpha = 0f
+        marker.showInfoWindow()
+        return true
+    }
+
+    override fun onInfoWindowClick(marker: Marker) {
+        val intent = Intent(this, ViewReportActivity::class.java)
+        intent.putExtra("index", DisplayReportActivity.markers.indexOf(marker))
+        startActivity(intent)
     }
 
     private fun getInfo(userId: Int){
