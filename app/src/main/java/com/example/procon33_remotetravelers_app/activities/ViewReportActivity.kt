@@ -4,7 +4,6 @@ import android.annotation.SuppressLint
 import android.os.Bundle
 import android.widget.Button
 import android.widget.ImageView
-import android.widget.SeekBar
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import com.example.procon33_remotetravelers_app.R
@@ -26,7 +25,7 @@ class ViewReportActivity: AppCompatActivity() {
         reportComment.text = comment
 
         val displayNumber = findViewById<TextView>(R.id.display_number)
-        displayNumber.text = excitement.toString() + "%"
+        displayNumber.text = getString(R.string.percentage, excitement)
 
         val displayImage = findViewById<ImageView>(R.id.report_image)
         displayImage.setImageBitmap(bitmap)
