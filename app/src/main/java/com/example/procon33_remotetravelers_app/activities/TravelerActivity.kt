@@ -51,7 +51,7 @@ import kotlin.properties.Delegates
 
 
 class TravelerActivity : AppCompatActivity(), OnMapReadyCallback,
-    LocationListener, GoogleMap.OnMarkerClickListener{
+    LocationListener, GoogleMap.OnMarkerClickListener, GoogleMap.OnInfoWindowClickListener {
 
     companion object {
         const val CAMERA_REQUEST_CODE = 1
@@ -213,15 +213,24 @@ class TravelerActivity : AppCompatActivity(), OnMapReadyCallback,
         mMap = googleMap
         CurrentLocationActivity.initializeMap(mMap)
         mMap.setInfoWindowAdapter(CustomInfoWindow(this))
+        mMap.setOnInfoWindowClickListener(this)
         mMap.setOnInfoWindowCloseListener(CustomInfoWindow(this))
         mMap.setOnMarkerClickListener(this)
     }
 
     override fun onMarkerClick(marker: Marker): Boolean {
+        if(!DisplayReportActivity.markers.contains(marker))
+            return false
         //マーカーを透明に設定
         marker.alpha = 0f
         marker.showInfoWindow()
         return true
+    }
+
+    override fun onInfoWindowClick(marker: Marker) {
+        val intent = Intent(this, ViewReportActivity::class.java)
+        intent.putExtra("index", DisplayReportActivity.markers.indexOf(marker))
+        startActivity(intent)
     }
 
     private fun saveCurrentLocation(){

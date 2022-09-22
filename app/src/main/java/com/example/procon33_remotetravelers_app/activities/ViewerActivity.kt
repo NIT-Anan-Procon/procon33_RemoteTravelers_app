@@ -32,7 +32,7 @@ import kotlin.concurrent.thread
 import kotlin.concurrent.scheduleAtFixedRate
 
 class ViewerActivity : AppCompatActivity(), OnMapReadyCallback,
-    GoogleMap.OnMarkerClickListener, GoogleMap.OnInfoWindowClickListener{
+    GoogleMap.OnMarkerClickListener, GoogleMap.OnInfoWindowClickListener {
 
     private val moshi = Moshi.Builder()
         .add(KotlinJsonAdapterFactory())
@@ -130,9 +130,9 @@ class ViewerActivity : AppCompatActivity(), OnMapReadyCallback,
     }
 
     override fun onMarkerClick(marker: Marker): Boolean {
-        //マーカーを透明に設定
         if(!DisplayReportActivity.markers.contains(marker))
             return false
+        //マーカーを透明に設定
         marker.alpha = 0f
         marker.showInfoWindow()
         return true

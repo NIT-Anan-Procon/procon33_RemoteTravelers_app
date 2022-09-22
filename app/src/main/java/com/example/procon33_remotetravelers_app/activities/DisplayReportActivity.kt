@@ -51,6 +51,7 @@ class CustomInfoWindow(private val context: Context) : GoogleMap.InfoWindowAdapt
     override fun getInfoWindow(marker: Marker): View? = setupWindow(marker)
 
     override fun onInfoWindowClose(marker: Marker) {
+        //透明にしたマーカーを元に戻す
         marker.alpha = 1f
     }
 
