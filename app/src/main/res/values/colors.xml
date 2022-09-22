@@ -20,4 +20,5 @@
     <color name="comment_submit_button">#FFA0A0</color>
     <color name="album_button">#FF8946</color>
     <color name="view_album_title">#F35151</color>
+    <color name="edge">#FF8946</color>
 </resources>
