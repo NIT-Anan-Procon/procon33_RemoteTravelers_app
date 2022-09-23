@@ -28,6 +28,7 @@ class DisplayPinActivity {
         private var lastPins = mutableListOf<Marker>()
         private var polyline: Polyline? = null
         private var polylines: ArrayList<Polyline>? = arrayListOf()
+        private var routesData: List<Route>? = arrayListOf()
 
         fun displayPin(mMap: GoogleMap, destinations: List<Location?>) {
             removePin()
@@ -52,30 +53,37 @@ class DisplayPinActivity {
 
         fun displayRoot(mMap: GoogleMap ,currentLocation: LatLng, suggestLocation: LatLng) {
             try {
-                val path: MutableList<LatLng> = ArrayList()
-                val routes = getRoot(currentLocation, suggestLocation) ?: return
-                val route = routes[0]
-                for (location in route.Legs) {
-                    val point = LatLng(location.end_location.lat, location.end_location.lng)
-                    path.add(point)
-                }
-                polylines = arrayListOf()
-                for (i in 1 until path.size) {
-                    polyline = mMap.addPolyline(
-                        PolylineOptions()
-                            .add(path[i - 1], path[i])
-                            .color(Color.CYAN)
-                            .width(20F)
-                    )
-                    polylines!!.add(polyline!!)
+                getRoot(currentLocation, suggestLocation)
+                while (true) {
+                    Log.d("displayRoot", routesData.toString())
+                    if (routesData != null) {
+                        val routes = routesData!!
+                        val route = routes[0]
+                        val leg = route.legs[0]
+                        val path: MutableList<LatLng> = ArrayList()
+                        for (location in leg.steps) {
+                            val point = LatLng(location.end_location.lat, location.end_location.lng)
+                            path.add(point)
+                        }
+                        polylines = arrayListOf()
+                        for (i in 1 until path.size) {
+                            polyline = mMap.addPolyline(
+                                PolylineOptions()
+                                    .add(path[i - 1], path[i])
+                                    .color(Color.CYAN)
+                                    .width(20F)
+                            )
+                            polylines!!.add(polyline!!)
+                        }
+                        break
+                    }
                 }
             }catch (e: Exception){
                 Log.e("displayRootError", e.message.toString())
             }
         }
 
-        private fun getRoot(current: LatLng, suggest: LatLng): List<Route>?{
-            var routes: List<Route>? = arrayListOf()
+        private fun getRoot(current: LatLng, suggest: LatLng) {
             thread {
                 try {
                     // マーカの表示処理
@@ -85,14 +93,19 @@ class DisplayPinActivity {
                     val service: GetRootService =
                         retrofit.create(GetRootService::class.java)
                     val getRootResponse = service.getRoot(
-                        origin = currentLocation, destination = suggestLocation, key = "AIzaSyCckGaBOG0jToeiS_uSSDrsK-YYz4Ussuk"
+                        origin = currentLocation, destination = suggestLocation, key = "AIzaSyAoQ-8XLGmUPOpGTrzVUnh0030oMkzORGU"
                     ).execute().body()
                         ?: throw IllegalStateException("body is null")
+
                     Handler(Looper.getMainLooper()).post {
                         // 実行結果を出力
                         Log.d("GetRoot", getRootResponse.toString())
                     }
-                    routes = getRootResponse.routes
+                    routesData = getRootResponse.routes?.toList()
+                    Handler(Looper.getMainLooper()).post {
+                        // 実行結果を出力
+                        Log.d("GetRoot", routesData.toString())
+                    }
                 } catch (e: Exception) {
                     Handler(Looper.getMainLooper()).post {
                         // エラー内容を出力
@@ -100,7 +113,6 @@ class DisplayPinActivity {
                     }
                 }
             }
-            return routes
         }
 
         fun clearRoot(){
@@ -110,7 +122,7 @@ class DisplayPinActivity {
                     it.remove()
                 }
             }
-            Log.e("Root", "clearRoot")
+            Log.d("Root", "clearRoot")
         }
     }
 }
