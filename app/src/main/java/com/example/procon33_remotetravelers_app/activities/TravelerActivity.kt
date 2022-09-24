@@ -107,7 +107,7 @@ class TravelerActivity : AppCompatActivity(), OnMapReadyCallback,
             Handler(Looper.getMainLooper()).post {
                 if (::mMap.isInitialized && ::info.isInitialized) {
                     CurrentLocationActivity.displayCurrentLocation(mMap, LatLng(info.current_location.lat, info.current_location.lon))
-                    DrawRoot.drawRoot(mMap, LatLng(info.current_location.lat, info.current_location.lon))
+                    DrawRoute.drawRoute(mMap, LatLng(info.current_location.lat, info.current_location.lon))
                     DisplayPinActivity.displayPin(mMap, info.destination)
                 }
                 displayComment()
@@ -199,13 +199,13 @@ class TravelerActivity : AppCompatActivity(), OnMapReadyCallback,
         saveCurrentLocation()
         if(::mMap.isInitialized){
             CurrentLocationActivity.displayCurrentLocation(mMap, currentLocation)
-            DrawRoot.drawRoot(mMap, currentLocation)
+            DrawRoute.drawRoute(mMap, currentLocation)
             // ルートの更新
             if(markerTouchFrag){
-                DisplayPinActivity.displayRoot(mMap, currentLocation, suggestLocation)
-            }else{
-                DisplayPinActivity.clearRoot()
+                DisplayPinActivity.displayRoute(mMap, currentLocation, suggestLocation)
+                return
             }
+            DisplayPinActivity.clearRoute()
         }
     }
 
@@ -232,14 +232,14 @@ class TravelerActivity : AppCompatActivity(), OnMapReadyCallback,
             suggestLocation = LatLng(marker.position.latitude, marker.position.longitude)
             markerTouchFrag = !markerTouchFrag
             if (markerTouchFrag) {
-                DisplayPinActivity.displayRoot(
+                DisplayPinActivity.displayRoute(
                     mMap,
-                    LatLng(info.current_location.lat, info.current_location.lon),
+                    currentLocation,
                     suggestLocation
                 )
                 return true
             }
-            DisplayPinActivity.clearRoot()
+            DisplayPinActivity.clearRoute()
             return true
         }
         //マーカーを透明に設定

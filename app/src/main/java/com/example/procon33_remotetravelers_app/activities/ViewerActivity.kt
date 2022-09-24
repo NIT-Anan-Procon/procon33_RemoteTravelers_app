@@ -48,6 +48,7 @@ class ViewerActivity : AppCompatActivity(), OnMapReadyCallback,
     private lateinit var binding: ActivityViewerBinding
     private lateinit var info: GetInfoResponse
     private lateinit var suggestLocation: LatLng
+    private lateinit var lastCurrentLocation: LatLng
     private var markerTouchFrag: Boolean = false
 
     @RequiresApi(Build.VERSION_CODES.O)
@@ -71,7 +72,12 @@ class ViewerActivity : AppCompatActivity(), OnMapReadyCallback,
                 if (::mMap.isInitialized && ::info.isInitialized) {
                     CurrentLocationActivity.displayCurrentLocation(mMap, LatLng(info.current_location.lat, info.current_location.lon))
                     DisplayPinActivity.displayPin(mMap, info.destination)
-                    DrawRoot.drawRoot(mMap, LatLng(info.current_location.lat, info.current_location.lon))
+                    DrawRoute.drawRoute(mMap, LatLng(info.current_location.lat, info.current_location.lon))
+                    if(markerTouchFrag){
+                        DisplayPinActivity.displayRoute(mMap, LatLng(info.current_location.lat, info.current_location.lon), suggestLocation)
+                    }else {
+                        DisplayPinActivity.clearRoute()
+                    }
                 }
                 displayComment()
                 changeSituation()
@@ -138,14 +144,14 @@ class ViewerActivity : AppCompatActivity(), OnMapReadyCallback,
             suggestLocation = LatLng(marker.position.latitude, marker.position.longitude)
             markerTouchFrag = !markerTouchFrag
             if (markerTouchFrag) {
-                DisplayPinActivity.displayRoot(
+                DisplayPinActivity.displayRoute(
                     mMap,
                     LatLng(info.current_location.lat, info.current_location.lon),
                     suggestLocation
                 )
                 return true
             }
-            DisplayPinActivity.clearRoot()
+            DisplayPinActivity.clearRoute()
             return true
         }
         //マーカーを透明に設定
