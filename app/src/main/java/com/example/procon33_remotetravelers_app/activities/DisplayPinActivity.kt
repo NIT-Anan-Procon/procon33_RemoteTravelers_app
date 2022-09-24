@@ -53,10 +53,15 @@ class DisplayPinActivity {
 
         fun displayRoot(mMap: GoogleMap ,currentLocation: LatLng, suggestLocation: LatLng) {
             try {
+                clearRoot()
+                var getTimes = 0
                 getRoot(currentLocation, suggestLocation)
                 while (true) {
+                    getTimes += 1
+                    Log.d("getTimes", getTimes.toString())
                     Log.d("displayRoot", routesData.toString())
-                    if (routesData != null) {
+                    if (!routesData.isNullOrEmpty()) {
+                        Log.d("displayRoot2", routesData.toString())
                         val routes = routesData!!
                         val route = routes[0]
                         val leg = route.legs[0]
@@ -75,6 +80,9 @@ class DisplayPinActivity {
                             )
                             polylines!!.add(polyline!!)
                         }
+                        break
+                    }
+                    if(getTimes == 100000){
                         break
                     }
                 }
@@ -115,7 +123,7 @@ class DisplayPinActivity {
             }
         }
 
-        fun clearRoot(){
+       fun clearRoot(){
             //アプリは今までのポリラインを消去する。
             if (polylines != null) {
                 polylines!!.forEach {

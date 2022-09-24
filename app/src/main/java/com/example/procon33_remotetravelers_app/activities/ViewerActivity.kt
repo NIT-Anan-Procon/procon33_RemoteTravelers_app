@@ -133,20 +133,24 @@ class ViewerActivity : AppCompatActivity(), OnMapReadyCallback,
     }
 
     override fun onMarkerClick(marker: Marker): Boolean {
-        if(!DisplayReportActivity.markers.contains(marker))
-            return false
+        if(!DisplayReportActivity.markers.contains(marker)) {
+            //ルート処理
+            suggestLocation = LatLng(marker.position.latitude, marker.position.longitude)
+            markerTouchFrag = !markerTouchFrag
+            if (markerTouchFrag) {
+                DisplayPinActivity.displayRoot(
+                    mMap,
+                    LatLng(info.current_location.lat, info.current_location.lon),
+                    suggestLocation
+                )
+                return true
+            }
+            DisplayPinActivity.clearRoot()
+            return true
+        }
         //マーカーを透明に設定
         marker.alpha = 0f
         marker.showInfoWindow()
-        //ルート処理
-        val markerPosition = marker.position
-        suggestLocation = LatLng(markerPosition.latitude, markerPosition.longitude)
-        markerTouchFrag = !markerTouchFrag
-        if(markerTouchFrag) {
-            DisplayPinActivity.displayRoot(mMap, LatLng(info.current_location.lat, info.current_location.lon), suggestLocation)
-        }else{
-            DisplayPinActivity.clearRoot()
-        }
         return true
     }
 
