@@ -14,6 +14,7 @@ import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import retrofit2.Retrofit
 import retrofit2.converter.moshi.MoshiConverterFactory
 import kotlin.concurrent.thread
+import com.google.maps.android.PolyUtil
 
 class DisplayPinActivity {
     companion object {
@@ -67,11 +68,9 @@ class DisplayPinActivity {
                     val routes = routesData!!
                     val route = routes[0]
                     val leg = route.legs[0]
-                    val path = mutableListOf<LatLng>()
-                    path.add(currentLocation)
+                    val path: MutableList<List<LatLng>> = ArrayList()
                     for (location in leg.steps) {
-                        val point = LatLng(location.end_location.lat, location.end_location.lng)
-                        path.add(point)
+                        path.add(PolyUtil.decode(location.polyline.points))
                     }
                     polylines = arrayListOf()
                     Handler(Looper.getMainLooper()).post {
@@ -79,8 +78,8 @@ class DisplayPinActivity {
                         for (i in 1 until path.size) {
                             polyline = mMap.addPolyline(
                                 PolylineOptions()
-                                    .add(path[i - 1], path[i])
-                                    .color(Color.GREEN)
+                                    .addAll(path[i]).
+                                    color(Color.GREEN)
                                     .width(20F)
                             )
                             polylines!!.add(polyline!!)

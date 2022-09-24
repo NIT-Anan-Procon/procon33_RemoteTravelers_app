@@ -13,10 +13,9 @@ data class Leg(
 )
 
 data class Step(
-    val end_location: Point,
+    val polyline: Points,
 )
 
-data class Point(
-    val lat: Double,
-    val lng: Double,
+data class Points(
+    val points: String,
 )
