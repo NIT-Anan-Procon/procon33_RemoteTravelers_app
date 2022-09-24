@@ -1,0 +1,15 @@
+package com.example.procon33_remotetravelers_app.models.apis
+
+data class GetReportAllResponse(
+    val ok: Boolean,
+    val album: List<GetReports>,
+    val error: String?,
+)
+
+data class GetReports(
+    val image: String,
+    val comment: String,
+    val excitement: Int,
+    val lat: Double,
+    val lon: Double,
+)

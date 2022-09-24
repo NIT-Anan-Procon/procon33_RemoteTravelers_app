@@ -3,12 +3,14 @@ package com.example.procon33_remotetravelers_app.activities
 import android.animation.ObjectAnimator
 import android.content.Intent
 import android.graphics.Color
+import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
 import android.view.View
 import android.widget.*
+import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import com.example.procon33_remotetravelers_app.BuildConfig
 import com.example.procon33_remotetravelers_app.R
@@ -30,7 +32,8 @@ import kotlin.concurrent.thread
 import kotlin.concurrent.scheduleAtFixedRate
 import com.google.android.gms.maps.GoogleMap.OnMarkerClickListener
 
-class ViewerActivity : AppCompatActivity(), OnMapReadyCallback, OnMarkerClickListener {
+class ViewerActivity : AppCompatActivity(), OnMapReadyCallback,
+    OnMarkerClickListener, GoogleMap.OnInfoWindowClickListener {
 
     private val moshi = Moshi.Builder()
         .add(KotlinJsonAdapterFactory())
@@ -47,6 +50,7 @@ class ViewerActivity : AppCompatActivity(), OnMapReadyCallback, OnMarkerClickLis
     private lateinit var suggestLocation: LatLng
     private var markerTouchFrag: Boolean = false
 
+    @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val userId = intent.getIntExtra("userId", 0)
@@ -57,6 +61,7 @@ class ViewerActivity : AppCompatActivity(), OnMapReadyCallback, OnMarkerClickLis
                 if (::mMap.isInitialized && ::info.isInitialized) {
                     CurrentLocationActivity.displayCurrentLocation(mMap, LatLng(info.current_location.lat, info.current_location.lon))
                     DisplayPinActivity.displayPin(mMap, info.destination)
+                    DisplayReportActivity.displayReport(mMap, info.reports)
                 }
             }
         }
@@ -121,11 +126,19 @@ class ViewerActivity : AppCompatActivity(), OnMapReadyCallback, OnMarkerClickLis
     override fun onMapReady(googleMap: GoogleMap) {
         mMap = googleMap
         CurrentLocationActivity.initializeMap(mMap)
+        mMap.setInfoWindowAdapter(CustomInfoWindow(this))
+        mMap.setOnInfoWindowClickListener(this)
+        mMap.setOnInfoWindowCloseListener(CustomInfoWindow(this))
         mMap.setOnMarkerClickListener(this)
     }
 
-    // マーカーをクリック
-    override fun onMarkerClick(marker: Marker): Boolean{
+    override fun onMarkerClick(marker: Marker): Boolean {
+        if(!DisplayReportActivity.markers.contains(marker))
+            return false
+        //マーカーを透明に設定
+        marker.alpha = 0f
+        marker.showInfoWindow()
+        //ルート処理
         val markerPosition = marker.position
         suggestLocation = LatLng(markerPosition.latitude, markerPosition.longitude)
         markerTouchFrag = !markerTouchFrag
@@ -134,7 +147,14 @@ class ViewerActivity : AppCompatActivity(), OnMapReadyCallback, OnMarkerClickLis
         }else{
             DisplayPinActivity.clearRoot()
         }
-        return false
+        return true
+    }
+
+    override fun onInfoWindowClick(marker: Marker) {
+        val intent = Intent(this, ViewReportActivity::class.java)
+        intent.putExtra("index", DisplayReportActivity.markers.indexOf(marker))
+        startActivity(intent)
+        mMap.setOnMarkerClickListener(this)
     }
 
     private fun getInfo(userId: Int){
