@@ -76,6 +76,9 @@ class ViewAlbumActivity : AppCompatActivity() {
             val albumFrame = findViewById<LinearLayout>(R.id.album_list)
             val reportFrame = findViewById<LinearLayout>(R.id.report_liner)
 
+            albumFrame.removeAllViews()
+            reportFrame.removeAllViews()
+
             val decode = Base64.decode(image, Base64.DEFAULT)
             val bitmap = Bitmap.createBitmap(16, 9, Bitmap.Config.ARGB_8888)
             bitmap.copyPixelsFromBuffer(ByteBuffer.wrap(decode))
