@@ -217,6 +217,7 @@ class TravelerActivity : AppCompatActivity(), OnMapReadyCallback,
 
     }
 
+    @SuppressLint("PotentialBehaviorOverride")
     override fun onMapReady(googleMap: GoogleMap) {
         mMap = googleMap
         CurrentLocationActivity.initializeMap(mMap)
@@ -248,6 +249,7 @@ class TravelerActivity : AppCompatActivity(), OnMapReadyCallback,
         return true
     }
 
+    @SuppressLint("PotentialBehaviorOverride")
     override fun onInfoWindowClick(marker: Marker) {
         val intent = Intent(this, ViewReportActivity::class.java)
         intent.putExtra("index", DisplayReportActivity.markers.indexOf(marker))

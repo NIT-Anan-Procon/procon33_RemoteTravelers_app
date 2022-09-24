@@ -1,6 +1,7 @@
 package com.example.procon33_remotetravelers_app.activities
 
 import android.animation.ObjectAnimator
+import android.annotation.SuppressLint
 import android.content.Intent
 import android.graphics.Color
 import android.os.Build
@@ -48,7 +49,6 @@ class ViewerActivity : AppCompatActivity(), OnMapReadyCallback,
     private lateinit var binding: ActivityViewerBinding
     private lateinit var info: GetInfoResponse
     private lateinit var suggestLocation: LatLng
-    private lateinit var lastCurrentLocation: LatLng
     private var markerTouchFrag: Boolean = false
 
     @RequiresApi(Build.VERSION_CODES.O)
@@ -129,6 +129,7 @@ class ViewerActivity : AppCompatActivity(), OnMapReadyCallback,
         }
     }
 
+    @SuppressLint("PotentialBehaviorOverride")
     override fun onMapReady(googleMap: GoogleMap) {
         mMap = googleMap
         CurrentLocationActivity.initializeMap(mMap)
@@ -160,6 +161,7 @@ class ViewerActivity : AppCompatActivity(), OnMapReadyCallback,
         return true
     }
 
+    @SuppressLint("PotentialBehaviorOverride")
     override fun onInfoWindowClick(marker: Marker) {
         val intent = Intent(this, ViewReportActivity::class.java)
         intent.putExtra("index", DisplayReportActivity.markers.indexOf(marker))
