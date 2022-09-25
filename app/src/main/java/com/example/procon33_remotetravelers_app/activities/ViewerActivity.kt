@@ -123,10 +123,7 @@ class ViewerActivity : AppCompatActivity(), OnMapReadyCallback,
     override fun onMapReady(googleMap: GoogleMap) {
         mMap = googleMap
         CurrentLocationActivity.initializeMap(mMap)
-        mMap.setInfoWindowAdapter(CustomInfoWindow(this))
-        mMap.setOnInfoWindowClickListener(this)
         mMap.setOnInfoWindowCloseListener(CustomInfoWindow(this))
-        mMap.setOnMarkerClickListener(this)
     }
 
     override fun onMarkerClick(marker: Marker): Boolean {
