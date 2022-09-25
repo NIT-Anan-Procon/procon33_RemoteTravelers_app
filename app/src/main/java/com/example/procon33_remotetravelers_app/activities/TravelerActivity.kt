@@ -42,6 +42,7 @@ import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.Marker
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
+import com.google.android.gms.maps.GoogleMap.OnMarkerClickListener
 import retrofit2.Retrofit
 import retrofit2.converter.moshi.MoshiConverterFactory
 import java.util.*
@@ -49,9 +50,8 @@ import kotlin.concurrent.scheduleAtFixedRate
 import kotlin.concurrent.thread
 import kotlin.properties.Delegates
 
-
 class TravelerActivity : AppCompatActivity(), OnMapReadyCallback,
-    LocationListener, GoogleMap.OnMarkerClickListener, GoogleMap.OnInfoWindowClickListener {
+    LocationListener, OnMarkerClickListener, GoogleMap.OnInfoWindowClickListener {
 
     companion object {
         const val CAMERA_REQUEST_CODE = 1
@@ -71,7 +71,9 @@ class TravelerActivity : AppCompatActivity(), OnMapReadyCallback,
     private lateinit var info: GetInfoResponse
     private lateinit var locationManager: LocationManager
     private lateinit var currentLocation: LatLng
+    private lateinit var suggestLocation: LatLng
     private var userId by Delegates.notNull<Int>()
+    private var markerTouchFrag: Boolean = false
     private val requestPermissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestPermission()
     ) { isGranted: Boolean ->
@@ -105,7 +107,7 @@ class TravelerActivity : AppCompatActivity(), OnMapReadyCallback,
             Handler(Looper.getMainLooper()).post {
                 if (::mMap.isInitialized && ::info.isInitialized) {
                     CurrentLocationActivity.displayCurrentLocation(mMap, LatLng(info.current_location.lat, info.current_location.lon))
-                    DrawRoot.drawRoot(mMap, LatLng(info.current_location.lat, info.current_location.lon))
+                    DrawRoute.drawRoute(mMap, LatLng(info.current_location.lat, info.current_location.lon))
                     DisplayPinActivity.displayPin(mMap, info.destination)
                 }
                 displayComment()
@@ -197,7 +199,13 @@ class TravelerActivity : AppCompatActivity(), OnMapReadyCallback,
         saveCurrentLocation()
         if(::mMap.isInitialized){
             CurrentLocationActivity.displayCurrentLocation(mMap, currentLocation)
-            DrawRoot.drawRoot(mMap, currentLocation)
+            DrawRoute.drawRoute(mMap, currentLocation)
+            // ルートの更新
+            if(markerTouchFrag){
+                DisplayPinActivity.displayRoute(mMap, currentLocation, suggestLocation)
+                return
+            }
+            DisplayPinActivity.clearRoute()
         }
     }
 
@@ -209,6 +217,7 @@ class TravelerActivity : AppCompatActivity(), OnMapReadyCallback,
 
     }
 
+    @SuppressLint("PotentialBehaviorOverride")
     override fun onMapReady(googleMap: GoogleMap) {
         mMap = googleMap
         CurrentLocationActivity.initializeMap(mMap)
@@ -219,14 +228,28 @@ class TravelerActivity : AppCompatActivity(), OnMapReadyCallback,
     }
 
     override fun onMarkerClick(marker: Marker): Boolean {
-        if(!DisplayReportActivity.markers.contains(marker))
-            return false
+        if(!DisplayReportActivity.markers.contains(marker)) {
+            //ルート処理
+            suggestLocation = LatLng(marker.position.latitude, marker.position.longitude)
+            markerTouchFrag = !markerTouchFrag
+            if (markerTouchFrag) {
+                DisplayPinActivity.displayRoute(
+                    mMap,
+                    currentLocation,
+                    suggestLocation
+                )
+                return true
+            }
+            DisplayPinActivity.clearRoute()
+            return true
+        }
         //マーカーを透明に設定
         marker.alpha = 0f
         marker.showInfoWindow()
         return true
     }
 
+    @SuppressLint("PotentialBehaviorOverride")
     override fun onInfoWindowClick(marker: Marker) {
         val intent = Intent(this, ViewReportActivity::class.java)
         intent.putExtra("index", DisplayReportActivity.markers.indexOf(marker))
