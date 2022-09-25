@@ -166,7 +166,6 @@ class ViewerActivity : AppCompatActivity(), OnMapReadyCallback,
         val intent = Intent(this, ViewReportActivity::class.java)
         intent.putExtra("index", DisplayReportActivity.markers.indexOf(marker))
         startActivity(intent)
-        mMap.setOnMarkerClickListener(this)
     }
 
     private fun getInfo(userId: Int){
