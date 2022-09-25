@@ -1,6 +1,7 @@
 package com.example.procon33_remotetravelers_app.activities
 
 import android.animation.ObjectAnimator
+import android.annotation.SuppressLint
 import android.content.Intent
 import android.graphics.Color
 import android.os.Build
@@ -30,9 +31,10 @@ import retrofit2.converter.moshi.MoshiConverterFactory
 import java.util.*
 import kotlin.concurrent.thread
 import kotlin.concurrent.scheduleAtFixedRate
+import com.google.android.gms.maps.GoogleMap.OnMarkerClickListener
 
 class ViewerActivity : AppCompatActivity(), OnMapReadyCallback,
-    GoogleMap.OnMarkerClickListener, GoogleMap.OnInfoWindowClickListener {
+    OnMarkerClickListener, GoogleMap.OnInfoWindowClickListener {
 
     private val moshi = Moshi.Builder()
         .add(KotlinJsonAdapterFactory())
@@ -46,6 +48,8 @@ class ViewerActivity : AppCompatActivity(), OnMapReadyCallback,
     private lateinit var mMap: GoogleMap
     private lateinit var binding: ActivityViewerBinding
     private lateinit var info: GetInfoResponse
+    private lateinit var suggestLocation: LatLng
+    private var markerTouchFrag: Boolean = false
 
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -68,7 +72,12 @@ class ViewerActivity : AppCompatActivity(), OnMapReadyCallback,
                 if (::mMap.isInitialized && ::info.isInitialized) {
                     CurrentLocationActivity.displayCurrentLocation(mMap, LatLng(info.current_location.lat, info.current_location.lon))
                     DisplayPinActivity.displayPin(mMap, info.destination)
-                    DrawRoot.drawRoot(mMap, LatLng(info.current_location.lat, info.current_location.lon))
+                    DrawRoute.drawRoute(mMap, LatLng(info.current_location.lat, info.current_location.lon))
+                    if(markerTouchFrag){
+                        DisplayPinActivity.displayRoute(mMap, LatLng(info.current_location.lat, info.current_location.lon), suggestLocation)
+                    }else {
+                        DisplayPinActivity.clearRoute()
+                    }
                 }
                 displayComment()
                 changeSituation()
@@ -120,6 +129,7 @@ class ViewerActivity : AppCompatActivity(), OnMapReadyCallback,
         }
     }
 
+    @SuppressLint("PotentialBehaviorOverride")
     override fun onMapReady(googleMap: GoogleMap) {
         mMap = googleMap
         CurrentLocationActivity.initializeMap(mMap)
@@ -127,14 +137,28 @@ class ViewerActivity : AppCompatActivity(), OnMapReadyCallback,
     }
 
     override fun onMarkerClick(marker: Marker): Boolean {
-        if(!DisplayReportActivity.markers.contains(marker))
-            return false
+        if(!DisplayReportActivity.markers.contains(marker)) {
+            //ルート処理
+            suggestLocation = LatLng(marker.position.latitude, marker.position.longitude)
+            markerTouchFrag = !markerTouchFrag
+            if (markerTouchFrag) {
+                DisplayPinActivity.displayRoute(
+                    mMap,
+                    LatLng(info.current_location.lat, info.current_location.lon),
+                    suggestLocation
+                )
+                return true
+            }
+            DisplayPinActivity.clearRoute()
+            return true
+        }
         //マーカーを透明に設定
         marker.alpha = 0f
         marker.showInfoWindow()
         return true
     }
 
+    @SuppressLint("PotentialBehaviorOverride")
     override fun onInfoWindowClick(marker: Marker) {
         val intent = Intent(this, ViewReportActivity::class.java)
         intent.putExtra("index", DisplayReportActivity.markers.indexOf(marker))
