@@ -175,19 +175,16 @@ class ViewerActivity : AppCompatActivity(), OnMapReadyCallback,
             val travelerText = findViewById<TextView>(R.id.traveler_situation_text)
             val travelerIcon = findViewById<ImageView>(R.id.traveler_situation_icon)
             travelerText.text= info.situation
-            if (info.situation == "食事中"){
-                travelerIcon.setImageResource(R.drawable.eatting)
-            }else if(info.situation == "観光中(建物)"){
-                travelerIcon.setImageResource(R.drawable.building)
-            }else if(info.situation == "観光中(風景)"){
-                travelerIcon.setImageResource(R.drawable.nature)
-            }else if(info.situation == "動物に癒され中"){
-                travelerIcon.setImageResource(R.drawable.animal)
-            }else if(info.situation == "人と交流中"){
-                travelerIcon.setImageResource(R.drawable.human)
-            }else{
-                travelerIcon.setImageResource(R.drawable.walking)
-            }
+            travelerIcon.setImageResource (
+                when(info.situation){
+                    "食事中" -> R.drawable.eatting
+                    "観光中(建物)" -> R.drawable.building
+                    "観光中(風景)" -> R.drawable.nature
+                    "動物に癒され中" -> R.drawable.animal
+                    "人と交流中" -> R.drawable.human
+                    else -> R.drawable.walking
+                }
+            )
         } catch (e: Exception) {
             Handler(Looper.getMainLooper()).post {
                 // エラー内容を出力
