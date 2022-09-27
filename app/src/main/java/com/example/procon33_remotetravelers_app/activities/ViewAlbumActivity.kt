@@ -1,5 +1,6 @@
 package com.example.procon33_remotetravelers_app.activities
 
+import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import androidx.appcompat.app.AppCompatActivity
@@ -72,12 +73,7 @@ class ViewAlbumActivity : AppCompatActivity() {
                 val MP = LinearLayout.LayoutParams.MATCH_PARENT
 
                 val albumLiner = findViewById<LinearLayout>(R.id.album_list)
-                val reportLiner = findViewById<LinearLayout>(R.id.report_liner)
-                val albumFrame = findViewById<FrameLayout>(R.id.report_album_frame)
-
                 albumLiner.removeAllViews()
-                reportLiner.removeAllViews()
-                albumFrame.removeAllViews()
 
                 for (report in reports){
                     val decodedBytes = Base64.decode(
@@ -86,27 +82,29 @@ class ViewAlbumActivity : AppCompatActivity() {
                     )
                     val bitmap = BitmapFactory.decodeByteArray(decodedBytes, 0, decodedBytes.size)
 
-                    reportLiner.removeAllViews()
+                    val reportLinear = setLinear()
 
-                    reportLiner.addView(
+                    reportLinear.addView(
                         setImageView(bitmap),
-                        LinearLayout.LayoutParams(WC, MP)
+                        LinearLayout.LayoutParams(150, 150)
                     )
 
                     val date = report.created_at.replace("-", "/").replace("T", " ").replace(".000000Z", "")
 
-                    reportLiner.addView(
+                    reportLinear.addView(
                         setTextView(date + "\n" + report.comment),
                         LinearLayout.LayoutParams(WC, MP)
                     )
 
+                    val albumFrame = setFrame()
+
                     albumFrame.addView(
-                        reportLiner,
+                        reportLinear,
                         LinearLayout.LayoutParams(MP, WC)
                     )
 
                     albumFrame.addView(
-                          setButton(),
+                          setButton(report, bitmap),
                         LinearLayout.LayoutParams(MP, MP)
                     )
 
@@ -129,7 +127,7 @@ class ViewAlbumActivity : AppCompatActivity() {
         val comment = TextView(this)
         comment.text = commentText
         comment.textSize = 20f
-        comment.setPadding(10, 15, 10, 15)
+        comment.setPadding(20, 15, 20, 15)
         return comment
     }
 
@@ -139,10 +137,35 @@ class ViewAlbumActivity : AppCompatActivity() {
         return image
     }
 
-    private fun setButton(): Button{
+    var count = 0
+
+    private fun setButton(report: GetReports, bitmap: Bitmap): Button{
+        count++
         val button = Button(this)
         //遷移できるように透明のボタンにする
         button.background = getDrawable(R.color.fide_report_button)
+        //id指定(なぜかIntしか無理)
+        button.id = count
+
+        button.setOnClickListener {
+            val intent = Intent(this, ViewSelectReportActivity::class.java)
+            intent.putExtra("excitement", report.excitement)
+            intent.putExtra("comment", report.comment)
+            intent.putExtra("image", bitmap)
+            startActivity(intent)
+        }
         return button
+    }
+
+    private fun setLinear(): LinearLayout{
+        val linear = LinearLayout(this)
+        linear.orientation = LinearLayout.HORIZONTAL
+        return linear
+    }
+
+    private fun setFrame(): FrameLayout{
+        val frame = FrameLayout(this)
+        frame.layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT)
+        return frame
     }
 }

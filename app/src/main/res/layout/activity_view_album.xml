@@ -38,28 +38,7 @@
             android:scrollbarAlwaysDrawVerticalTrack="false"
             android:scrollbarStyle="outsideInset"
             app:backgroundTint="@null"
-            android:clipToPadding="false">
-
-            <FrameLayout
-                android:id="@+id/report_album_frame"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent">
-
-                <LinearLayout
-                    android:id="@+id/report_liner"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:orientation="horizontal"/>
-
-<!--                <Button-->
-<!--                    android:id="@+id/fide_report_button"-->
-<!--                    android:layout_width="match_parent"-->
-<!--                    android:layout_height="match_parent"-->
-<!--                    android:background="@color/fide_report_button" />-->
-
-            </FrameLayout>
-
-        </LinearLayout>
+            android:clipToPadding="false"/>
     </ScrollView>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
