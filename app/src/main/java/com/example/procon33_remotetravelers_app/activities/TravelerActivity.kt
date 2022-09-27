@@ -98,7 +98,7 @@ class TravelerActivity : AppCompatActivity(), OnMapReadyCallback,
             Handler(Looper.getMainLooper()).post {
                 if (::mMap.isInitialized && ::info.isInitialized) {
                     CurrentLocationActivity.displayCurrentLocation(mMap, LatLng(info.current_location.lat, info.current_location.lon))
-                    DisplayReportActivity.displayReport(mMap, info.reports)
+                    DisplayReportActivity.createReportMarker(mMap, info.reports)
                 }
             }
         }

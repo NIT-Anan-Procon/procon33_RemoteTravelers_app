@@ -10,21 +10,21 @@ class DrawRoute {
         // 線の太さを15pxに設定
         private val INITIAL_STROKE_WIDTH_PX = 15
 
-        var beforeLatLng = LatLng(0.0, 0.0)
-        var i = 0.0
+        private var lastLatLng = LatLng(0.0, 0.0)
 
         fun drawRoute(mMap: GoogleMap, currentLatLng: LatLng){
 
-            if(beforeLatLng != LatLng(0.0, 0.0)) {
+            if(lastLatLng != LatLng(0.0, 0.0)) {
                 mMap.addPolyline(
                     PolylineOptions()
-                        .add(beforeLatLng, currentLatLng)
+                        .add(lastLatLng, currentLatLng)
                         .width(INITIAL_STROKE_WIDTH_PX.toFloat())
-                        .color(Color.parseColor("#766BF3FF")).geodesic(true)
+                        .color(Color.parseColor("#766BF3FF"))
+                        .geodesic(true)
                 )
             }
 
-            beforeLatLng = currentLatLng
+            lastLatLng = currentLatLng
         }
     }
 }

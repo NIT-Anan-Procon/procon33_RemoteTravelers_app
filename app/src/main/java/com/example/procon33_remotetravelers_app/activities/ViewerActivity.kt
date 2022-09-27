@@ -1,7 +1,6 @@
 package com.example.procon33_remotetravelers_app.activities
 
 import android.animation.ObjectAnimator
-import android.annotation.SuppressLint
 import android.content.Intent
 import android.graphics.Color
 import android.os.Build
@@ -16,6 +15,7 @@ import androidx.appcompat.app.AppCompatActivity
 import com.example.procon33_remotetravelers_app.BuildConfig
 import com.example.procon33_remotetravelers_app.R
 import com.example.procon33_remotetravelers_app.databinding.ActivityViewerBinding
+import com.example.procon33_remotetravelers_app.models.apis.FootPrints
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
@@ -23,6 +23,7 @@ import com.google.android.gms.maps.model.LatLng
 import com.example.procon33_remotetravelers_app.models.apis.GetInfoResponse
 import com.example.procon33_remotetravelers_app.services.GetInfoService
 import com.example.procon33_remotetravelers_app.services.AddCommentService
+import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.model.Marker
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
@@ -35,6 +36,9 @@ import com.google.android.gms.maps.GoogleMap.OnMarkerClickListener
 
 class ViewerActivity : AppCompatActivity(), OnMapReadyCallback,
     OnMarkerClickListener, GoogleMap.OnInfoWindowClickListener {
+    companion object{
+        var stopRelive = true
+    }
 
     private val moshi = Moshi.Builder()
         .add(KotlinJsonAdapterFactory())
@@ -58,11 +62,17 @@ class ViewerActivity : AppCompatActivity(), OnMapReadyCallback,
         thread {
             Thread.sleep(2500)
             getInfo(userId)
-            Handler(Looper.getMainLooper()).post {
-                if (::mMap.isInitialized && ::info.isInitialized) {
-                    CurrentLocationActivity.displayCurrentLocation(mMap, LatLng(info.current_location.lat, info.current_location.lon))
+            if (::mMap.isInitialized && ::info.isInitialized) {
+                Handler(Looper.getMainLooper()).post {
+                    DisplayReportActivity.createReportMarker(mMap, info.reports)
+                }
+                relive(mMap, info.route)
+                Handler(Looper.getMainLooper()).post {
+                    CurrentLocationActivity.displayCurrentLocation(
+                        mMap,
+                        LatLng(info.current_location.lat, info.current_location.lon)
+                    )
                     DisplayPinActivity.displayPin(mMap, info.destination)
-                    DisplayReportActivity.displayReport(mMap, info.reports)
                 }
             }
         }
@@ -129,11 +139,13 @@ class ViewerActivity : AppCompatActivity(), OnMapReadyCallback,
         }
     }
 
-    @SuppressLint("PotentialBehaviorOverride")
     override fun onMapReady(googleMap: GoogleMap) {
         mMap = googleMap
         CurrentLocationActivity.initializeMap(mMap)
+        mMap.setInfoWindowAdapter(CustomInfoWindow(this))
+        mMap.setOnInfoWindowClickListener(this)
         mMap.setOnInfoWindowCloseListener(CustomInfoWindow(this))
+        mMap.setOnMarkerClickListener(this)
     }
 
     override fun onMarkerClick(marker: Marker): Boolean {
@@ -158,10 +170,10 @@ class ViewerActivity : AppCompatActivity(), OnMapReadyCallback,
         return true
     }
 
-    @SuppressLint("PotentialBehaviorOverride")
     override fun onInfoWindowClick(marker: Marker) {
         val intent = Intent(this, ViewReportActivity::class.java)
         intent.putExtra("index", DisplayReportActivity.markers.indexOf(marker))
+        intent.putExtra("isRelive", false)
         startActivity(intent)
     }
 
@@ -279,6 +291,50 @@ class ViewerActivity : AppCompatActivity(), OnMapReadyCallback,
                     // エラー内容を出力
                     Log.e("error", e.message.toString())
                 }
+            }
+        }
+    }
+
+    private fun relive(mMap: GoogleMap, routes: List<FootPrints?>){
+        if(routes.isEmpty()){
+            return
+        }
+        var index = 0
+        Handler(Looper.getMainLooper()).post {
+            mMap.animateCamera(
+                CameraUpdateFactory.newLatLngZoom(
+                    LatLng(
+                        routes[0]!!.lat,
+                        routes[0]!!.lon
+                    ),
+                    10f,
+                )
+            )
+        }
+        Thread.sleep(2000)
+        for (route in routes) {
+            Thread.sleep(100)
+            val location = LatLng(route!!.lat, route.lon)
+            Handler(Looper.getMainLooper()).post {
+                DrawRoute.drawRoute(mMap, location)
+                mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(location, 10f))
+            }
+            if (route.flag == 1) {
+                Thread.sleep(500)
+                val marker = DisplayReportActivity.markers[index++]
+                Handler(Looper.getMainLooper()).post {
+                    marker.showInfoWindow()
+                }
+                Thread.sleep(1500)
+                val intent = Intent(this, ViewReportActivity::class.java)
+                intent.putExtra("index", DisplayReportActivity.markers.indexOf(marker))
+                intent.putExtra("isRelive", true)
+                startActivity(intent)
+                stopRelive = true
+                while(stopRelive){
+                    Thread.sleep(500)
+                }
+                Thread.sleep(300)
             }
         }
     }

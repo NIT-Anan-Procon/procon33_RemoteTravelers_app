@@ -25,7 +25,7 @@ class DisplayReportActivity {
         var markers = mutableListOf<Marker>()
 
         @RequiresApi(Build.VERSION_CODES.O)
-        fun displayReport(mMap: GoogleMap, reports: List<Report?>){
+        fun createReportMarker(mMap: GoogleMap, reports: List<Report?>){
             for(report in reports){
                 report!!
                 val image = Base64.getDecoder().decode(report.image)
@@ -35,9 +35,10 @@ class DisplayReportActivity {
                     mMap.addMarker(
                         MarkerOptions()
                         .position(LatLng(report.lat, report.lon))
-                        .infoWindowAnchor(0.5f, 0.5f)
+                        .infoWindowAnchor(0.5f, 1.0f)
                         .icon(BitmapDescriptorFactory.fromBitmap(Bitmap.createScaledBitmap(bitmap, 150, 150, true)))
                         .snippet(report.comment + "/" + report.excitement)
+                        .alpha(0f)
                     )!!
                 )
             }
