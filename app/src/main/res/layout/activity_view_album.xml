@@ -41,6 +41,7 @@
             app:backgroundTint="@null" />
     </ScrollView>
 
+    <!--        なぜか色だけ指定できない-->
     <Button
         android:id="@+id/album_back_button"
         android:layout_width="0dp"
