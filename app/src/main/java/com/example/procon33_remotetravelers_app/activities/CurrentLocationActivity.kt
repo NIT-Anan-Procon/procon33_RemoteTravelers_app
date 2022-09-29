@@ -13,7 +13,7 @@ import kotlin.concurrent.thread
 class CurrentLocationActivity {
     companion object{
         private var track = false
-        private var firstTrack = false
+        private var firstTrack = true
         private var setUpped: Boolean = false
         private var lastLocation = LatLng(0.0, 0.0)
         private var currentLocationMarker: Marker? = null
