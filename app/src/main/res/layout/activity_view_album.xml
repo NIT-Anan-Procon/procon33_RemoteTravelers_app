@@ -41,4 +41,17 @@
             app:backgroundTint="@null" />
     </ScrollView>
 
+    <Button
+        android:id="@+id/album_back_button"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="0"
+        android:background="@drawable/without_save_button"
+        android:backgroundTint="@null"
+        android:text="@string/album_back_button"
+        android:textColor="@color/white"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -36,6 +36,11 @@ class ViewAlbumActivity : AppCompatActivity() {
         val userId = intent.getIntExtra("userId", 0)
 
         getReportAll(userId)
+
+        val albumBack = findViewById<Button>(R.id.album_back_button)
+        albumBack.setOnClickListener {
+            finish()
+        }
     }
 
     private fun getReportAll(userId: Int){
@@ -86,7 +91,7 @@ class ViewAlbumActivity : AppCompatActivity() {
 
                     reportLinear.addView(
                         setImageView(bitmap),
-                        LinearLayout.LayoutParams(200, 200)
+                        LinearLayout.LayoutParams(WC, MP)
                     )
 
                     val date = report.created_at.replace("-", "/").replace("T", " ").replace(".000000Z", "")
@@ -168,6 +173,7 @@ class ViewAlbumActivity : AppCompatActivity() {
     private fun setFrame(): FrameLayout{
         val frame = FrameLayout(this)
         frame.layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT)
+        frame.setPadding(10, 10, 10, 10)
         return frame
     }
 }
