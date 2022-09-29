@@ -5,7 +5,7 @@ import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.PolylineOptions
 
-class DrawRoot {
+class DrawRoute {
     companion object{
         // 線の太さを15pxに設定
         private val INITIAL_STROKE_WIDTH_PX = 15
@@ -13,7 +13,7 @@ class DrawRoot {
         var beforeLatLng = LatLng(0.0, 0.0)
         var i = 0.0
 
-        fun drawRoot(mMap: GoogleMap, currentLatLng: LatLng){
+        fun drawRoute(mMap: GoogleMap, currentLatLng: LatLng){
 
             if(beforeLatLng != LatLng(0.0, 0.0)) {
                 mMap.addPolyline(
