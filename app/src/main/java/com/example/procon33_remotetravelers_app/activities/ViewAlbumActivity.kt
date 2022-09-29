@@ -86,7 +86,7 @@ class ViewAlbumActivity : AppCompatActivity() {
 
                     reportLinear.addView(
                         setImageView(bitmap),
-                        LinearLayout.LayoutParams(150, 150)
+                        LinearLayout.LayoutParams(200, 200)
                     )
 
                     val date = report.created_at.replace("-", "/").replace("T", " ").replace(".000000Z", "")
@@ -128,6 +128,7 @@ class ViewAlbumActivity : AppCompatActivity() {
         comment.text = commentText
         comment.textSize = 20f
         comment.setPadding(20, 15, 20, 15)
+        comment.maxLines = 2
         return comment
     }
 
@@ -160,6 +161,7 @@ class ViewAlbumActivity : AppCompatActivity() {
     private fun setLinear(): LinearLayout{
         val linear = LinearLayout(this)
         linear.orientation = LinearLayout.HORIZONTAL
+        linear.weightSum = 3.0F
         return linear
     }
 
