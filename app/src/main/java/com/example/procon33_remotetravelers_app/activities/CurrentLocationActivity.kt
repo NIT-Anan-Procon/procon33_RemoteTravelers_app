@@ -53,7 +53,7 @@ class CurrentLocationActivity {
             if (lastLocation != currentLocation) {
                 currentLocationMarker?.remove()
                 currentLocationMarker =
-                    mMap.addMarker(MarkerOptions().position(currentLocation).title("現在地"))
+                    mMap.addMarker(MarkerOptions().position(currentLocation).title("現在地").zIndex(10000f))
                 if (track) {
                     mMap.animateCamera(CameraUpdateFactory.newLatLng(currentLocation))
                 }
@@ -62,8 +62,8 @@ class CurrentLocationActivity {
             if (firstTrack) {
                 currentLocationMarker?.remove()
                 currentLocationMarker =
-                    mMap.addMarker(MarkerOptions().position(currentLocation).title("現在地"))
-                mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(currentLocation, 15f))
+                    mMap.addMarker(MarkerOptions().position(currentLocation).title("現在地").zIndex(10000f))
+                mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(currentLocation, 18f))
                 if (!setUpped) {
                     thread {
                         Thread.sleep(2000)

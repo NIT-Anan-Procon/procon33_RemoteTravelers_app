@@ -97,8 +97,8 @@ class TravelerActivity : AppCompatActivity(), OnMapReadyCallback,
             getInfo(userId)
             Handler(Looper.getMainLooper()).post {
                 if (::mMap.isInitialized && ::info.isInitialized) {
-                    CurrentLocationActivity.displayCurrentLocation(mMap, LatLng(info.current_location.lat, info.current_location.lon))
-                    DisplayReportActivity.createReportMarker(mMap, info.reports)
+                    CurrentLocationActivity.displayCurrentLocation(mMap, currentLocation)
+                    DisplayReportActivity.createReportMarker(mMap, info.reports, visible = true)
                 }
             }
         }

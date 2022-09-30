@@ -1,6 +1,7 @@
 package com.example.procon33_remotetravelers_app.activities
 
 import android.animation.ObjectAnimator
+import android.annotation.SuppressLint
 import android.content.Intent
 import android.graphics.Color
 import android.os.Build
@@ -37,6 +38,7 @@ import com.google.android.gms.maps.GoogleMap.OnMarkerClickListener
 class ViewerActivity : AppCompatActivity(), OnMapReadyCallback,
     OnMarkerClickListener, GoogleMap.OnInfoWindowClickListener {
     companion object{
+        var reliveFlag = 1
         var stopRelive = true
     }
 
@@ -64,7 +66,7 @@ class ViewerActivity : AppCompatActivity(), OnMapReadyCallback,
             getInfo(userId)
             if (::mMap.isInitialized && ::info.isInitialized) {
                 Handler(Looper.getMainLooper()).post {
-                    DisplayReportActivity.createReportMarker(mMap, info.reports)
+                    DisplayReportActivity.createReportMarker(mMap, info.reports, visible = false)
                 }
                 relive(mMap, info.route)
                 Handler(Looper.getMainLooper()).post {
@@ -79,7 +81,7 @@ class ViewerActivity : AppCompatActivity(), OnMapReadyCallback,
         Timer().scheduleAtFixedRate(0, 5000){
             getInfo(userId)
             Handler(Looper.getMainLooper()).post {
-                if (::mMap.isInitialized && ::info.isInitialized) {
+                if (::mMap.isInitialized && ::info.isInitialized && reliveFlag == 0) {
                     CurrentLocationActivity.displayCurrentLocation(mMap, LatLng(info.current_location.lat, info.current_location.lon))
                     DisplayPinActivity.displayPin(mMap, info.destination)
                     DrawRoute.drawRoute(mMap, LatLng(info.current_location.lat, info.current_location.lon))
@@ -139,6 +141,7 @@ class ViewerActivity : AppCompatActivity(), OnMapReadyCallback,
         }
     }
 
+    @SuppressLint("PotentialBehaviorOverride")
     override fun onMapReady(googleMap: GoogleMap) {
         mMap = googleMap
         CurrentLocationActivity.initializeMap(mMap)
@@ -317,7 +320,7 @@ class ViewerActivity : AppCompatActivity(), OnMapReadyCallback,
             val location = LatLng(route!!.lat, route.lon)
             Handler(Looper.getMainLooper()).post {
                 DrawRoute.drawRoute(mMap, location)
-                mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(location, 20f))
+                mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(location, 18f))
             }
             if (route.flag == 1) {
                 Thread.sleep(500)
@@ -334,8 +337,13 @@ class ViewerActivity : AppCompatActivity(), OnMapReadyCallback,
                 while(stopRelive){
                     Thread.sleep(500)
                 }
+                Handler(Looper.getMainLooper()).post {
+                    marker.hideInfoWindow()
+                    marker.alpha = 1f
+                }
                 Thread.sleep(300)
             }
         }
+        reliveFlag = 0
     }
 }

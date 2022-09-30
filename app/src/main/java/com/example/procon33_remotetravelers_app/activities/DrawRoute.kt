@@ -8,7 +8,7 @@ import com.google.android.gms.maps.model.PolylineOptions
 class DrawRoute {
     companion object{
         // 線の太さを15pxに設定
-        private val INITIAL_STROKE_WIDTH_PX = 15
+        private const val INITIAL_STROKE_WIDTH_PX = 15
 
         private var lastLatLng = LatLng(0.0, 0.0)
 
