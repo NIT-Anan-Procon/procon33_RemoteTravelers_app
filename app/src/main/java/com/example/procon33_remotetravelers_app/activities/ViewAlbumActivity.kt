@@ -77,8 +77,9 @@ class ViewAlbumActivity : AppCompatActivity() {
                 val WC = LinearLayout.LayoutParams.WRAP_CONTENT
                 val MP = LinearLayout.LayoutParams.MATCH_PARENT
 
-                val albumLiner = findViewById<LinearLayout>(R.id.album_list)
-                albumLiner.removeAllViews()
+                val albumLinear = findViewById<LinearLayout>(R.id.album_list)
+                albumLinear.removeAllViews()
+                albumLinear.layoutParams.height = 300
 
                 for (report in reports){
                     val decodedBytes = Base64.decode(
@@ -91,14 +92,14 @@ class ViewAlbumActivity : AppCompatActivity() {
 
                     reportLinear.addView(
                         setImageView(bitmap),
-                        LinearLayout.LayoutParams(WC, MP)
+                        LinearLayout.LayoutParams(300, 300)
                     )
 
                     val date = report.created_at.replace("-", "/").replace("T", " ").replace(".000000Z", "")
 
                     reportLinear.addView(
                         setTextView(date + "\n" + report.comment),
-                        LinearLayout.LayoutParams(WC, MP)
+                        LinearLayout.LayoutParams(WC, 300)
                     )
 
                     val albumFrame = setFrame()
@@ -113,7 +114,7 @@ class ViewAlbumActivity : AppCompatActivity() {
                         LinearLayout.LayoutParams(MP, MP)
                     )
 
-                    albumLiner.addView(
+                    albumLinear.addView(
                         albumFrame,
                         LinearLayout.LayoutParams(MP, WC)
                     )
