@@ -310,7 +310,7 @@ class ViewerActivity : AppCompatActivity(), OnMapReadyCallback,
                         routes[0]!!.lat,
                         routes[0]!!.lon
                     ),
-                    10f,
+                    18f,
                 )
             )
         }
