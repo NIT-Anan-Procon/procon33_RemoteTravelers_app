@@ -98,6 +98,7 @@ class TravelerActivity : AppCompatActivity(), OnMapReadyCallback,
             getInfo(userId)
             Handler(Looper.getMainLooper()).post {
                 if (::mMap.isInitialized && ::info.isInitialized) {
+                    CurrentLocationActivity.displayCurrentLocation(mMap, currentLocation)
                     DisplayReportActivity.createReportMarker(mMap, info.reports, visible = true)
                 }
             }
@@ -194,7 +195,7 @@ class TravelerActivity : AppCompatActivity(), OnMapReadyCallback,
             locationManager.requestLocationUpdates(
                 NETWORK_PROVIDER,
                 1000,
-                15f,
+                20f,
                 this
             )
         }
