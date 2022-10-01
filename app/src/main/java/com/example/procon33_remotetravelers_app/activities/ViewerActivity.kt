@@ -210,7 +210,7 @@ class ViewerActivity : AppCompatActivity(), OnMapReadyCallback,
         try {
             val travelerText = findViewById<TextView>(R.id.traveler_situation_text)
             val travelerIcon = findViewById<ImageView>(R.id.traveler_situation_icon)
-            travelerText.text= info.situation
+            travelerText.text = info.situation
             travelerIcon.setImageResource (
                 when(info.situation){
                     "食事中" -> R.drawable.eatting
