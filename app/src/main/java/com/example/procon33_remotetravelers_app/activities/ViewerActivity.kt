@@ -16,6 +16,7 @@ import androidx.appcompat.app.AppCompatActivity
 import com.example.procon33_remotetravelers_app.BuildConfig
 import com.example.procon33_remotetravelers_app.R
 import com.example.procon33_remotetravelers_app.databinding.ActivityViewerBinding
+import com.example.procon33_remotetravelers_app.models.apis.Comment
 import com.example.procon33_remotetravelers_app.models.apis.FootPrints
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
@@ -40,6 +41,9 @@ import com.google.android.gms.maps.GoogleMap.OnMarkerClickListener
 class ViewerActivity : AppCompatActivity(), OnMapReadyCallback,
     OnMarkerClickListener, GoogleMap.OnInfoWindowClickListener {
     companion object{
+        const val WC = LinearLayout.LayoutParams.WRAP_CONTENT
+        const val MP = LinearLayout.LayoutParams.MATCH_PARENT
+
         var reliveFlag = 1
         var stopRelive = true
     }
@@ -77,8 +81,10 @@ class ViewerActivity : AppCompatActivity(), OnMapReadyCallback,
             Handler(Looper.getMainLooper()).post {
                 CurrentLocationActivity.displayCurrentLocation(mMap, LatLng(info.current_location.lat, info.current_location.lon))
                 DisplayPinActivity.displayPin(mMap, info.destination)
-                Thread.sleep(2500)
+                displayComment(info.comments)
+                displaySituation(info.situation!!)
             }
+            Thread.sleep(2500)
         }
         Timer().scheduleAtFixedRate(0, 5000){
             while(!::updatedInfo.isInitialized) {
@@ -98,8 +104,12 @@ class ViewerActivity : AppCompatActivity(), OnMapReadyCallback,
                 if(updatedInfo.destination != null) {
                     DisplayPinActivity.displayPin(mMap, updatedInfo.destination!!)
                 }
-                displayComment()
-                changeSituation()
+                if(updatedInfo.comments != null) {
+                    displayComment(updatedInfo.comments!!)
+                }
+                if(updatedInfo.situation != null) {
+                    displaySituation(updatedInfo.situation!!)
+                }
             }
         }
 
@@ -127,7 +137,7 @@ class ViewerActivity : AppCompatActivity(), OnMapReadyCallback,
                 val (text, color) = CurrentLocationActivity.pressedButton()
                 currentLocationButton.setText(text)
                 currentLocationButton.setBackgroundResource(color)
-                CurrentLocationActivity.displayCurrentLocation(mMap, LatLng(info.current_location.lat, info.current_location.lon))
+                CurrentLocationActivity.displayCurrentLocation(mMap, CurrentLocationActivity.currentLocation)
             }
         }
 
@@ -202,6 +212,9 @@ class ViewerActivity : AppCompatActivity(), OnMapReadyCallback,
                     // 実行結果を出力
                     Log.d("getInfoResponse", getInfoResponse.toString())
                 }
+                if(getInfoResponse.situation == null){
+                    getInfoResponse.situation = "移動中"
+                }
                 info = getInfoResponse
             } catch (e: Exception) {
                 Handler(Looper.getMainLooper()).post {
@@ -238,27 +251,20 @@ class ViewerActivity : AppCompatActivity(), OnMapReadyCallback,
     }
 
     // 状況把握の画像・テキストを変更
-    private fun changeSituation(){
-        try {
-            val travelerText = findViewById<TextView>(R.id.traveler_situation_text)
-            val travelerIcon = findViewById<ImageView>(R.id.traveler_situation_icon)
-            travelerText.text = info.situation
-            travelerIcon.setImageResource (
-                when(info.situation){
-                    "食事中" -> R.drawable.eatting
-                    "観光中(建物)" -> R.drawable.building
-                    "観光中(風景)" -> R.drawable.nature
-                    "動物に癒され中" -> R.drawable.animal
-                    "人と交流中" -> R.drawable.human
-                    else -> R.drawable.walking
-                }
-            )
-        } catch (e: Exception) {
-            Handler(Looper.getMainLooper()).post {
-                // エラー内容を出力
-                Log.e("situation_error", e.message.toString())
+    private fun displaySituation(situation: String){
+        val travelerText = findViewById<TextView>(R.id.traveler_situation_text)
+        val travelerIcon = findViewById<ImageView>(R.id.traveler_situation_icon)
+        travelerText.text = situation
+        travelerIcon.setImageResource (
+            when(situation){
+                "食事中" -> R.drawable.eatting
+                "観光中(建物)" -> R.drawable.building
+                "観光中(風景)" -> R.drawable.nature
+                "動物に癒され中" -> R.drawable.animal
+                "人と交流中" -> R.drawable.human
+                else -> R.drawable.walking
             }
-        }
+        )
     }
 
     private fun moveComment(fragment: Boolean) {
@@ -272,20 +278,18 @@ class ViewerActivity : AppCompatActivity(), OnMapReadyCallback,
         commentBottom.text = if (fragment) "コメントを閉じる" else "コメントを開く"
     }
 
-    private fun displayComment(){
+    private fun displayComment(comments: List<Comment?>){
         try {
             val commentList = findViewById<LinearLayout>(R.id.comment_list)
             commentList.removeAllViews()
-            val WC = LinearLayout.LayoutParams.WRAP_CONTENT
-            val MP = LinearLayout.LayoutParams.MATCH_PARENT
-            for (oneComment in info.comments) {
-                if (oneComment == null) {
-                    Log.d("oneComment", "null")
-                    continue
-                }
-                val commentText: String = oneComment.comment
-                val commentColor: String = if(oneComment.traveler == 0) "#FFA800" else "#4B4B4B"
-                commentList.addView(setView(commentText, commentColor), 0, LinearLayout.LayoutParams(MP, WC))
+            for (comment in comments) {
+                val commentText = comment!!.comment
+                val commentColor =
+                    when(comment.traveler){
+                        1 -> R.color.traveler_comment
+                        else -> R.color.viewer_comment
+                    }
+                commentList.addView(setView(commentText, commentColor.toString()), 0, LinearLayout.LayoutParams(MP, WC))
             }
         } catch (e: Exception) {
             Handler(Looper.getMainLooper()).post {

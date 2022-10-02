@@ -32,9 +32,12 @@ import androidx.core.content.ContextCompat
 import com.example.procon33_remotetravelers_app.BuildConfig
 import com.example.procon33_remotetravelers_app.R
 import com.example.procon33_remotetravelers_app.databinding.ActivityTravelerBinding
+import com.example.procon33_remotetravelers_app.models.apis.Comment
 import com.example.procon33_remotetravelers_app.models.apis.GetInfoResponse
+import com.example.procon33_remotetravelers_app.models.apis.GetUpdatedInfoResponse
 import com.example.procon33_remotetravelers_app.services.AddCommentService
 import com.example.procon33_remotetravelers_app.services.GetInfoService
+import com.example.procon33_remotetravelers_app.services.GetUpdatedInfoService
 import com.example.procon33_remotetravelers_app.services.SaveCurrentLocationService
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
@@ -55,8 +58,8 @@ class TravelerActivity : AppCompatActivity(), OnMapReadyCallback,
     LocationListener, OnMarkerClickListener, GoogleMap.OnInfoWindowClickListener {
 
     companion object {
-        const val CAMERA_REQUEST_CODE = 1
-        const val CAMERA_PERMISSION_REQUEST_CODE = 2
+        const val WC = LinearLayout.LayoutParams.WRAP_CONTENT
+        const val MP = LinearLayout.LayoutParams.MATCH_PARENT
     }
     private val moshi = Moshi.Builder()
         .add(KotlinJsonAdapterFactory())
@@ -70,11 +73,14 @@ class TravelerActivity : AppCompatActivity(), OnMapReadyCallback,
     private lateinit var mMap: GoogleMap
     private lateinit var binding: ActivityTravelerBinding
     private lateinit var info: GetInfoResponse
+    private lateinit var updatedInfo: GetUpdatedInfoResponse
     private lateinit var locationManager: LocationManager
     private lateinit var currentLocation: LatLng
     private lateinit var suggestLocation: LatLng
     private var userId by Delegates.notNull<Int>()
-    private var markerTouchFrag: Boolean = false
+    private var firstDisplayFlag = true
+    private var markerTouchFrag = false
+
     private val requestPermissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestPermission()
     ) { isGranted: Boolean ->
@@ -94,25 +100,37 @@ class TravelerActivity : AppCompatActivity(), OnMapReadyCallback,
         super.onCreate(savedInstanceState)
         userId = intent.getIntExtra("userId", 0)
         thread {
-            Thread.sleep(2500)
-            getInfo(userId)
+            while(!::info.isInitialized) {
+                getInfo(userId)
+                Thread.sleep(2500)
+            }
+            while(!::mMap.isInitialized){
+                Thread.sleep(1000)
+            }
             Handler(Looper.getMainLooper()).post {
-                if (::mMap.isInitialized && ::info.isInitialized) {
-                    CurrentLocationActivity.displayCurrentLocation(mMap, currentLocation)
-                    DisplayReportActivity.createReportMarker(mMap, info.reports, visible = true)
-                }
+                CurrentLocationActivity.displayCurrentLocation(mMap, currentLocation)
+                DisplayReportActivity.createReportMarker(mMap, info.reports, visible = true)
+                displayComment(info.comments)
             }
         }
         Timer().scheduleAtFixedRate(0, 5000){
-            getInfo(userId)
+            while (firstDisplayFlag){
+                Thread.sleep(1000)
+            }
+            while(!::updatedInfo.isInitialized) {
+                getUpdatedInfo(userId)
+                Thread.sleep(2500)
+            }
             Handler(Looper.getMainLooper()).post {
-                if (::mMap.isInitialized && ::info.isInitialized) {
-                    CurrentLocationActivity.displayCurrentLocation(mMap, currentLocation)
-                    DisplayPinActivity.displayPin(mMap, info.destination)
-                    DrawRoute.drawRoute(mMap, currentLocation)
+                if(updatedInfo.destination != null) {
+                    DisplayPinActivity.displayPin(mMap, updatedInfo.destination!!)
                 }
-                displayComment()
-                changeSituation()
+                if(updatedInfo.comments != null) {
+                    displayComment(updatedInfo.comments!!)
+                }
+                if(updatedInfo.situation != null) {
+                    displaySituation(updatedInfo.situation!!)
+                }
             }
         }
 
@@ -141,7 +159,7 @@ class TravelerActivity : AppCompatActivity(), OnMapReadyCallback,
         }
 
         if (ContextCompat.checkSelfPermission(this,
-                Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             requestPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
         } else {
             locationStart()
@@ -158,7 +176,9 @@ class TravelerActivity : AppCompatActivity(), OnMapReadyCallback,
         submitComment.setOnClickListener {
             val comment = findViewById<EditText>(R.id.comment_text)
             val commentText = comment.text.toString()
-            if (commentText != "") addComment(userId, commentText)
+            if (commentText != ""){
+                addComment(userId, commentText)
+            }
             comment.setText("")
         }
     }
@@ -340,28 +360,46 @@ class TravelerActivity : AppCompatActivity(), OnMapReadyCallback,
         }
     }
 
-    // 状況把握の画像・テキストを変更
-    private fun changeSituation(){
-        try {
-            val travelerText = findViewById<TextView>(R.id.traveler_situation_text)
-            val travelerIcon = findViewById<ImageView>(R.id.traveler_situation_icon)
-            travelerText.text = info.situation
-            travelerIcon.setImageResource (
-                when(info.situation){
-                    "食事中" -> R.drawable.eatting
-                    "観光中(建物)" -> R.drawable.building
-                    "観光中(風景)" -> R.drawable.nature
-                    "動物に癒され中" -> R.drawable.animal
-                    "人と交流中" -> R.drawable.human
-                    else -> R.drawable.walking
+    private fun getUpdatedInfo(userId: Int){
+        thread {
+            try {
+                // APIを実行
+                val service: GetUpdatedInfoService =
+                    retrofit.create(GetUpdatedInfoService::class.java)
+                val getUpdatedInfoResponse = service.getUpdatedInfo(
+                    user_id = userId
+                ).execute().body()
+                    ?: throw IllegalStateException("body is null")
+
+                Handler(Looper.getMainLooper()).post {
+                    // 実行結果を出力
+                    Log.d("getUpdatedInfoResponse", getUpdatedInfoResponse.toString())
                 }
-            )
-        } catch (e: Exception) {
-            Handler(Looper.getMainLooper()).post {
-                // エラー内容を出力
-                Log.e("situation_error", e.message.toString())
+                updatedInfo = getUpdatedInfoResponse
+            } catch (e: Exception) {
+                Handler(Looper.getMainLooper()).post {
+                    // エラー内容を出力
+                    Log.e("error", e.message.toString())
+                }
             }
         }
+    }
+
+    // 状況把握の画像・テキストを変更
+    private fun displaySituation(situation: String){
+        val travelerText = findViewById<TextView>(R.id.traveler_situation_text)
+        val travelerIcon = findViewById<ImageView>(R.id.traveler_situation_icon)
+        travelerText.text = situation
+        travelerIcon.setImageResource (
+            when(situation){
+                "食事中" -> R.drawable.eatting
+                "観光中(建物)" -> R.drawable.building
+                "観光中(風景)" -> R.drawable.nature
+                "動物に癒され中" -> R.drawable.animal
+                "人と交流中" -> R.drawable.human
+                else -> R.drawable.walking
+            }
+        )
     }
 
     private fun moveComment(fragment: Boolean) {
@@ -375,20 +413,18 @@ class TravelerActivity : AppCompatActivity(), OnMapReadyCallback,
         commentBottom.text = if (fragment) "コメントを閉じる" else "コメントを開く"
     }
 
-    private fun displayComment(){
+    private fun displayComment(comments: List<Comment?>){
         try {
             val commentList = findViewById<LinearLayout>(R.id.comment_list)
             commentList.removeAllViews()
-            val WC = LinearLayout.LayoutParams.WRAP_CONTENT
-            val MP = LinearLayout.LayoutParams.MATCH_PARENT
-            for (oneComment in info.comments) {
-                if (oneComment == null) {
-                    Log.d("oneComment", "null")
-                    continue
-                }
-                val commentText: String = oneComment.comment
-                val commentColor: String = if(oneComment.traveler == 0) "#FFA800" else "#4B4B4B"
-                commentList.addView(setView(commentText, commentColor), 0, LinearLayout.LayoutParams(MP, WC))
+            for (comment in comments) {
+                val commentText = comment!!.comment
+                val commentColor =
+                    when(comment.traveler){
+                        1 -> R.color.traveler_comment
+                        else -> R.color.viewer_comment
+                    }
+                commentList.addView(setView(commentText, commentColor.toString()), 0, LinearLayout.LayoutParams(MP, WC))
             }
         } catch (e: Exception) {
             Handler(Looper.getMainLooper()).post {
