@@ -114,22 +114,18 @@ class TravelerActivity : AppCompatActivity(), OnMapReadyCallback,
             }
         }
         Timer().scheduleAtFixedRate(0, 5000){
-            while (firstDisplayFlag){
-                Thread.sleep(1000)
-            }
-            while(!::updatedInfo.isInitialized) {
-                getUpdatedInfo(userId)
-                Thread.sleep(2500)
-            }
-            Handler(Looper.getMainLooper()).post {
-                if(updatedInfo.destination != null) {
-                    DisplayPinActivity.displayPin(mMap, updatedInfo.destination!!)
-                }
-                if(updatedInfo.comments != null) {
-                    displayComment(updatedInfo.comments!!)
-                }
-                if(updatedInfo.situation != null) {
-                    displaySituation(updatedInfo.situation!!)
+            getUpdatedInfo(userId)
+            if(::updatedInfo.isInitialized && firstDisplayFlag) {
+                Handler(Looper.getMainLooper()).post {
+                    if (updatedInfo.destination != null) {
+                        DisplayPinActivity.displayPin(mMap, updatedInfo.destination!!)
+                    }
+                    if (updatedInfo.comments != null) {
+                        displayComment(updatedInfo.comments!!)
+                    }
+                    if (updatedInfo.situation != null) {
+                        displaySituation(updatedInfo.situation!!)
+                    }
                 }
             }
         }

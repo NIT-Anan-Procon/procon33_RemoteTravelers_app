@@ -87,28 +87,46 @@ class ViewerActivity : AppCompatActivity(), OnMapReadyCallback,
             Thread.sleep(2500)
         }
         Timer().scheduleAtFixedRate(0, 5000){
-            while(!::updatedInfo.isInitialized) {
-                getUpdatedInfo(userId)
-                Thread.sleep(2500)
-            }
-            Handler(Looper.getMainLooper()).post {
-                if(updatedInfo.current_location != null) {
-                    CurrentLocationActivity.displayCurrentLocation(mMap, LatLng(updatedInfo.current_location!!.lat, updatedInfo.current_location!!.lon))
-                    DrawRoute.drawRoute(mMap, LatLng(updatedInfo.current_location!!.lat, updatedInfo.current_location!!.lon))
-                    if(markerTouchFrag){
-                        DisplayPinActivity.displayRoute(mMap, LatLng(updatedInfo.current_location!!.lat, updatedInfo.current_location!!.lon), suggestLocation)
-                    }else {
-                        DisplayPinActivity.clearRoute()
+            getUpdatedInfo(userId)
+            if(::updatedInfo.isInitialized && reliveFlag == 1) {
+                Handler(Looper.getMainLooper()).post {
+                    if (updatedInfo.current_location != null) {
+                        CurrentLocationActivity.displayCurrentLocation(
+                            mMap,
+                            LatLng(
+                                updatedInfo.current_location!!.lat,
+                                updatedInfo.current_location!!.lon
+                            )
+                        )
+                        DrawRoute.drawRoute(
+                            mMap,
+                            LatLng(
+                                updatedInfo.current_location!!.lat,
+                                updatedInfo.current_location!!.lon
+                            )
+                        )
+                        if (markerTouchFrag) {
+                            DisplayPinActivity.displayRoute(
+                                mMap,
+                                LatLng(
+                                    updatedInfo.current_location!!.lat,
+                                    updatedInfo.current_location!!.lon
+                                ),
+                                suggestLocation
+                            )
+                        } else {
+                            DisplayPinActivity.clearRoute()
+                        }
                     }
-                }
-                if(updatedInfo.destination != null) {
-                    DisplayPinActivity.displayPin(mMap, updatedInfo.destination!!)
-                }
-                if(updatedInfo.comments != null) {
-                    displayComment(updatedInfo.comments!!)
-                }
-                if(updatedInfo.situation != null) {
-                    displaySituation(updatedInfo.situation!!)
+                    if (updatedInfo.destination != null) {
+                        DisplayPinActivity.displayPin(mMap, updatedInfo.destination!!)
+                    }
+                    if (updatedInfo.comments != null) {
+                        displayComment(updatedInfo.comments!!)
+                    }
+                    if (updatedInfo.situation != null) {
+                        displaySituation(updatedInfo.situation!!)
+                    }
                 }
             }
         }
