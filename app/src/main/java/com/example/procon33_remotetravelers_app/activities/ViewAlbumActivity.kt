@@ -150,7 +150,7 @@ class ViewAlbumActivity : AppCompatActivity() {
         count++
         val button = Button(this)
         //遷移できるように透明のボタンにする
-        button.background = getDrawable(R.color.fide_report_button)
+        button.background = getDrawable(R.color.hide_report_button)
         //id指定(なぜかIntしか無理)
         button.id = count
 
