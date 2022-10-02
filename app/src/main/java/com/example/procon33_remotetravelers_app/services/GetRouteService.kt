@@ -5,7 +5,7 @@ import retrofit2.Call
 import retrofit2.http.GET
 import retrofit2.http.Query
 
-sealed interface GetRouteService {
+interface GetRouteService {
     @GET("/maps/api/directions/json?")
     fun getRoute(
         @Query("origin") origin: String,

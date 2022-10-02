@@ -21,8 +21,10 @@ import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.LatLng
 import com.example.procon33_remotetravelers_app.models.apis.GetInfoResponse
+import com.example.procon33_remotetravelers_app.models.apis.GetUpdatedInfoResponse
 import com.example.procon33_remotetravelers_app.services.GetInfoService
 import com.example.procon33_remotetravelers_app.services.AddCommentService
+import com.example.procon33_remotetravelers_app.services.GetUpdatedInfoService
 import com.google.android.gms.maps.model.Marker
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
@@ -48,6 +50,7 @@ class ViewerActivity : AppCompatActivity(), OnMapReadyCallback,
     private lateinit var mMap: GoogleMap
     private lateinit var binding: ActivityViewerBinding
     private lateinit var info: GetInfoResponse
+    private lateinit var updatedInfo: GetUpdatedInfoResponse
     private lateinit var suggestLocation: LatLng
     private var markerTouchFrag: Boolean = false
 
@@ -56,28 +59,36 @@ class ViewerActivity : AppCompatActivity(), OnMapReadyCallback,
         super.onCreate(savedInstanceState)
         val userId = intent.getIntExtra("userId", 0)
         thread {
-            Thread.sleep(2500)
-            getInfo(userId)
+            while(!::info.isInitialized) {
+                getInfo(userId)
+                Thread.sleep(2500)
+            }
+            while(!::mMap.isInitialized){
+                Thread.sleep(1000)
+            }
             Handler(Looper.getMainLooper()).post {
-                if (::mMap.isInitialized && ::info.isInitialized) {
-                    CurrentLocationActivity.displayCurrentLocation(mMap, LatLng(info.current_location.lat, info.current_location.lon))
-                    DisplayPinActivity.displayPin(mMap, info.destination)
-                    DisplayReportActivity.displayReport(mMap, info.reports)
-                }
+                CurrentLocationActivity.displayCurrentLocation(mMap, LatLng(info.current_location.lat, info.current_location.lon))
+                DisplayPinActivity.displayPin(mMap, info.destination)
+                DisplayReportActivity.displayReport(mMap, info.reports)
             }
         }
         Timer().scheduleAtFixedRate(0, 5000){
-            getInfo(userId)
+            while(!::updatedInfo.isInitialized) {
+                getUpdatedInfo(userId)
+                Thread.sleep(2500)
+            }
             Handler(Looper.getMainLooper()).post {
-                if (::mMap.isInitialized && ::info.isInitialized) {
-                    CurrentLocationActivity.displayCurrentLocation(mMap, LatLng(info.current_location.lat, info.current_location.lon))
-                    DisplayPinActivity.displayPin(mMap, info.destination)
-                    DrawRoute.drawRoute(mMap, LatLng(info.current_location.lat, info.current_location.lon))
+                if(updatedInfo.current_location != null) {
+                    CurrentLocationActivity.displayCurrentLocation(mMap, LatLng(updatedInfo.current_location!!.lat, updatedInfo.current_location!!.lon))
+                    DrawRoute.drawRoute(mMap, LatLng(updatedInfo.current_location!!.lat, updatedInfo.current_location!!.lon))
                     if(markerTouchFrag){
-                        DisplayPinActivity.displayRoute(mMap, LatLng(info.current_location.lat, info.current_location.lon), suggestLocation)
+                        DisplayPinActivity.displayRoute(mMap, LatLng(updatedInfo.current_location!!.lat, updatedInfo.current_location!!.lon), suggestLocation)
                     }else {
                         DisplayPinActivity.clearRoute()
                     }
+                }
+                if(updatedInfo.destination != null) {
+                    DisplayPinActivity.displayPin(mMap, updatedInfo.destination!!)
                 }
                 displayComment()
                 changeSituation()
@@ -184,6 +195,31 @@ class ViewerActivity : AppCompatActivity(), OnMapReadyCallback,
                     Log.d("getInfoResponse", getInfoResponse.toString())
                 }
                 info = getInfoResponse
+            } catch (e: Exception) {
+                Handler(Looper.getMainLooper()).post {
+                    // エラー内容を出力
+                    Log.e("error", e.message.toString())
+                }
+            }
+        }
+    }
+
+    private fun getUpdatedInfo(userId: Int){
+        thread {
+            try {
+                // APIを実行
+                val service: GetUpdatedInfoService =
+                    retrofit.create(GetUpdatedInfoService::class.java)
+                val getUpdatedInfoResponse = service.getUpdatedInfo(
+                    user_id = userId
+                ).execute().body()
+                    ?: throw IllegalStateException("body is null")
+
+                Handler(Looper.getMainLooper()).post {
+                    // 実行結果を出力
+                    Log.d("getUpdatedInfoResponse", getUpdatedInfoResponse.toString())
+                }
+                updatedInfo = getUpdatedInfoResponse
             } catch (e: Exception) {
                 Handler(Looper.getMainLooper()).post {
                     // エラー内容を出力

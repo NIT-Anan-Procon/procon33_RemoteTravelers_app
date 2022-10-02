@@ -5,7 +5,7 @@ import retrofit2.Call
 import retrofit2.http.GET
 import retrofit2.http.Query
 
-sealed interface GetInfoService {
+interface GetInfoService {
     @GET("/api/common/get-info")
     fun getInfo(
         @Query("user_id") user_id: Int,

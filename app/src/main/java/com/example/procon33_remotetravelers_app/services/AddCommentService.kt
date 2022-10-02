@@ -5,7 +5,7 @@ import retrofit2.Call
 import retrofit2.http.*
 import retrofit2.http.Field
 
-sealed interface AddCommentService {
+interface AddCommentService {
     @FormUrlEncoded
     @POST("/api/common/add-comment")
     fun addComment(
