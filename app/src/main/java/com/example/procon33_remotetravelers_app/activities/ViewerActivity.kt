@@ -16,6 +16,7 @@ import androidx.appcompat.app.AppCompatActivity
 import com.example.procon33_remotetravelers_app.BuildConfig
 import com.example.procon33_remotetravelers_app.R
 import com.example.procon33_remotetravelers_app.databinding.ActivityViewerBinding
+import com.example.procon33_remotetravelers_app.models.apis.FootPrints
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
@@ -24,6 +25,7 @@ import com.example.procon33_remotetravelers_app.models.apis.GetInfoResponse
 import com.example.procon33_remotetravelers_app.models.apis.GetUpdatedInfoResponse
 import com.example.procon33_remotetravelers_app.services.GetInfoService
 import com.example.procon33_remotetravelers_app.services.AddCommentService
+import com.google.android.gms.maps.CameraUpdateFactory
 import com.example.procon33_remotetravelers_app.services.GetUpdatedInfoService
 import com.google.android.gms.maps.model.Marker
 import com.squareup.moshi.Moshi
@@ -37,6 +39,10 @@ import com.google.android.gms.maps.GoogleMap.OnMarkerClickListener
 
 class ViewerActivity : AppCompatActivity(), OnMapReadyCallback,
     OnMarkerClickListener, GoogleMap.OnInfoWindowClickListener {
+    companion object{
+        var reliveFlag = 1
+        var stopRelive = true
+    }
 
     private val moshi = Moshi.Builder()
         .add(KotlinJsonAdapterFactory())
@@ -66,10 +72,12 @@ class ViewerActivity : AppCompatActivity(), OnMapReadyCallback,
             while(!::mMap.isInitialized){
                 Thread.sleep(1000)
             }
+            DisplayReportActivity.createReportMarker(mMap, info.reports, visible = false)
+            relive(mMap, info.route)
             Handler(Looper.getMainLooper()).post {
                 CurrentLocationActivity.displayCurrentLocation(mMap, LatLng(info.current_location.lat, info.current_location.lon))
                 DisplayPinActivity.displayPin(mMap, info.destination)
-                DisplayReportActivity.displayReport(mMap, info.reports)
+                Thread.sleep(2500)
             }
         }
         Timer().scheduleAtFixedRate(0, 5000){
@@ -172,10 +180,10 @@ class ViewerActivity : AppCompatActivity(), OnMapReadyCallback,
         return true
     }
 
-    @SuppressLint("PotentialBehaviorOverride")
     override fun onInfoWindowClick(marker: Marker) {
         val intent = Intent(this, ViewReportActivity::class.java)
         intent.putExtra("index", DisplayReportActivity.markers.indexOf(marker))
+        intent.putExtra("isRelive", false)
         startActivity(intent)
     }
 
@@ -234,20 +242,17 @@ class ViewerActivity : AppCompatActivity(), OnMapReadyCallback,
         try {
             val travelerText = findViewById<TextView>(R.id.traveler_situation_text)
             val travelerIcon = findViewById<ImageView>(R.id.traveler_situation_icon)
-            travelerText.text= info.situation
-            if (info.situation == "食事中"){
-                travelerIcon.setImageResource(R.drawable.eatting)
-            }else if(info.situation == "観光中(建物)"){
-                travelerIcon.setImageResource(R.drawable.building)
-            }else if(info.situation == "観光中(風景)"){
-                travelerIcon.setImageResource(R.drawable.nature)
-            }else if(info.situation == "動物に癒され中"){
-                travelerIcon.setImageResource(R.drawable.animal)
-            }else if(info.situation == "人と交流中"){
-                travelerIcon.setImageResource(R.drawable.human)
-            }else{
-                travelerIcon.setImageResource(R.drawable.walking)
-            }
+            travelerText.text = info.situation
+            travelerIcon.setImageResource (
+                when(info.situation){
+                    "食事中" -> R.drawable.eatting
+                    "観光中(建物)" -> R.drawable.building
+                    "観光中(風景)" -> R.drawable.nature
+                    "動物に癒され中" -> R.drawable.animal
+                    "人と交流中" -> R.drawable.human
+                    else -> R.drawable.walking
+                }
+            )
         } catch (e: Exception) {
             Handler(Looper.getMainLooper()).post {
                 // エラー内容を出力
@@ -323,5 +328,54 @@ class ViewerActivity : AppCompatActivity(), OnMapReadyCallback,
                 }
             }
         }
+    }
+
+    private fun relive(mMap: GoogleMap, routes: List<FootPrints?>){
+        if(routes.isEmpty()){
+            return
+        }
+        var index = 0
+        Handler(Looper.getMainLooper()).post {
+            mMap.animateCamera(
+                CameraUpdateFactory.newLatLngZoom(
+                    LatLng(
+                        routes[0]!!.lat,
+                        routes[0]!!.lon
+                    ),
+                    18f,
+                )
+            )
+        }
+        Thread.sleep(2500)
+        for (route in routes) {
+            Thread.sleep(200)
+            val location = LatLng(route!!.lat, route.lon)
+            Handler(Looper.getMainLooper()).post {
+                DrawRoute.drawRoute(mMap, location)
+                mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(location, 18f))
+            }
+            if (route.flag == 1) {
+                Thread.sleep(500)
+                val marker = DisplayReportActivity.markers[index++]
+                Handler(Looper.getMainLooper()).post {
+                    marker.showInfoWindow()
+                }
+                Thread.sleep(1500)
+                val intent = Intent(this, ViewReportActivity::class.java)
+                intent.putExtra("index", DisplayReportActivity.markers.indexOf(marker))
+                intent.putExtra("isRelive", true)
+                startActivity(intent)
+                stopRelive = true
+                while(stopRelive){
+                    Thread.sleep(500)
+                }
+                Handler(Looper.getMainLooper()).post {
+                    marker.hideInfoWindow()
+                    marker.alpha = 1f
+                }
+                Thread.sleep(300)
+            }
+        }
+        reliveFlag = 0
     }
 }

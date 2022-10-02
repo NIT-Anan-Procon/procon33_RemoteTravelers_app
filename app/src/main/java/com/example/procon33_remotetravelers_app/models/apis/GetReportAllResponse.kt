@@ -1,5 +1,6 @@
 package com.example.procon33_remotetravelers_app.models.apis
 
+
 data class GetReportAllResponse(
     val ok: Boolean,
     val album: List<GetReports>,
@@ -7,6 +8,7 @@ data class GetReportAllResponse(
 )
 
 data class GetReports(
+    val created_at: String,
     val image: String,
     val comment: String,
     val excitement: Int,

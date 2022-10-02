@@ -12,6 +12,7 @@ import android.location.Location
 import android.location.LocationListener
 import android.location.LocationManager
 import android.location.LocationManager.GPS_PROVIDER
+import android.location.LocationManager.NETWORK_PROVIDER
 import android.os.Build
 import android.os.Bundle
 import android.os.Handler
@@ -97,8 +98,8 @@ class TravelerActivity : AppCompatActivity(), OnMapReadyCallback,
             getInfo(userId)
             Handler(Looper.getMainLooper()).post {
                 if (::mMap.isInitialized && ::info.isInitialized) {
-                    CurrentLocationActivity.displayCurrentLocation(mMap, LatLng(info.current_location.lat, info.current_location.lon))
-                    DisplayReportActivity.displayReport(mMap, info.reports)
+                    CurrentLocationActivity.displayCurrentLocation(mMap, currentLocation)
+                    DisplayReportActivity.createReportMarker(mMap, info.reports, visible = true)
                 }
             }
         }
@@ -106,9 +107,9 @@ class TravelerActivity : AppCompatActivity(), OnMapReadyCallback,
             getInfo(userId)
             Handler(Looper.getMainLooper()).post {
                 if (::mMap.isInitialized && ::info.isInitialized) {
-                    CurrentLocationActivity.displayCurrentLocation(mMap, LatLng(info.current_location.lat, info.current_location.lon))
-                    DrawRoute.drawRoute(mMap, LatLng(info.current_location.lat, info.current_location.lon))
+                    CurrentLocationActivity.displayCurrentLocation(mMap, currentLocation)
                     DisplayPinActivity.displayPin(mMap, info.destination)
+                    DrawRoute.drawRoute(mMap, currentLocation)
                 }
                 displayComment()
                 changeSituation()
@@ -180,18 +181,24 @@ class TravelerActivity : AppCompatActivity(), OnMapReadyCallback,
             Log.d("debug", "not gpsEnable, startActivity")
         }
 
-        if (ContextCompat.checkSelfPermission(this,
-                Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(this,
-                arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), 1000)
-
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
+            != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), 1000)
             Log.d("debug", "checkSelfPermission false")
-        } else
+        } else {
             locationManager.requestLocationUpdates(
                 GPS_PROVIDER,
                 1000,
                 20f,
-                this)
+                this
+            )
+            locationManager.requestLocationUpdates(
+                NETWORK_PROVIDER,
+                1000,
+                20f,
+                this
+            )
+        }
     }
 
     override fun onLocationChanged(location: Location) {
@@ -338,20 +345,17 @@ class TravelerActivity : AppCompatActivity(), OnMapReadyCallback,
         try {
             val travelerText = findViewById<TextView>(R.id.traveler_situation_text)
             val travelerIcon = findViewById<ImageView>(R.id.traveler_situation_icon)
-            travelerText.text= info.situation
-            if (info.situation == "食事中"){
-                travelerIcon.setImageResource(R.drawable.eatting)
-            }else if(info.situation == "観光中(建物)"){
-                travelerIcon.setImageResource(R.drawable.building)
-            }else if(info.situation == "観光中(風景)"){
-                travelerIcon.setImageResource(R.drawable.nature)
-            }else if(info.situation == "動物に癒され中"){
-                travelerIcon.setImageResource(R.drawable.animal)
-            }else if(info.situation == "人と交流中"){
-                travelerIcon.setImageResource(R.drawable.human)
-            }else{
-                travelerIcon.setImageResource(R.drawable.walking)
-            }
+            travelerText.text = info.situation
+            travelerIcon.setImageResource (
+                when(info.situation){
+                    "食事中" -> R.drawable.eatting
+                    "観光中(建物)" -> R.drawable.building
+                    "観光中(風景)" -> R.drawable.nature
+                    "動物に癒され中" -> R.drawable.animal
+                    "人と交流中" -> R.drawable.human
+                    else -> R.drawable.walking
+                }
+            )
         } catch (e: Exception) {
             Handler(Looper.getMainLooper()).post {
                 // エラー内容を出力
