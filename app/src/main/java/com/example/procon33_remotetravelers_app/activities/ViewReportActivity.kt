@@ -1,6 +1,5 @@
 package com.example.procon33_remotetravelers_app.activities
 
-import android.annotation.SuppressLint
 import android.os.Bundle
 import android.widget.Button
 import android.widget.ImageView
@@ -9,11 +8,11 @@ import androidx.appcompat.app.AppCompatActivity
 import com.example.procon33_remotetravelers_app.R
 
 class ViewReportActivity: AppCompatActivity() {
-    @SuppressLint("MissingInflatedId")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_view_report)
         val index = intent.getIntExtra("index", 0)
+        val isRelive = intent.getBooleanExtra("isRelive", false)
         val marker = DisplayReportActivity.markers[index]
         val bitmap = DisplayReportActivity.bitmaps[index]
 
@@ -32,6 +31,9 @@ class ViewReportActivity: AppCompatActivity() {
 
         val backButton = findViewById<Button>(R.id.back_to_map_button)
         backButton.setOnClickListener{
+            if(isRelive) {
+                ViewerActivity.stopRelive = false
+            }
             finish()
         }
     }
