@@ -30,4 +30,6 @@
     <string name="excitement_initial">0%</string>
     <string name="percentage">%d%%</string>
     <string name="view_comment_text">マップに戻る</string>
+    <string name="view_report_back">レポートアルバムに戻る</string>
+    <string name="album_back_button">戻る</string>
 </resources>
