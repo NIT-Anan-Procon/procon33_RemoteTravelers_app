@@ -21,7 +21,6 @@
     <string name="track_off">追跡\nオフ</string>
     <string name="decide_suggestion_button">ピンを決定する</string>
     <string name="cancel_suggestion_button">ピンの設置をキャンセル</string>
-    <string name="debug_button">デバッグ用参加者画面に遷移するボタン</string>
     <string name="traveler_situation">移動中</string>
     <string name="traveler_icon_image">Icon</string>
     <string name="album_button">旅のアルバム</string>
