@@ -18,5 +18,9 @@
     <color name="track_off">#FF8946</color>
     <color name="comment_door_button">#D9D9D9</color>
     <color name="comment_submit_button">#FFA0A0</color>
-    <color name="travel_exit_button">#766BF3</color>>
+    <color name="album_button">#FF8946</color>
+    <color name="view_album_title">#F35151</color>
+    <color name="edge">#FF8946</color>
+    <color name="hide_report_button">#00000000</color>
+    <color name="travel_exit_button">#766BF3</color>
 </resources>
