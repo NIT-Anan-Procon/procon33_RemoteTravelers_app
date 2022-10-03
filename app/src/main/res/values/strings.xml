@@ -4,6 +4,7 @@
     <string name="participant_input">参加者ID</string>
     <string name="title_activity_traveler">TravelerActivity</string>
     <string name="camera_button">写真\n撮る</string>
+    <string name="pin_button">ピン\n置く</string>
     <string name="user_id_text">あなたのID:%s</string>
     <string name="title_activity_viewer">ViewerActivity</string>
     <string name="comment_headline">ひとことコメント</string>
@@ -13,4 +14,12 @@
     <string name="cancel_button_text">取り消す</string>
     <string name="report_title_hint">タイトルを入力</string>
     <string name="report_image">Report_image</string>
+    <string name="determine_pin_button">ピンを決定する</string>
+    <string name="comment">コメントを開く</string>
+    <string name="comment_submit_button">送信</string>
+    <string name="track_on">追跡\nオン</string>
+    <string name="track_off">追跡\nオフ</string>
+    <string name="decide_suggestion_button">ピンを決定する</string>
+    <string name="cancel_suggestion_button">ピンの設置をキャンセル</string>
+    <string name="debug_button">デバッグ用参加者画面に遷移するボタン</string>
 </resources>
