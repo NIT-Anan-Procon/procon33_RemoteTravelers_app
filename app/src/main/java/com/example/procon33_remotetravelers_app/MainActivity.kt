@@ -12,6 +12,7 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.example.procon33_remotetravelers_app.activities.TravelerActivity
+import com.example.procon33_remotetravelers_app.activities.ViewAlbumActivity
 import com.example.procon33_remotetravelers_app.activities.ViewerActivity
 import com.example.procon33_remotetravelers_app.services.CheckTravelingService
 import com.example.procon33_remotetravelers_app.services.SignupService
@@ -59,18 +60,10 @@ class MainActivity : AppCompatActivity() {
             startActivity(intent)
         }
 
-        // デバッグ用ボタンが押されるとViewerActivityに遷移する
-        val debugButton = findViewById<Button>(R.id.debug_button)
-        debugButton.setOnClickListener {
-            val intent = Intent(this, ViewerActivity::class.java)
-            intent.putExtra("userId", getUserId().toInt())
-            startActivity(intent)
-        }
-
-        // デバッグ用ボタンが押されるとViewerActivityに遷移する
-        val debugButton2 = findViewById<Button>(R.id.debug_button2)
-        debugButton2.setOnClickListener {
-            val intent = Intent(this, TravelerActivity::class.java)
+        //旅アルバムの画面に遷移
+        val albumButton = findViewById<Button>(R.id.album_button)
+        albumButton.setOnClickListener {
+            val intent = Intent(this, ViewAlbumActivity::class.java)
             intent.putExtra("userId", getUserId().toInt())
             startActivity(intent)
         }

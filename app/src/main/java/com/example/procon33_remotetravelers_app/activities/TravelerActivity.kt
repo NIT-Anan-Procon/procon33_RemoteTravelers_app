@@ -7,10 +7,13 @@ import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
 import android.content.pm.PackageManager
+import android.graphics.Color
 import android.location.Location
 import android.location.LocationListener
 import android.location.LocationManager
 import android.location.LocationManager.GPS_PROVIDER
+import android.location.LocationManager.NETWORK_PROVIDER
+import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -18,35 +21,39 @@ import android.provider.MediaStore
 import android.provider.Settings
 import android.util.Log
 import android.view.View
-import android.widget.Button
-import android.widget.EditText
-import android.widget.Toast
+import android.widget.*
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
+import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.example.procon33_remotetravelers_app.BuildConfig
 import com.example.procon33_remotetravelers_app.R
 import com.example.procon33_remotetravelers_app.databinding.ActivityTravelerBinding
+import com.example.procon33_remotetravelers_app.models.apis.GetInfoResponse
 import com.example.procon33_remotetravelers_app.services.AddCommentService
+import com.example.procon33_remotetravelers_app.services.ExitTravelService
+import com.example.procon33_remotetravelers_app.services.GetInfoService
 import com.example.procon33_remotetravelers_app.services.SaveCurrentLocationService
-import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.maps.model.Marker
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
+import com.google.android.gms.maps.GoogleMap.OnMarkerClickListener
 import retrofit2.Retrofit
 import retrofit2.converter.moshi.MoshiConverterFactory
+import java.util.*
+import kotlin.concurrent.scheduleAtFixedRate
 import kotlin.concurrent.thread
 import kotlin.properties.Delegates
 
-
 class TravelerActivity : AppCompatActivity(), OnMapReadyCallback,
-    LocationListener {
+    LocationListener, OnMarkerClickListener, GoogleMap.OnInfoWindowClickListener {
 
     companion object {
         const val CAMERA_REQUEST_CODE = 1
@@ -63,9 +70,12 @@ class TravelerActivity : AppCompatActivity(), OnMapReadyCallback,
 
     private lateinit var mMap: GoogleMap
     private lateinit var binding: ActivityTravelerBinding
+    private lateinit var info: GetInfoResponse
     private lateinit var locationManager: LocationManager
     private lateinit var currentLocation: LatLng
+    private lateinit var suggestLocation: LatLng
     private var userId by Delegates.notNull<Int>()
+    private var markerTouchFrag: Boolean = false
     private val requestPermissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestPermission()
     ) { isGranted: Boolean ->
@@ -80,9 +90,32 @@ class TravelerActivity : AppCompatActivity(), OnMapReadyCallback,
         }
     }
 
+    @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         userId = intent.getIntExtra("userId", 0)
+        thread {
+            Thread.sleep(2500)
+            getInfo(userId)
+            Handler(Looper.getMainLooper()).post {
+                if (::mMap.isInitialized && ::info.isInitialized) {
+                    CurrentLocationActivity.displayCurrentLocation(mMap, currentLocation)
+                    DisplayReportActivity.createReportMarker(mMap, info.reports, visible = true)
+                }
+            }
+        }
+        Timer().scheduleAtFixedRate(0, 5000){
+            getInfo(userId)
+            Handler(Looper.getMainLooper()).post {
+                if (::mMap.isInitialized && ::info.isInitialized) {
+                    CurrentLocationActivity.displayCurrentLocation(mMap, currentLocation)
+                    DisplayPinActivity.displayPin(mMap, info.destination)
+                    DrawRoute.drawRoute(mMap, currentLocation)
+                }
+                displayComment()
+                changeSituation()
+            }
+        }
 
         binding = ActivityTravelerBinding.inflate(layoutInflater)
         setContentView(binding.root)
@@ -129,6 +162,12 @@ class TravelerActivity : AppCompatActivity(), OnMapReadyCallback,
             if (commentText != "") addComment(userId, commentText)
             comment.setText("")
         }
+
+        val exitTravelButton = findViewById<Button>(R.id.travel_exit_button)
+        exitTravelButton.setOnClickListener {
+            exitTravel(userId)
+            finish()
+        }
     }
 
     @SuppressLint("MissingPermission")
@@ -149,18 +188,24 @@ class TravelerActivity : AppCompatActivity(), OnMapReadyCallback,
             Log.d("debug", "not gpsEnable, startActivity")
         }
 
-        if (ContextCompat.checkSelfPermission(this,
-                Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(this,
-                arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), 1000)
-
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
+            != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), 1000)
             Log.d("debug", "checkSelfPermission false")
-        } else
+        } else {
             locationManager.requestLocationUpdates(
                 GPS_PROVIDER,
                 1000,
                 20f,
-                this)
+                this
+            )
+            locationManager.requestLocationUpdates(
+                NETWORK_PROVIDER,
+                1000,
+                20f,
+                this
+            )
+        }
     }
 
     override fun onLocationChanged(location: Location) {
@@ -168,7 +213,13 @@ class TravelerActivity : AppCompatActivity(), OnMapReadyCallback,
         saveCurrentLocation()
         if(::mMap.isInitialized){
             CurrentLocationActivity.displayCurrentLocation(mMap, currentLocation)
-            DrawRoot.drawRoot(mMap, currentLocation)
+            DrawRoute.drawRoute(mMap, currentLocation)
+            // ルートの更新
+            if(markerTouchFrag){
+                DisplayPinActivity.displayRoute(mMap, currentLocation, suggestLocation)
+                return
+            }
+            DisplayPinActivity.clearRoute()
         }
     }
 
@@ -180,9 +231,43 @@ class TravelerActivity : AppCompatActivity(), OnMapReadyCallback,
 
     }
 
+    @SuppressLint("PotentialBehaviorOverride")
     override fun onMapReady(googleMap: GoogleMap) {
         mMap = googleMap
         CurrentLocationActivity.initializeMap(mMap)
+        mMap.setInfoWindowAdapter(CustomInfoWindow(this))
+        mMap.setOnInfoWindowClickListener(this)
+        mMap.setOnInfoWindowCloseListener(CustomInfoWindow(this))
+        mMap.setOnMarkerClickListener(this)
+    }
+
+    override fun onMarkerClick(marker: Marker): Boolean {
+        if(!DisplayReportActivity.markers.contains(marker)) {
+            //ルート処理
+            suggestLocation = LatLng(marker.position.latitude, marker.position.longitude)
+            markerTouchFrag = !markerTouchFrag
+            if (markerTouchFrag) {
+                DisplayPinActivity.displayRoute(
+                    mMap,
+                    currentLocation,
+                    suggestLocation
+                )
+                return true
+            }
+            DisplayPinActivity.clearRoute()
+            return true
+        }
+        //マーカーを透明に設定
+        marker.alpha = 0f
+        marker.showInfoWindow()
+        return true
+    }
+
+    @SuppressLint("PotentialBehaviorOverride")
+    override fun onInfoWindowClick(marker: Marker) {
+        val intent = Intent(this, ViewReportActivity::class.java)
+        intent.putExtra("index", DisplayReportActivity.markers.indexOf(marker))
+        startActivity(intent)
     }
 
     private fun saveCurrentLocation(){
@@ -222,23 +307,113 @@ class TravelerActivity : AppCompatActivity(), OnMapReadyCallback,
                     return@registerForActivityResult
                 }
                 else{
+                    //位置情報の所得
+                    val lat: Double = currentLocation.latitude
+                    val lon: Double = currentLocation.longitude
                     // CreateReportActivityに写真データを持って遷移する
                     val photo = data.getParcelableExtra<Bitmap>("data")
                     val intent = Intent(this,CreateReportActivity::class.java)
                     intent.putExtra("data", photo)
+                    intent.putExtra("lat", lat)
+                    intent.putExtra("lon", lon)
                     startActivity(intent)
                 }
             }
         }
     }
 
+    private fun getInfo(userId: Int){
+        thread {
+            try {
+                // APIを実行
+                val service: GetInfoService =
+                    retrofit.create(GetInfoService::class.java)
+                val getInfoResponse = service.getInfo(
+                    user_id = userId
+                ).execute().body()
+                    ?: throw IllegalStateException("body is null")
+
+                Handler(Looper.getMainLooper()).post {
+                    // 実行結果を出力
+                    Log.d("getInfoResponse", getInfoResponse.toString())
+                }
+                info = getInfoResponse
+            } catch (e: Exception) {
+                Handler(Looper.getMainLooper()).post {
+                    // エラー内容を出力
+                    Log.e("error", e.message.toString())
+                }
+            }
+        }
+    }
+
+    // 状況把握の画像・テキストを変更
+    private fun changeSituation(){
+        try {
+            val travelerText = findViewById<TextView>(R.id.traveler_situation_text)
+            val travelerIcon = findViewById<ImageView>(R.id.traveler_situation_icon)
+            travelerText.text = info.situation
+            travelerIcon.setImageResource (
+                when(info.situation){
+                    "食事中" -> R.drawable.eatting
+                    "観光中(建物)" -> R.drawable.building
+                    "観光中(風景)" -> R.drawable.nature
+                    "動物に癒され中" -> R.drawable.animal
+                    "人と交流中" -> R.drawable.human
+                    else -> R.drawable.walking
+                }
+            )
+        } catch (e: Exception) {
+            Handler(Looper.getMainLooper()).post {
+                // エラー内容を出力
+                Log.e("situation_error", e.message.toString())
+            }
+        }
+    }
+
     private fun moveComment(fragment: Boolean) {
-        val target: View = findViewById(R.id.comments) // 対象となるオブジェクト
-        val destination = if (fragment) -550f else 0f
-        ObjectAnimator.ofFloat(target, "translationY", destination).apply {
+        val commentList: View = findViewById(R.id.comments) // 対象となるオブジェクト
+        val commentBottom = findViewById<Button>(R.id.comment_door_button)
+        val destination = if (fragment) -1230f else 0f
+        ObjectAnimator.ofFloat(commentList, "translationY", destination).apply {
             duration = 200 // ミリ秒
             start() // アニメーション開始
         }
+        commentBottom.text = if (fragment) "コメントを閉じる" else "コメントを開く"
+    }
+
+    private fun displayComment(){
+        try {
+            val commentList = findViewById<LinearLayout>(R.id.comment_list)
+            commentList.removeAllViews()
+            val WC = LinearLayout.LayoutParams.WRAP_CONTENT
+            val MP = LinearLayout.LayoutParams.MATCH_PARENT
+            for (oneComment in info.comments) {
+                if (oneComment == null) {
+                    Log.d("oneComment", "null")
+                    continue
+                }
+                val commentText: String = oneComment.comment
+                val commentColor: String = if(oneComment.traveler == 0) "#FFA800" else "#4B4B4B"
+                commentList.addView(setView(commentText, commentColor), 0, LinearLayout.LayoutParams(MP, WC))
+            }
+        } catch (e: Exception) {
+            Handler(Looper.getMainLooper()).post {
+                // エラー内容を出力
+                Log.e("getCommentError", e.message.toString())
+            }
+        }
+    }
+
+    // コメントのviewを設定する関数
+    private fun setView (commentText: String, commentColor: String): TextView{
+        val comment = TextView(this)
+        comment.text = commentText
+        comment.textSize = 28f
+        comment.setTextColor(Color.parseColor(commentColor))
+        comment.setPadding(10, 15, 10, 15)
+        comment.setBackgroundResource(R.drawable.comment_design)
+        return comment
     }
 
     private fun addComment(userId: Int, comment: String) {
@@ -255,6 +430,31 @@ class TravelerActivity : AppCompatActivity(), OnMapReadyCallback,
                 Handler(Looper.getMainLooper()).post {
                     // 実行結果を出力
                     Log.d("addCommentResponse", addCommentResponse.toString())
+                }
+            } catch (e: Exception) {
+                Handler(Looper.getMainLooper()).post {
+                    // エラー内容を出力
+                    Log.e("error", e.message.toString())
+                }
+            }
+        }
+    }
+
+    //旅行を抜けるAPIを叩く
+    private fun exitTravel(userId: Int){
+        thread {
+            try {
+                // APIを実行
+                val service: ExitTravelService =
+                    retrofit.create(ExitTravelService::class.java)
+                val exitTravelResponse = service.exitTravel(
+                    user_id = userId
+                ).execute().body()
+                    ?: throw IllegalStateException("body is null")
+
+                Handler(Looper.getMainLooper()).post {
+                    // 実行結果を出力
+                    Log.d("exitTravelResponse", exitTravelResponse.toString())
                 }
             } catch (e: Exception) {
                 Handler(Looper.getMainLooper()).post {
