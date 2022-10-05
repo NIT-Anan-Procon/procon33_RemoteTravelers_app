@@ -2,7 +2,6 @@ package com.example.procon33_remotetravelers_app.activities
 
 import android.content.Context
 import android.graphics.Bitmap
-import android.opengl.ETC1.encodeImage
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.os.Handler
