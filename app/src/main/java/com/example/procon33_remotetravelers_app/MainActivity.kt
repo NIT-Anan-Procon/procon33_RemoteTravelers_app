@@ -48,9 +48,15 @@ class MainActivity : AppCompatActivity() {
             signup(userIdText)
         }
 
-        //すでに旅行に参加しているかどうかの判断
-        checkTraveling()
-
+        Thread {
+            while(userId.isEmpty()){
+                Thread.sleep(100)
+            }
+            Handler(Looper.getMainLooper()).post {
+                //すでに旅行に参加しているかどうかの判断
+                checkTraveling()
+            }
+        }
         // 旅行するボタンが押されるとTravelerActivityに遷移する
         val travelButton = findViewById<Button>(R.id.travel_button)
         travelButton.setOnClickListener {
