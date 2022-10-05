@@ -60,6 +60,9 @@ class TravelerActivity : AppCompatActivity(), OnMapReadyCallback,
     companion object {
         const val WC = LinearLayout.LayoutParams.WRAP_CONTENT
         const val MP = LinearLayout.LayoutParams.MATCH_PARENT
+
+        var stopUpdateFlag = true
+        var updateRequestFlag = false
     }
     private val moshi = Moshi.Builder()
         .add(KotlinJsonAdapterFactory())
@@ -78,7 +81,6 @@ class TravelerActivity : AppCompatActivity(), OnMapReadyCallback,
     private lateinit var currentLocation: LatLng
     private lateinit var suggestLocation: LatLng
     private var userId by Delegates.notNull<Int>()
-    private var firstDisplayFlag = true
     private var markerTouchFrag = false
 
     private val requestPermissionLauncher = registerForActivityResult(
@@ -105,28 +107,27 @@ class TravelerActivity : AppCompatActivity(), OnMapReadyCallback,
                 Thread.sleep(2500)
             }
             while(!::mMap.isInitialized){
-                Thread.sleep(1000)
+                Thread.sleep(500)
             }
             Handler(Looper.getMainLooper()).post {
                 CurrentLocationActivity.displayCurrentLocation(mMap, currentLocation)
                 DisplayReportActivity.createReportMarker(mMap, info.reports, visible = true)
                 displayComment(info.comments)
+                displaySituation(info.situation)
+            }
+            stopUpdateFlag = false
+        }
+        Timer().scheduleAtFixedRate(0, 5000){   //定期的に画面を更新
+            if(!stopUpdateFlag) {
+                update()
             }
         }
-        Timer().scheduleAtFixedRate(0, 5000){
-            getUpdatedInfo(userId)
-            if(::updatedInfo.isInitialized && firstDisplayFlag) {
-                Handler(Looper.getMainLooper()).post {
-                    if (updatedInfo.destination != null) {
-                        DisplayPinActivity.displayPin(mMap, updatedInfo.destination!!)
-                    }
-                    if (updatedInfo.comments != null) {
-                        displayComment(updatedInfo.comments!!)
-                    }
-                    if (updatedInfo.situation != null) {
-                        displaySituation(updatedInfo.situation!!)
-                    }
-                }
+
+        Timer().scheduleAtFixedRate(0, 50){   //画面更新リクエストを待機
+            if(updateRequestFlag) {
+                Thread.sleep(100)
+                update()
+                updateRequestFlag = false
             }
         }
 
@@ -140,18 +141,17 @@ class TravelerActivity : AppCompatActivity(), OnMapReadyCallback,
 
         val cameraButton = findViewById<Button>(R.id.camera_button)
         cameraButton.setOnClickListener {
+            stopUpdateFlag = true
             val intent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
             resultLauncher.launch(intent)
         }
 
         val currentLocationButton = findViewById<Button>(R.id.travel_current_location_button)
         currentLocationButton.setOnClickListener {
-            if(::mMap.isInitialized && ::currentLocation.isInitialized){
-                val (text, color) = CurrentLocationActivity.pressedButton()
-                currentLocationButton.setText(text)
-                currentLocationButton.setBackgroundResource(color)
-                CurrentLocationActivity.displayCurrentLocation(mMap, currentLocation)
-            }
+            val (text, color) = CurrentLocationActivity.pressedButton()
+            currentLocationButton.setText(text)
+            currentLocationButton.setBackgroundResource(color)
+            CurrentLocationActivity.displayCurrentLocation(mMap, currentLocation)
         }
 
         if (ContextCompat.checkSelfPermission(this,
@@ -251,24 +251,28 @@ class TravelerActivity : AppCompatActivity(), OnMapReadyCallback,
     }
 
     override fun onMarkerClick(marker: Marker): Boolean {
-        if(!DisplayReportActivity.markers.contains(marker)) {
-            //ルート処理
-            suggestLocation = LatLng(marker.position.latitude, marker.position.longitude)
-            markerTouchFrag = !markerTouchFrag
-            if (markerTouchFrag) {
-                DisplayPinActivity.displayRoute(
-                    mMap,
-                    currentLocation,
-                    suggestLocation
-                )
-                return true
-            }
-            DisplayPinActivity.clearRoute()
+        if(CurrentLocationActivity.currentLocationMarker == marker){    //現在地マーカー
             return true
         }
-        //マーカーを透明に設定
-        marker.alpha = 0f
-        marker.showInfoWindow()
+        if(DisplayReportActivity.markers.contains(marker)) {   //旅レポート
+            //マーカーを透明に設定
+            marker.alpha = 0f
+            marker.showInfoWindow()
+            return true
+        }
+
+        //行先提案ピン
+        suggestLocation = LatLng(marker.position.latitude, marker.position.longitude)
+        markerTouchFrag = !markerTouchFrag
+        if (markerTouchFrag) {
+            DisplayPinActivity.displayRoute(
+                mMap,
+                currentLocation,
+                suggestLocation
+            )
+            return true
+        }
+        DisplayPinActivity.clearRoute()
         return true
     }
 
@@ -356,6 +360,32 @@ class TravelerActivity : AppCompatActivity(), OnMapReadyCallback,
         }
     }
 
+    @RequiresApi(Build.VERSION_CODES.O)
+    private fun update() {
+        getUpdatedInfo(userId)
+        if(!::updatedInfo.isInitialized){
+            return
+        }
+        Handler(Looper.getMainLooper()).post {
+            if (updatedInfo.destination != null) {
+                DisplayPinActivity.displayPin(mMap, updatedInfo.destination!!)
+            }
+            if (updatedInfo.comments != null) {
+                displayComment(updatedInfo.comments!!)
+            }
+            if (updatedInfo.situation != null) {
+                displaySituation(updatedInfo.situation!!)
+            }
+            if (updatedInfo.reports != null) {
+                DisplayReportActivity.createReportMarker(
+                    mMap,
+                    updatedInfo.reports!!,
+                    visible = true
+                )
+            }
+        }
+    }
+
     private fun getUpdatedInfo(userId: Int){
         thread {
             try {
@@ -382,10 +412,10 @@ class TravelerActivity : AppCompatActivity(), OnMapReadyCallback,
     }
 
     // 状況把握の画像・テキストを変更
-    private fun displaySituation(situation: String){
+    private fun displaySituation(situation: String?){
         val travelerText = findViewById<TextView>(R.id.traveler_situation_text)
         val travelerIcon = findViewById<ImageView>(R.id.traveler_situation_icon)
-        travelerText.text = situation
+        travelerText.text = situation ?: "移動中"
         travelerIcon.setImageResource (
             when(situation){
                 "食事中" -> R.drawable.eatting
@@ -401,12 +431,22 @@ class TravelerActivity : AppCompatActivity(), OnMapReadyCallback,
     private fun moveComment(fragment: Boolean) {
         val commentList: View = findViewById(R.id.comments) // 対象となるオブジェクト
         val commentBottom = findViewById<Button>(R.id.comment_door_button)
-        val destination = if (fragment) -1230f else 0f
+        val destination =
+            if (fragment) {
+                -1230f
+            } else {
+                0f
+            }
         ObjectAnimator.ofFloat(commentList, "translationY", destination).apply {
             duration = 200 // ミリ秒
             start() // アニメーション開始
         }
-        commentBottom.text = if (fragment) "コメントを閉じる" else "コメントを開く"
+        commentBottom.text =
+            if (fragment) {
+                "コメントを閉じる"
+            } else {
+                "コメントを開く"
+            }
     }
 
     private fun displayComment(comments: List<Comment?>){
@@ -417,10 +457,10 @@ class TravelerActivity : AppCompatActivity(), OnMapReadyCallback,
                 val commentText = comment!!.comment
                 val commentColor =
                     when(comment.traveler){
-                        1 -> R.color.traveler_comment
-                        else -> R.color.viewer_comment
+                        1 -> "#4B4B4B"
+                        else -> "#FFA800"
                     }
-                commentList.addView(setView(commentText, commentColor.toString()), 0, LinearLayout.LayoutParams(MP, WC))
+                commentList.addView(setView(commentText, commentColor), 0, LinearLayout.LayoutParams(MP, WC))
             }
         } catch (e: Exception) {
             Handler(Looper.getMainLooper()).post {
@@ -456,6 +496,7 @@ class TravelerActivity : AppCompatActivity(), OnMapReadyCallback,
                     // 実行結果を出力
                     Log.d("addCommentResponse", addCommentResponse.toString())
                 }
+                updateRequestFlag = true
             } catch (e: Exception) {
                 Handler(Looper.getMainLooper()).post {
                     // エラー内容を出力

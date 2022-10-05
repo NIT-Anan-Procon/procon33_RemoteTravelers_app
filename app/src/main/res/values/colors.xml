@@ -22,6 +22,4 @@
     <color name="view_album_title">#F35151</color>
     <color name="edge">#FF8946</color>
     <color name="hide_report_button">#00000000</color>
-    <color name="traveler_comment">#4B4B4B</color>
-    <color name="viewer_comment">#FFA800</color>
 </resources>

@@ -2,8 +2,11 @@ package com.example.procon33_remotetravelers_app.activities
 
 import android.content.Context
 import android.graphics.Bitmap
+import android.opengl.ETC1.encodeImage
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.util.Base64
 import android.util.Log
 import android.widget.*
@@ -95,10 +98,12 @@ class CreateReportActivity : AppCompatActivity() {
             //感動パラメータの取得
             val excitement = displayNumber.text.toString().removeSuffix("%").toInt()
             sendReport(userId, image, comment, lat, lon, excitement)
+            TravelerActivity.stopUpdateFlag = false
             finish()
         }
 
         backButton.setOnClickListener {
+            TravelerActivity.stopUpdateFlag = false
             finish()
         }
     }
@@ -134,11 +139,16 @@ class CreateReportActivity : AppCompatActivity() {
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(object : Observer<CreateReportResponse> {
                     override fun onNext(r: CreateReportResponse) {  // 成功
-                        Log.d("CreateReport", r.toString())
+                        Handler(Looper.getMainLooper()).post {
+                            Log.d("CreateReport", r.toString())
+                        }
+                        TravelerActivity.updateRequestFlag = true   //画面更新
                     }
 
-                    override fun onError(e: Throwable) {
-                        Log.d("CreateReportError", e.toString())  // 失敗
+                    override fun onError(e: Throwable) {    // 失敗
+                        Handler(Looper.getMainLooper()).post {
+                            Log.d("CreateReportError", e.toString())
+                        }
                     }
 
                     override fun onSubscribe(d: Disposable) {

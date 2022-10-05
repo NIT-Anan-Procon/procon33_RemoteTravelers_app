@@ -16,7 +16,7 @@ class CurrentLocationActivity {
         private var firstTrack = true
         private var setUpped: Boolean = false
         private var lastLocation = LatLng(0.0, 0.0)
-        private var currentLocationMarker: Marker? = null
+        var currentLocationMarker: Marker? = null
         lateinit var currentLocation: LatLng
 
         fun initializeMap(mMap: GoogleMap){
@@ -53,7 +53,7 @@ class CurrentLocationActivity {
             if (lastLocation != currentLocation) {
                 currentLocationMarker?.remove()
                 currentLocationMarker =
-                    mMap.addMarker(MarkerOptions().position(currentLocation).title("現在地").zIndex(10000f))
+                    mMap.addMarker(MarkerOptions().position(currentLocation).title("現在地").zIndex(10f))
                 if (track) {
                     mMap.animateCamera(CameraUpdateFactory.newLatLng(currentLocation))
                 }
@@ -62,7 +62,7 @@ class CurrentLocationActivity {
             if (firstTrack) {
                 currentLocationMarker?.remove()
                 currentLocationMarker =
-                    mMap.addMarker(MarkerOptions().position(currentLocation).title("現在地").zIndex(10000f))
+                    mMap.addMarker(MarkerOptions().position(currentLocation).title("現在地").zIndex(10f))
                 mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(currentLocation, 18f))
                 if (!setUpped) {
                     thread {

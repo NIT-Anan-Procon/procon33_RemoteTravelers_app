@@ -68,8 +68,10 @@ class SuggestDestinationActivity : AppCompatActivity(), OnMapReadyCallback,
         val suggestButton = findViewById<Button>(R.id.decide_suggestion_button)
         suggestButton.setOnClickListener {
             //ここで最終的なピンの情報をDBに保存(APIを叩く)
-            if(suggestMarker != null)
+            if(suggestMarker != null) {
                 decidePin(userId)
+            }
+            ViewerActivity.updateRequestFlag = true
             finish()
         }
 
