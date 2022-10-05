@@ -44,7 +44,6 @@ class MainActivity : AppCompatActivity() {
         if (userId.isNotEmpty()) {
             userId = getString(R.string.user_id_text, userId)
             userIdText.text = userId
-
             //すでに旅行に参加しているかどうかの判断
             checkTraveling()
         } else {
