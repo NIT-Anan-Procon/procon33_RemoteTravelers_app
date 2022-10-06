@@ -48,8 +48,8 @@ class SuggestDestinationActivity : AppCompatActivity(), OnMapReadyCallback,
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         Timer().scheduleAtFixedRate(0, 5000) {
-            Handler(Looper.getMainLooper()).post {
-                if (::mMap.isInitialized) {
+            if(::mMap.isInitialized) {
+                Handler(Looper.getMainLooper()).post {
                     displayCurrentLocation()
                 }
             }
@@ -71,7 +71,6 @@ class SuggestDestinationActivity : AppCompatActivity(), OnMapReadyCallback,
             if(suggestMarker != null) {
                 decidePin(userId)
             }
-            ViewerActivity.updateRequestFlag = true
             finish()
         }
 
@@ -122,6 +121,7 @@ class SuggestDestinationActivity : AppCompatActivity(), OnMapReadyCallback,
                     // 実行結果を出力
                     Log.d("suggestDestinationResponse", suggestDestinationResponse.toString())
                 }
+                ViewerActivity.updateRequestFlag = true
             } catch (e: Exception) {
                 Handler(Looper.getMainLooper()).post {
                     // エラー内容を出力

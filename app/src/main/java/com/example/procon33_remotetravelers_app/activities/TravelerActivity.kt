@@ -19,6 +19,7 @@ import android.os.Handler
 import android.os.Looper
 import android.provider.MediaStore
 import android.provider.Settings
+import android.provider.SyncStateContract.Helpers.update
 import android.util.Log
 import android.view.View
 import android.widget.*
@@ -102,14 +103,21 @@ class TravelerActivity : AppCompatActivity(), OnMapReadyCallback,
         super.onCreate(savedInstanceState)
         userId = intent.getIntExtra("userId", 0)
         thread {
+            while(!::mMap.isInitialized){
+                Thread.sleep(100)
+            }
             while(!::info.isInitialized) {
                 getInfo(userId)
-                Thread.sleep(2500)
+                Thread.sleep(1000)
             }
-            while(!::mMap.isInitialized){
-                Thread.sleep(500)
+            while(!::currentLocation.isInitialized){
+                Thread.sleep(100)
             }
             Handler(Looper.getMainLooper()).post {
+                for(route in info.route) {
+                    route!!
+                    DrawRoute.drawRoute(mMap, LatLng(route.lat, route.lon))
+                }
                 CurrentLocationActivity.displayCurrentLocation(mMap, currentLocation)
                 DisplayReportActivity.createReportMarker(mMap, info.reports, visible = true)
                 displayComment(info.comments)
@@ -122,10 +130,12 @@ class TravelerActivity : AppCompatActivity(), OnMapReadyCallback,
                 update()
             }
         }
-
-        Timer().scheduleAtFixedRate(0, 50){   //画面更新リクエストを待機
+        Timer().scheduleAtFixedRate(0, 100){   //画面更新リクエストを待機
             if(updateRequestFlag) {
-                Thread.sleep(100)
+                Handler(Looper.getMainLooper()).post {
+                    Log.d("aaa", "aaa")
+                }
+                Thread.sleep(1000)
                 update()
                 updateRequestFlag = false
             }
@@ -141,17 +151,11 @@ class TravelerActivity : AppCompatActivity(), OnMapReadyCallback,
 
         val cameraButton = findViewById<Button>(R.id.camera_button)
         cameraButton.setOnClickListener {
-            stopUpdateFlag = true
-            val intent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
-            resultLauncher.launch(intent)
-        }
-
-        val currentLocationButton = findViewById<Button>(R.id.travel_current_location_button)
-        currentLocationButton.setOnClickListener {
-            val (text, color) = CurrentLocationActivity.pressedButton()
-            currentLocationButton.setText(text)
-            currentLocationButton.setBackgroundResource(color)
-            CurrentLocationActivity.displayCurrentLocation(mMap, currentLocation)
+            if(!stopUpdateFlag) {
+                stopUpdateFlag = true
+                val intent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
+                resultLauncher.launch(intent)
+            }
         }
 
         if (ContextCompat.checkSelfPermission(this,
@@ -161,11 +165,23 @@ class TravelerActivity : AppCompatActivity(), OnMapReadyCallback,
             locationStart()
         }
 
+        val currentLocationButton = findViewById<Button>(R.id.travel_current_location_button)
+        currentLocationButton.setOnClickListener {
+            if (!stopUpdateFlag) {
+                val (text, color) = CurrentLocationActivity.pressedButton()
+                currentLocationButton.setText(text)
+                currentLocationButton.setBackgroundResource(color)
+                CurrentLocationActivity.displayCurrentLocation(mMap, currentLocation)
+            }
+        }
+
         var fragment = false
         val buttonComment = findViewById<Button>(R.id.comment_door_button)
         buttonComment.setOnClickListener {
-            fragment = !fragment
-            moveComment(fragment)
+            if (!stopUpdateFlag) {
+                fragment = !fragment
+                moveComment(fragment)
+            }
         }
 
         val submitComment = findViewById<Button>(R.id.comment_submit)
@@ -457,8 +473,8 @@ class TravelerActivity : AppCompatActivity(), OnMapReadyCallback,
                 val commentText = comment!!.comment
                 val commentColor =
                     when(comment.traveler){
-                        1 -> "#4B4B4B"
-                        else -> "#FFA800"
+                        1 -> "#FFA800"
+                        else -> "#4B4B4B"
                     }
                 commentList.addView(setView(commentText, commentColor), 0, LinearLayout.LayoutParams(MP, WC))
             }

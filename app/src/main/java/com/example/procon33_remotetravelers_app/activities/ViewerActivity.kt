@@ -75,7 +75,7 @@ class ViewerActivity : AppCompatActivity(), OnMapReadyCallback,
                 Thread.sleep(2500)
             }
             while(!::mMap.isInitialized){
-                Thread.sleep(500)
+                Thread.sleep(100)
             }
             Handler(Looper.getMainLooper()).post {
                 DisplayReportActivity.createReportMarker(mMap, info.reports, visible = false)
@@ -98,9 +98,9 @@ class ViewerActivity : AppCompatActivity(), OnMapReadyCallback,
                 update(userId)
             }
         }
-        Timer().scheduleAtFixedRate(0, 50){   //画面更新リクエストを待機
+        Timer().scheduleAtFixedRate(0, 100){   //画面更新リクエストを待機
             if(updateRequestFlag) {
-                Thread.sleep(100)
+                Thread.sleep(1000)
                 update(userId)
                 updateRequestFlag = false
             }
@@ -116,12 +116,14 @@ class ViewerActivity : AppCompatActivity(), OnMapReadyCallback,
 
         val pinButton = findViewById<Button>(R.id.pin_button)
         pinButton.setOnClickListener {
-            val intent = Intent(this, SuggestDestinationActivity::class.java)
-            intent.putExtra("userId", userId)
-            intent.putExtra("lat", mMap.cameraPosition.target.latitude)
-            intent.putExtra("lon", mMap.cameraPosition.target.longitude)
-            intent.putExtra("zoom", mMap.cameraPosition.zoom)
-            startActivity(intent)
+            if(!stopUpdateFlag) {
+                val intent = Intent(this, SuggestDestinationActivity::class.java)
+                intent.putExtra("userId", userId)
+                intent.putExtra("lat", mMap.cameraPosition.target.latitude)
+                intent.putExtra("lon", mMap.cameraPosition.target.longitude)
+                intent.putExtra("zoom", mMap.cameraPosition.zoom)
+                startActivity(intent)
+            }
         }
 
         val currentLocationButton = findViewById<Button>(R.id.viewer_current_location_button)
@@ -333,8 +335,8 @@ class ViewerActivity : AppCompatActivity(), OnMapReadyCallback,
                 val commentText = comment!!.comment
                 val commentColor =
                     when(comment.traveler){
-                        1 -> "#4B4B4B"
-                        else -> "#FFA800"
+                        1 -> "#FFA800"
+                        else -> "#4B4B4B"
                     }
                 commentList.addView(setView(commentText, commentColor), 0, LinearLayout.LayoutParams(MP, WC))
             }

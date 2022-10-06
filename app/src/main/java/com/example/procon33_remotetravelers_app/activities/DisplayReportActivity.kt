@@ -29,6 +29,9 @@ class DisplayReportActivity {
         fun createReportMarker(mMap: GoogleMap, reports: List<Report?>, visible: Boolean){
             for(report in reports){
                 report!!
+                if(checkMarkerExist(report.lat, report.lon)){
+                    continue
+                }
                 val image = Base64.getDecoder().decode(report.image)
                 val bitmap = BitmapFactory.decodeByteArray(image, 0, image.size)
                 bitmaps.add(bitmap)
@@ -49,6 +52,15 @@ class DisplayReportActivity {
                     )!!
                 )
             }
+        }
+
+        private fun checkMarkerExist(lat: Double, lon: Double): Boolean {
+            for(marker in markers){
+                if(marker.position == LatLng(lat, lon)){
+                    return true
+                }
+            }
+            return false
         }
     }
 }

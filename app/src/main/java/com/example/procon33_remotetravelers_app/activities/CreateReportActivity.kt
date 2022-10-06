@@ -98,6 +98,7 @@ class CreateReportActivity : AppCompatActivity() {
             val excitement = displayNumber.text.toString().removeSuffix("%").toInt()
             sendReport(userId, image, comment, lat, lon, excitement)
             TravelerActivity.stopUpdateFlag = false
+            TravelerActivity.updateRequestFlag = true   //画面更新
             finish()
         }
 
@@ -141,7 +142,6 @@ class CreateReportActivity : AppCompatActivity() {
                         Handler(Looper.getMainLooper()).post {
                             Log.d("CreateReport", r.toString())
                         }
-                        TravelerActivity.updateRequestFlag = true   //画面更新
                     }
 
                     override fun onError(e: Throwable) {    // 失敗
