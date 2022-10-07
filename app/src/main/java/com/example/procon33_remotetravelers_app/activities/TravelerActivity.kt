@@ -132,9 +132,6 @@ class TravelerActivity : AppCompatActivity(), OnMapReadyCallback,
         }
         Timer().scheduleAtFixedRate(0, 100){   //画面更新リクエストを待機
             if(updateRequestFlag) {
-                Handler(Looper.getMainLooper()).post {
-                    Log.d("aaa", "aaa")
-                }
                 Thread.sleep(1000)
                 update()
                 updateRequestFlag = false
