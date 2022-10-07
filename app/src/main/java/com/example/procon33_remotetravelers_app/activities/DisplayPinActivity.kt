@@ -33,6 +33,7 @@ class DisplayPinActivity {
         private var lastCurrentLocation: LatLng? = null
         private var lastSuggestLocation: LatLng? = null
 
+        //
         fun displayPin(mMap: GoogleMap, destinations: List<Location?>) {
             removePin()
             for (destination in destinations) {

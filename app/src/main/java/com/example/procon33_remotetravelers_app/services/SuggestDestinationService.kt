@@ -6,7 +6,7 @@ import retrofit2.http.Field
 import retrofit2.http.FormUrlEncoded
 import retrofit2.http.POST
 
-sealed interface SuggestDestinationService {
+interface SuggestDestinationService {
     @FormUrlEncoded
     @POST("/api/common/save-location")
     fun suggestDestination(

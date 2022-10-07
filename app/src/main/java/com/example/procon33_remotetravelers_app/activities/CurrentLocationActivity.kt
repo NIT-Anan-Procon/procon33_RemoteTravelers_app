@@ -16,9 +16,10 @@ class CurrentLocationActivity {
         private var firstTrack = true
         private var setUpped: Boolean = false
         private var lastLocation = LatLng(0.0, 0.0)
-        private var currentLocationMarker: Marker? = null
+        var currentLocationMarker: Marker? = null
         lateinit var currentLocation: LatLng
 
+        //マップの拡大値・初期位置を定義
         fun initializeMap(mMap: GoogleMap){
             val tokyo = LatLng(35.90684931, 139.68896404)
             mMap.moveCamera(CameraUpdateFactory.newLatLng(LatLng(tokyo.latitude, 180 - tokyo.longitude)))
@@ -30,6 +31,7 @@ class CurrentLocationActivity {
             }
         }
 
+        //現在地追跡ボタンが押されたときの処理
         fun pressedButton() : Pair<Int, Int>{
             track = !track
             firstTrack = track
@@ -48,12 +50,13 @@ class CurrentLocationActivity {
             return Pair(text, color)
         }
 
+        //現在地を表示
         fun displayCurrentLocation(mMap: GoogleMap, location: LatLng){
             currentLocation = location
             if (lastLocation != currentLocation) {
                 currentLocationMarker?.remove()
                 currentLocationMarker =
-                    mMap.addMarker(MarkerOptions().position(currentLocation).title("現在地").zIndex(10000f))
+                    mMap.addMarker(MarkerOptions().position(currentLocation).title("現在地").zIndex(10f))
                 if (track) {
                     mMap.animateCamera(CameraUpdateFactory.newLatLng(currentLocation))
                 }
@@ -62,7 +65,7 @@ class CurrentLocationActivity {
             if (firstTrack) {
                 currentLocationMarker?.remove()
                 currentLocationMarker =
-                    mMap.addMarker(MarkerOptions().position(currentLocation).title("現在地").zIndex(10000f))
+                    mMap.addMarker(MarkerOptions().position(currentLocation).title("現在地").zIndex(10f))
                 mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(currentLocation, 18f))
                 if (!setUpped) {
                     thread {

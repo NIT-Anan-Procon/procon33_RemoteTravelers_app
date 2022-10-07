@@ -1,6 +1,5 @@
 package com.example.procon33_remotetravelers_app.activities
 
-import android.content.Intent
 import android.graphics.Bitmap
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle

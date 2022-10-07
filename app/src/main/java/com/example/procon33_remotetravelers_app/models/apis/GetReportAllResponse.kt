@@ -1,6 +1,5 @@
 package com.example.procon33_remotetravelers_app.models.apis
 
-import java.sql.Timestamp
 
 data class GetReportAllResponse(
     val ok: Boolean,

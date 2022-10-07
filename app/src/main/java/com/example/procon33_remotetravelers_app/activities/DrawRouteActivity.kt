@@ -5,13 +5,14 @@ import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.PolylineOptions
 
-class DrawRoute {
+class DrawRouteActivity {
     companion object{
         // 線の太さを15pxに設定
         private const val INITIAL_STROKE_WIDTH_PX = 15
 
         private var lastLatLng = LatLng(0.0, 0.0)
 
+        //旅行者が通ったルート表示
         fun drawRoute(mMap: GoogleMap, currentLatLng: LatLng){
 
             if(lastLatLng != LatLng(0.0, 0.0)) {
