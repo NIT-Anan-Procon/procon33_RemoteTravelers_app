@@ -36,6 +36,7 @@ import com.example.procon33_remotetravelers_app.models.apis.Comment
 import com.example.procon33_remotetravelers_app.models.apis.GetInfoResponse
 import com.example.procon33_remotetravelers_app.models.apis.GetUpdatedInfoResponse
 import com.example.procon33_remotetravelers_app.services.AddCommentService
+import com.example.procon33_remotetravelers_app.services.ExitTravelService
 import com.example.procon33_remotetravelers_app.services.GetInfoService
 import com.example.procon33_remotetravelers_app.services.GetUpdatedInfoService
 import com.example.procon33_remotetravelers_app.services.SaveCurrentLocationService
@@ -191,6 +192,12 @@ class TravelerActivity : AppCompatActivity(), OnMapReadyCallback,
                 addComment(userId, commentText)
             }
             comment.setText("")
+        }
+
+        val exitTravelButton = findViewById<Button>(R.id.travel_exit_button)
+        exitTravelButton.setOnClickListener {
+            exitTravel(userId)
+            finish()
         }
     }
 
@@ -512,6 +519,31 @@ class TravelerActivity : AppCompatActivity(), OnMapReadyCallback,
                     Log.d("addCommentResponse", addCommentResponse.toString())
                 }
                 updateRequestFlag = true
+            } catch (e: Exception) {
+                Handler(Looper.getMainLooper()).post {
+                    // エラー内容を出力
+                    Log.e("error", e.message.toString())
+                }
+            }
+        }
+    }
+
+    //旅行を抜けるAPIを叩く
+    private fun exitTravel(userId: Int){
+        thread {
+            try {
+                // APIを実行
+                val service: ExitTravelService =
+                    retrofit.create(ExitTravelService::class.java)
+                val exitTravelResponse = service.exitTravel(
+                    user_id = userId
+                ).execute().body()
+                    ?: throw IllegalStateException("body is null")
+
+                Handler(Looper.getMainLooper()).post {
+                    // 実行結果を出力
+                    Log.d("exitTravelResponse", exitTravelResponse.toString())
+                }
             } catch (e: Exception) {
                 Handler(Looper.getMainLooper()).post {
                     // エラー内容を出力

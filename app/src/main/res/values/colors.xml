@@ -22,4 +22,5 @@
     <color name="view_album_title">#F35151</color>
     <color name="edge">#FF8946</color>
     <color name="hide_report_button">#00000000</color>
+    <color name="travel_exit_button">#766BF3</color>
 </resources>

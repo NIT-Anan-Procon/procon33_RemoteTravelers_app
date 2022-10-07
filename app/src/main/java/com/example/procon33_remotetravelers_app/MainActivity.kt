@@ -14,6 +14,7 @@ import androidx.appcompat.app.AppCompatActivity
 import com.example.procon33_remotetravelers_app.activities.TravelerActivity
 import com.example.procon33_remotetravelers_app.activities.ViewAlbumActivity
 import com.example.procon33_remotetravelers_app.activities.ViewerActivity
+import com.example.procon33_remotetravelers_app.services.CheckTravelingService
 import com.example.procon33_remotetravelers_app.services.SignupService
 import com.example.procon33_remotetravelers_app.services.StartTravelService
 import com.squareup.moshi.Moshi
@@ -47,26 +48,19 @@ class MainActivity : AppCompatActivity() {
             signup(userIdText)
         }
 
+        Thread {
+            while(userId.isEmpty()){
+                Thread.sleep(100)
+            }
+            Handler(Looper.getMainLooper()).post {
+                //すでに旅行に参加しているかどうかの判断
+                checkTraveling()
+            }
+        }
         // 旅行するボタンが押されるとTravelerActivityに遷移する
         val travelButton = findViewById<Button>(R.id.travel_button)
         travelButton.setOnClickListener {
             startTravel()
-            val intent = Intent(this, TravelerActivity::class.java)
-            intent.putExtra("userId", getUserId().toInt())
-            startActivity(intent)
-        }
-
-        // デバッグ用ボタンが押されるとViewerActivityに遷移する
-        val debugButton = findViewById<Button>(R.id.debug_button)
-        debugButton.setOnClickListener {
-            val intent = Intent(this, ViewerActivity::class.java)
-            intent.putExtra("userId", getUserId().toInt())
-            startActivity(intent)
-        }
-
-        // デバッグ用ボタンが押されるとViewerActivityに遷移する
-        val debugButton2 = findViewById<Button>(R.id.debug_button2)
-        debugButton2.setOnClickListener {
             val intent = Intent(this, TravelerActivity::class.java)
             intent.putExtra("userId", getUserId().toInt())
             startActivity(intent)
@@ -167,5 +161,49 @@ class MainActivity : AppCompatActivity() {
         val pref = getSharedPreferences("AppSettings", Context.MODE_PRIVATE)
         val userId = pref.getString("userId", "").toString()
         return userId
+    }
+
+    private fun checkTraveling(){
+        val userId = getUserId().toInt()
+
+        //旅行をしているか、または旅行に参加しているかを判断するAPIを叩く
+        thread {
+            try {
+                val service: CheckTravelingService =
+                    retrofit.create(CheckTravelingService::class.java)
+                val checkTraveling = service.checkTraveling(
+                    user_id = userId
+                ).execute().body()
+                    ?: throw IllegalStateException("body is null")
+
+                Handler(Looper.getMainLooper()).post {
+                    // 実行結果を出力
+                    Log.d("checkTravellingResponse", checkTraveling.toString())
+                }
+
+                //旅行者ならTravelerActivityに遷移
+                if(checkTraveling.traveling == true){
+                    if(checkTraveling.traveler == true){
+                        val intent = Intent(this, TravelerActivity::class.java)
+                        intent.putExtra("userId", getUserId().toInt())
+                        startActivity(intent)
+                    }else {
+                        val intent = Intent(this, ViewerActivity::class.java)
+                        intent.putExtra("userId", getUserId().toInt())
+                        startActivity(intent)
+                    }
+                }
+            } catch (e: Exception) {
+                Handler(Looper.getMainLooper()).post {
+                    // エラー内容を出力
+                    Log.e("error", e.message.toString())
+
+                    // 通信に失敗したことを通知
+                    val toast =
+                        Toast.makeText(this, "通信に失敗しました", Toast.LENGTH_SHORT)
+                    toast.show()
+                }
+            }
+        }
     }
 }

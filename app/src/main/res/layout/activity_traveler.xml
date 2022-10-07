@@ -41,6 +41,19 @@
         app:layout_constraintTop_toBottomOf="@+id/camera_button"
         tools:ignore="TextContrastCheck" />
 
+    <Button
+        android:id="@+id/travel_exit_button"
+        android:layout_width="70dp"
+        android:layout_height="65dp"
+        android:background="@color/travel_exit_button"
+        android:text="@string/travel_exit_button"
+        android:textColor="@color/white"
+        android:textSize="17sp"
+        app:backgroundTint="@null"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/travel_current_location_button"
+        tools:ignore="TextContrastCheck" />
+
     <TextView
         android:id="@+id/traveler_situation_text"
         android:layout_width="150dp"
