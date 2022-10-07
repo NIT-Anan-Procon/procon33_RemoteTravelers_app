@@ -21,6 +21,11 @@ import retrofit2.converter.moshi.MoshiConverterFactory
 import kotlin.concurrent.thread
 
 class ViewAlbumActivity : AppCompatActivity() {
+    companion object{
+        const val WC = LinearLayout.LayoutParams.WRAP_CONTENT
+        const val MP = LinearLayout.LayoutParams.MATCH_PARENT
+    }
+
     private val moshi = Moshi.Builder()
         .add(KotlinJsonAdapterFactory())
         .build()
@@ -76,14 +81,12 @@ class ViewAlbumActivity : AppCompatActivity() {
         //別スレッドでUIをいじるための回避策
         runOnUiThread {
             try {
-                val WC = LinearLayout.LayoutParams.WRAP_CONTENT
-                val MP = LinearLayout.LayoutParams.MATCH_PARENT
-
                 val albumLinear = findViewById<LinearLayout>(R.id.album_list)
                 albumLinear.removeAllViews()
                 albumLinear.layoutParams.height = 300
 
-                for (report in reports){
+                for (i in (reports.count() - 1) downTo 0){
+                    val report = reports[i]
                     val decodedBytes = Base64.decode(
                         report.image.substring(report.image.indexOf(",") + 1),
                         Base64.DEFAULT
