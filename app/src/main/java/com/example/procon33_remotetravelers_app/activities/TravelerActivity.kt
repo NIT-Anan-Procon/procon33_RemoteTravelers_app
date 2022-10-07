@@ -19,7 +19,6 @@ import android.os.Handler
 import android.os.Looper
 import android.provider.MediaStore
 import android.provider.Settings
-import android.provider.SyncStateContract.Helpers.update
 import android.util.Log
 import android.view.View
 import android.widget.*
@@ -116,7 +115,7 @@ class TravelerActivity : AppCompatActivity(), OnMapReadyCallback,
             Handler(Looper.getMainLooper()).post {
                 for(route in info.route) {
                     route!!
-                    DrawRoute.drawRoute(mMap, LatLng(route.lat, route.lon))
+                    DrawRouteActivity.drawRoute(mMap, LatLng(route.lat, route.lon))
                 }
                 CurrentLocationActivity.displayCurrentLocation(mMap, currentLocation)
                 DisplayReportActivity.createReportMarker(mMap, info.reports, visible = true)
@@ -238,7 +237,7 @@ class TravelerActivity : AppCompatActivity(), OnMapReadyCallback,
         saveCurrentLocation()
         if(::mMap.isInitialized){
             CurrentLocationActivity.displayCurrentLocation(mMap, currentLocation)
-            DrawRoute.drawRoute(mMap, currentLocation)
+            DrawRouteActivity.drawRoute(mMap, currentLocation)
             // ルートの更新
             if(markerTouchFrag){
                 DisplayPinActivity.displayRoute(mMap, currentLocation, suggestLocation)

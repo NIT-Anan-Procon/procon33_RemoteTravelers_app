@@ -239,7 +239,7 @@ class ViewerActivity : AppCompatActivity(), OnMapReadyCallback,
                         updatedInfo.current_location!!.lon,
                     )
                 )
-                DrawRoute.drawRoute(
+                DrawRouteActivity.drawRoute(
                     mMap,
                     LatLng(
                         updatedInfo.current_location!!.lat,
@@ -405,7 +405,7 @@ class ViewerActivity : AppCompatActivity(), OnMapReadyCallback,
             Thread.sleep(200)
             val location = LatLng(route!!.lat, route.lon)
             Handler(Looper.getMainLooper()).post {
-                DrawRoute.drawRoute(mMap, location)
+                DrawRouteActivity.drawRoute(mMap, location)
                 mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(location, 18f))
             }
             if (route.flag == 1) {
