@@ -26,6 +26,7 @@ class DisplayReportActivity {
         var markers = mutableListOf<Marker>()
 
         @RequiresApi(Build.VERSION_CODES.O)
+        //旅レポートを作成
         fun createReportMarker(mMap: GoogleMap, reports: List<Report?>, visible: Boolean){
             for(report in reports){
                 report!!
@@ -54,6 +55,7 @@ class DisplayReportActivity {
             }
         }
 
+        //旅レポートが既に存在するか
         private fun checkMarkerExist(lat: Double, lon: Double): Boolean {
             for(marker in markers){
                 if(marker.position == LatLng(lat, lon)){
@@ -65,19 +67,23 @@ class DisplayReportActivity {
     }
 }
 
+//旅レポートの詳細画面に関する処理
 class CustomInfoWindow(private val context: Context) : GoogleMap.InfoWindowAdapter, GoogleMap.OnInfoWindowCloseListener {
     companion object {
         private const val INFO_WINDOW_WIDTH = 500
     }
     override fun getInfoContents(marker: Marker): View? = null
 
+    //旅レポートのピンがクリックされたとき詳細画面を表示する
     override fun getInfoWindow(marker: Marker): View? = setupWindow(marker)
 
+    //詳細画面が消されたとき
     override fun onInfoWindowClose(marker: Marker) {
-        //透明にしたマーカーを元に戻す
+        //透明にした元々の旅レポートピンを再度表示
         marker.alpha = 1f
     }
 
+    //詳細画面を表示
     private fun setupWindow(marker: Marker): View? {
         if (!markers.contains(marker)) {
             return null

@@ -43,6 +43,7 @@ class ViewAlbumActivity : AppCompatActivity() {
         }
     }
 
+    //旅レポートの履歴をアルバムとして取得
     private fun getReportAll(userId: Int){
         thread{
             try {
@@ -70,6 +71,7 @@ class ViewAlbumActivity : AppCompatActivity() {
         }
     }
 
+    //レポートをリスト表示
     private fun setReport(reports: List<GetReports>){
         //別スレッドでUIをいじるための回避策
         runOnUiThread {
@@ -129,6 +131,7 @@ class ViewAlbumActivity : AppCompatActivity() {
         }
     }
 
+    //コメント表示
     private fun setTextView (commentText: String): TextView{
         val comment = TextView(this)
         comment.text = commentText
@@ -138,6 +141,7 @@ class ViewAlbumActivity : AppCompatActivity() {
         return comment
     }
 
+    //画像表示
     private fun setImageView(bitmap: Bitmap): ImageView{
         val image = ImageView(this)
         image.setImageBitmap(bitmap)
@@ -146,6 +150,7 @@ class ViewAlbumActivity : AppCompatActivity() {
 
     var count = 0
 
+    //レポートの詳細を表示するためのボタン
     private fun setButton(report: GetReports, bitmap: Bitmap): Button{
         count++
         val button = Button(this)
@@ -164,6 +169,7 @@ class ViewAlbumActivity : AppCompatActivity() {
         return button
     }
 
+    //リスト表示のためリニアレイアウトを作成
     private fun setLinear(): LinearLayout{
         val linear = LinearLayout(this)
         linear.orientation = LinearLayout.HORIZONTAL
@@ -171,6 +177,7 @@ class ViewAlbumActivity : AppCompatActivity() {
         return linear
     }
 
+    //フレーム定義
     private fun setFrame(): FrameLayout{
         val frame = FrameLayout(this)
         frame.layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT)

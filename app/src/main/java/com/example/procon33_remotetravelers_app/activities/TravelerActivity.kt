@@ -88,10 +88,10 @@ class TravelerActivity : AppCompatActivity(), OnMapReadyCallback,
         ActivityResultContracts.RequestPermission()
     ) { isGranted: Boolean ->
         if (isGranted) {
-            // 使用が許可された
+            //使用が許可された
             locationStart()
         } else {
-            // それでも拒否された時の対応
+            //それでも拒否された時の対応
             val toast = Toast.makeText(this,
                 "位置情報の利用を許可してください", Toast.LENGTH_SHORT)
             toast.show()
@@ -102,36 +102,50 @@ class TravelerActivity : AppCompatActivity(), OnMapReadyCallback,
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         userId = intent.getIntExtra("userId", 0)
+        //初回の画面表示
         thread {
+            //画面情報を取得できるまで繰り返す
             while(!::mMap.isInitialized){
                 Thread.sleep(100)
             }
+            //マップ表示まで待機
             while(!::info.isInitialized) {
                 getInfo(userId)
                 Thread.sleep(1000)
             }
+            //現在地取得まで待機
             while(!::currentLocation.isInitialized){
                 Thread.sleep(100)
             }
+
             Handler(Looper.getMainLooper()).post {
+                //今まで通ったルート表示
                 for(route in info.route) {
                     route!!
                     DrawRouteActivity.drawRoute(mMap, LatLng(route.lat, route.lon))
                 }
+                //現在地表示
                 CurrentLocationActivity.displayCurrentLocation(mMap, currentLocation)
+                //旅レポートを表示
                 DisplayReportActivity.createReportMarker(mMap, info.reports, visible = true)
+                //コメント表示
                 displayComment(info.comments)
+                //現在情報を表示
                 displaySituation(info.situation)
             }
             stopUpdateFlag = false
         }
-        Timer().scheduleAtFixedRate(0, 5000){   //定期的に画面を更新
+        //定期的に画面を更新
+        Timer().scheduleAtFixedRate(0, 5000){
             if(!stopUpdateFlag) {
+                //画面を更新
                 update()
             }
         }
-        Timer().scheduleAtFixedRate(0, 100){   //画面更新リクエストを待機
+        //画面更新リクエストを待機
+        Timer().scheduleAtFixedRate(0, 100){
             if(updateRequestFlag) {
+                //画面を更新
                 Thread.sleep(1000)
                 update()
                 updateRequestFlag = false
@@ -199,6 +213,7 @@ class TravelerActivity : AppCompatActivity(), OnMapReadyCallback,
     }
 
     @SuppressLint("MissingPermission")
+    //現在地取得
     private fun locationStart() {
         Log.d("debug", "locationStart()")
 
@@ -236,18 +251,21 @@ class TravelerActivity : AppCompatActivity(), OnMapReadyCallback,
         }
     }
 
+    //位置情報が更新されたとき
     override fun onLocationChanged(location: Location) {
         currentLocation = LatLng(location.latitude, location.longitude)
+        //現在地保存
         saveCurrentLocation()
         if(::mMap.isInitialized){
+            //現在地表示
             CurrentLocationActivity.displayCurrentLocation(mMap, currentLocation)
+            //旅行者が通ったルート表示
             DrawRouteActivity.drawRoute(mMap, currentLocation)
-            // ルートの更新
+            //行き先提案までのルート表示中のとき
             if(markerTouchFrag){
+                //旅行者の現在位置に合わせたルートを提案
                 DisplayPinActivity.displayRoute(mMap, currentLocation, suggestLocation)
-                return
             }
-            DisplayPinActivity.clearRoute()
         }
     }
 
@@ -260,6 +278,7 @@ class TravelerActivity : AppCompatActivity(), OnMapReadyCallback,
     }
 
     @SuppressLint("PotentialBehaviorOverride")
+    //マップを初期化
     override fun onMapReady(googleMap: GoogleMap) {
         mMap = googleMap
         CurrentLocationActivity.initializeMap(mMap)
@@ -269,6 +288,7 @@ class TravelerActivity : AppCompatActivity(), OnMapReadyCallback,
         mMap.setOnMarkerClickListener(this)
     }
 
+    //マーカーがクリックされたとき
     override fun onMarkerClick(marker: Marker): Boolean {
         if(CurrentLocationActivity.currentLocationMarker == marker){    //現在地マーカー
             return true
@@ -284,6 +304,7 @@ class TravelerActivity : AppCompatActivity(), OnMapReadyCallback,
         suggestLocation = LatLng(marker.position.latitude, marker.position.longitude)
         markerTouchFrag = !markerTouchFrag
         if (markerTouchFrag) {
+            //行き先提案までのルート表示
             DisplayPinActivity.displayRoute(
                 mMap,
                 currentLocation,
@@ -296,12 +317,14 @@ class TravelerActivity : AppCompatActivity(), OnMapReadyCallback,
     }
 
     @SuppressLint("PotentialBehaviorOverride")
+    //旅レポートがクリックされたとき
     override fun onInfoWindowClick(marker: Marker) {
         val intent = Intent(this, ViewReportActivity::class.java)
         intent.putExtra("index", DisplayReportActivity.markers.indexOf(marker))
         startActivity(intent)
     }
 
+    //現在地情報を保存
     private fun saveCurrentLocation(){
         val latitude = currentLocation.latitude
         val longitude = currentLocation.longitude
@@ -328,6 +351,7 @@ class TravelerActivity : AppCompatActivity(), OnMapReadyCallback,
         }
     }
 
+    //写真撮影時の処理
     private val resultLauncher = registerForActivityResult(
         StartActivityForResult()
     ) { result: ActivityResult ->
@@ -354,6 +378,7 @@ class TravelerActivity : AppCompatActivity(), OnMapReadyCallback,
         }
     }
 
+    //全ての画面情報を取得
     private fun getInfo(userId: Int){
         thread {
             try {
@@ -380,22 +405,35 @@ class TravelerActivity : AppCompatActivity(), OnMapReadyCallback,
     }
 
     @RequiresApi(Build.VERSION_CODES.O)
+    //更新された情報のみを取得・画面更新
     private fun update() {
+        //更新された情報を取得
         getUpdatedInfo(userId)
+        Thread.sleep(300)
+        //取得できていないとき
         if(!::updatedInfo.isInitialized){
             return
         }
+        //
         Handler(Looper.getMainLooper()).post {
+            //行先提案の更新があるか
             if (updatedInfo.destination != null) {
+                //行先提案を再表示
                 DisplayPinActivity.displayPin(mMap, updatedInfo.destination!!)
             }
+            //コメントの更新があるか
             if (updatedInfo.comments != null) {
+                //コメントを再表示
                 displayComment(updatedInfo.comments!!)
             }
+            //現在情報の更新があるか
             if (updatedInfo.situation != null) {
+                //現在情報を再表示
                 displaySituation(updatedInfo.situation!!)
             }
+            //旅レポートの更新があるか
             if (updatedInfo.reports != null) {
+                //旅レポートを追加
                 DisplayReportActivity.createReportMarker(
                     mMap,
                     updatedInfo.reports!!,
@@ -405,6 +443,7 @@ class TravelerActivity : AppCompatActivity(), OnMapReadyCallback,
         }
     }
 
+    //更新情報を取得
     private fun getUpdatedInfo(userId: Int){
         thread {
             try {
@@ -447,6 +486,7 @@ class TravelerActivity : AppCompatActivity(), OnMapReadyCallback,
         )
     }
 
+    //コメント画面を表示・非表示
     private fun moveComment(fragment: Boolean) {
         val commentList: View = findViewById(R.id.comments) // 対象となるオブジェクト
         val commentBottom = findViewById<Button>(R.id.comment_door_button)
@@ -468,6 +508,7 @@ class TravelerActivity : AppCompatActivity(), OnMapReadyCallback,
             }
     }
 
+    //コメントのテキストを表示
     private fun displayComment(comments: List<Comment?>){
         try {
             val travelerCommentColor = "#FFA800"    //オレンジ
@@ -502,6 +543,7 @@ class TravelerActivity : AppCompatActivity(), OnMapReadyCallback,
         return comment
     }
 
+    //コメントを投稿
     private fun addComment(userId: Int, comment: String) {
         thread {
             try {
@@ -527,7 +569,7 @@ class TravelerActivity : AppCompatActivity(), OnMapReadyCallback,
         }
     }
 
-    //旅行を抜けるAPIを叩く
+    //旅行を抜ける
     private fun exitTravel(userId: Int){
         thread {
             try {

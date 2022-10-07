@@ -65,21 +65,26 @@ class SuggestDestinationActivity : AppCompatActivity(), OnMapReadyCallback,
             .findFragmentById(R.id.map) as SupportMapFragment
         mapFragment.getMapAsync(this)
 
+        //行先提案を確定
         val suggestButton = findViewById<Button>(R.id.decide_suggestion_button)
         suggestButton.setOnClickListener {
             //ここで最終的なピンの情報をDBに保存(APIを叩く)
             if(suggestMarker != null) {
                 decidePin(userId)
             }
+            //閲覧者画面に戻る
             finish()
         }
 
+        //行先提案をやめる
         val cancelButton = findViewById<Button>(R.id.cancel_suggestion_button)
         cancelButton.setOnClickListener {
+            //閲覧者画面に戻る
             finish()
         }
     }
 
+    //マップ起動時
     override fun onMapReady(googleMap: GoogleMap) {
         mMap = googleMap
         val cameraPosition = LatLng(intent.getDoubleExtra("lat", 0.0), intent.getDoubleExtra("lon", 0.0))
@@ -89,21 +94,25 @@ class SuggestDestinationActivity : AppCompatActivity(), OnMapReadyCallback,
         mMap.setOnMapClickListener(this)
     }
 
+    //マップがクリックされたとき
     override fun onMapClick(point: LatLng) {
         suggestDestination = point
         suggestMarker?.remove()
+        //行先提案ピンを仮置き
         suggestMarker = mMap.addMarker(
             MarkerOptions().position(point)
                 .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN))
         )
     }
 
+    //現在地ピンを表示
     private fun displayCurrentLocation(){
         currentLocationMarker?.remove()
         currentLocationMarker =
             mMap.addMarker(MarkerOptions().position(CurrentLocationActivity.currentLocation).title("現在地"))
     }
 
+    //行先提案ピンを確定しDBに保存
     private fun decidePin(userId: Int){
         val latitude = suggestDestination.latitude
         val longitude = suggestDestination.longitude

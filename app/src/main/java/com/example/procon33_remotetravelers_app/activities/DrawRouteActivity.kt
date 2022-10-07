@@ -12,6 +12,7 @@ class DrawRouteActivity {
 
         private var lastLatLng = LatLng(0.0, 0.0)
 
+        //旅行者が通ったルート表示
         fun drawRoute(mMap: GoogleMap, currentLatLng: LatLng){
 
             if(lastLatLng != LatLng(0.0, 0.0)) {
