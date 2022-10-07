@@ -16,15 +16,18 @@ import androidx.appcompat.app.AppCompatActivity
 import com.example.procon33_remotetravelers_app.BuildConfig
 import com.example.procon33_remotetravelers_app.R
 import com.example.procon33_remotetravelers_app.databinding.ActivityViewerBinding
+import com.example.procon33_remotetravelers_app.models.apis.Comment
 import com.example.procon33_remotetravelers_app.models.apis.FootPrints
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.LatLng
 import com.example.procon33_remotetravelers_app.models.apis.GetInfoResponse
+import com.example.procon33_remotetravelers_app.models.apis.GetUpdatedInfoResponse
 import com.example.procon33_remotetravelers_app.services.GetInfoService
 import com.example.procon33_remotetravelers_app.services.AddCommentService
 import com.google.android.gms.maps.CameraUpdateFactory
+import com.example.procon33_remotetravelers_app.services.GetUpdatedInfoService
 import com.google.android.gms.maps.model.Marker
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
@@ -38,7 +41,11 @@ import com.google.android.gms.maps.GoogleMap.OnMarkerClickListener
 class ViewerActivity : AppCompatActivity(), OnMapReadyCallback,
     OnMarkerClickListener, GoogleMap.OnInfoWindowClickListener {
     companion object{
-        var reliveFlag = 1
+        const val WC = LinearLayout.LayoutParams.WRAP_CONTENT
+        const val MP = LinearLayout.LayoutParams.MATCH_PARENT
+
+        var stopUpdateFlag = true
+        var updateRequestFlag = false
         var stopRelive = true
     }
 
@@ -54,6 +61,7 @@ class ViewerActivity : AppCompatActivity(), OnMapReadyCallback,
     private lateinit var mMap: GoogleMap
     private lateinit var binding: ActivityViewerBinding
     private lateinit var info: GetInfoResponse
+    private lateinit var updatedInfo: GetUpdatedInfoResponse
     private lateinit var suggestLocation: LatLng
     private var markerTouchFrag: Boolean = false
 
@@ -62,37 +70,39 @@ class ViewerActivity : AppCompatActivity(), OnMapReadyCallback,
         super.onCreate(savedInstanceState)
         val userId = intent.getIntExtra("userId", 0)
         thread {
+            while(!::info.isInitialized) {
+                getInfo(userId)
+                Thread.sleep(2500)
+            }
+            while(!::mMap.isInitialized){
+                Thread.sleep(100)
+            }
+            Handler(Looper.getMainLooper()).post {
+                DisplayReportActivity.createReportMarker(mMap, info.reports, visible = false)
+            }
+            relive(mMap, info.route)
+            Handler(Looper.getMainLooper()).post {
+                CurrentLocationActivity.displayCurrentLocation(
+                    mMap,
+                    LatLng(info.current_location!!.lat, info.current_location!!.lon),
+                )
+                DisplayPinActivity.displayPin(mMap, info.destination)
+                displayComment(info.comments)
+                displaySituation(info.situation)
+            }
             Thread.sleep(2500)
-            getInfo(userId)
-            if (::mMap.isInitialized && ::info.isInitialized) {
-                Handler(Looper.getMainLooper()).post {
-                    DisplayReportActivity.createReportMarker(mMap, info.reports, visible = false)
-                }
-                relive(mMap, info.route)
-                Handler(Looper.getMainLooper()).post {
-                    CurrentLocationActivity.displayCurrentLocation(
-                        mMap,
-                        LatLng(info.current_location.lat, info.current_location.lon)
-                    )
-                    DisplayPinActivity.displayPin(mMap, info.destination)
-                }
+            stopUpdateFlag = false
+        }
+        Timer().scheduleAtFixedRate(0, 5000){   //定期的に画面を更新
+            if(!stopUpdateFlag) {
+                update(userId)
             }
         }
-        Timer().scheduleAtFixedRate(0, 5000){
-            getInfo(userId)
-            Handler(Looper.getMainLooper()).post {
-                if (::mMap.isInitialized && ::info.isInitialized && reliveFlag == 0) {
-                    CurrentLocationActivity.displayCurrentLocation(mMap, LatLng(info.current_location.lat, info.current_location.lon))
-                    DisplayPinActivity.displayPin(mMap, info.destination)
-                    DrawRoute.drawRoute(mMap, LatLng(info.current_location.lat, info.current_location.lon))
-                    if(markerTouchFrag){
-                        DisplayPinActivity.displayRoute(mMap, LatLng(info.current_location.lat, info.current_location.lon), suggestLocation)
-                    }else {
-                        DisplayPinActivity.clearRoute()
-                    }
-                }
-                displayComment()
-                changeSituation()
+        Timer().scheduleAtFixedRate(0, 100){   //画面更新リクエストを待機
+            if(updateRequestFlag) {
+                Thread.sleep(1000)
+                update(userId)
+                updateRequestFlag = false
             }
         }
 
@@ -106,21 +116,23 @@ class ViewerActivity : AppCompatActivity(), OnMapReadyCallback,
 
         val pinButton = findViewById<Button>(R.id.pin_button)
         pinButton.setOnClickListener {
-            val intent = Intent(this, SuggestDestinationActivity::class.java)
-            intent.putExtra("userId", userId)
-            intent.putExtra("lat", mMap.cameraPosition.target.latitude)
-            intent.putExtra("lon", mMap.cameraPosition.target.longitude)
-            intent.putExtra("zoom", mMap.cameraPosition.zoom)
-            startActivity(intent)
+            if(!stopUpdateFlag) {
+                val intent = Intent(this, SuggestDestinationActivity::class.java)
+                intent.putExtra("userId", userId)
+                intent.putExtra("lat", mMap.cameraPosition.target.latitude)
+                intent.putExtra("lon", mMap.cameraPosition.target.longitude)
+                intent.putExtra("zoom", mMap.cameraPosition.zoom)
+                startActivity(intent)
+            }
         }
 
         val currentLocationButton = findViewById<Button>(R.id.viewer_current_location_button)
         currentLocationButton.setOnClickListener {
-            if (::mMap.isInitialized && ::info.isInitialized) {
+            if(!stopUpdateFlag){
                 val (text, color) = CurrentLocationActivity.pressedButton()
                 currentLocationButton.setText(text)
                 currentLocationButton.setBackgroundResource(color)
-                CurrentLocationActivity.displayCurrentLocation(mMap, LatLng(info.current_location.lat, info.current_location.lon))
+                CurrentLocationActivity.displayCurrentLocation(mMap, CurrentLocationActivity.currentLocation)
             }
         }
 
@@ -128,16 +140,20 @@ class ViewerActivity : AppCompatActivity(), OnMapReadyCallback,
         var fragment = false
         val buttonComment = findViewById<Button>(R.id.comment_door_button)
         buttonComment.setOnClickListener {
-            fragment = !fragment
-            moveComment(fragment)
+            if(!stopUpdateFlag){
+                fragment = !fragment
+                moveComment(fragment)
+            }
         }
 
         // コメントの送信
         val submitComment = findViewById<Button>(R.id.comment_submit)
         submitComment.setOnClickListener {
-            val comment = findViewById<EditText>(R.id.comment_text)
-            addComment(userId, comment.text.toString())
-            comment.setText("")
+            if(!stopUpdateFlag) {
+                val comment = findViewById<EditText>(R.id.comment_text)
+                addComment(userId, comment.text.toString())
+                comment.setText("")
+            }
         }
     }
 
@@ -159,7 +175,7 @@ class ViewerActivity : AppCompatActivity(), OnMapReadyCallback,
             if (markerTouchFrag) {
                 DisplayPinActivity.displayRoute(
                     mMap,
-                    LatLng(info.current_location.lat, info.current_location.lon),
+                    LatLng(info.current_location!!.lat, info.current_location!!.lon),
                     suggestLocation
                 )
                 return true
@@ -195,6 +211,9 @@ class ViewerActivity : AppCompatActivity(), OnMapReadyCallback,
                     // 実行結果を出力
                     Log.d("getInfoResponse", getInfoResponse.toString())
                 }
+                if(getInfoResponse.situation == null){
+                    getInfoResponse.situation = "移動中"
+                }
                 info = getInfoResponse
             } catch (e: Exception) {
                 Handler(Looper.getMainLooper()).post {
@@ -205,28 +224,96 @@ class ViewerActivity : AppCompatActivity(), OnMapReadyCallback,
         }
     }
 
-    // 状況把握の画像・テキストを変更
-    private fun changeSituation(){
-        try {
-            val travelerText = findViewById<TextView>(R.id.traveler_situation_text)
-            val travelerIcon = findViewById<ImageView>(R.id.traveler_situation_icon)
-            travelerText.text = info.situation
-            travelerIcon.setImageResource (
-                when(info.situation){
-                    "食事中" -> R.drawable.eatting
-                    "観光中(建物)" -> R.drawable.building
-                    "観光中(風景)" -> R.drawable.nature
-                    "動物に癒され中" -> R.drawable.animal
-                    "人と交流中" -> R.drawable.human
-                    else -> R.drawable.walking
+    @RequiresApi(Build.VERSION_CODES.O)
+    private fun update(userId :Int){
+        getUpdatedInfo(userId)
+        if(!::updatedInfo.isInitialized) {
+            return
+        }
+        Handler(Looper.getMainLooper()).post {
+            if (updatedInfo.current_location != null) {
+                CurrentLocationActivity.displayCurrentLocation(
+                    mMap,
+                    LatLng(
+                        updatedInfo.current_location!!.lat,
+                        updatedInfo.current_location!!.lon,
+                    )
+                )
+                DrawRouteActivity.drawRoute(
+                    mMap,
+                    LatLng(
+                        updatedInfo.current_location!!.lat,
+                        updatedInfo.current_location!!.lon,
+                    )
+                )
+                if (markerTouchFrag) {
+                    DisplayPinActivity.displayRoute(
+                        mMap,
+                        LatLng(
+                            updatedInfo.current_location!!.lat,
+                            updatedInfo.current_location!!.lon,
+                        ),
+                        suggestLocation,
+                    )
+                } else {
+                    DisplayPinActivity.clearRoute()
                 }
-            )
-        } catch (e: Exception) {
-            Handler(Looper.getMainLooper()).post {
-                // エラー内容を出力
-                Log.e("situation_error", e.message.toString())
+            }
+            if (updatedInfo.destination != null) {
+                DisplayPinActivity.displayPin(mMap, updatedInfo.destination!!)
+            }
+            if (updatedInfo.comments != null) {
+                displayComment(updatedInfo.comments!!)
+            }
+            if (updatedInfo.situation != null) {
+                displaySituation(updatedInfo.situation!!)
+            }
+            if(updatedInfo.reports != null){
+                DisplayReportActivity.createReportMarker(mMap, updatedInfo.reports!!, visible = true)
             }
         }
+    }
+
+    private fun getUpdatedInfo(userId: Int){
+        thread {
+            try {
+                // APIを実行
+                val service: GetUpdatedInfoService =
+                    retrofit.create(GetUpdatedInfoService::class.java)
+                val getUpdatedInfoResponse = service.getUpdatedInfo(
+                    user_id = userId
+                ).execute().body()
+                    ?: throw IllegalStateException("body is null")
+
+                Handler(Looper.getMainLooper()).post {
+                    // 実行結果を出力
+                    Log.d("getUpdatedInfoResponse", getUpdatedInfoResponse.toString())
+                }
+                updatedInfo = getUpdatedInfoResponse
+            } catch (e: Exception) {
+                Handler(Looper.getMainLooper()).post {
+                    // エラー内容を出力
+                    Log.e("error", e.message.toString())
+                }
+            }
+        }
+    }
+
+    // 状況把握の画像・テキストを変更
+    private fun displaySituation(situation: String?){
+        val travelerText = findViewById<TextView>(R.id.traveler_situation_text)
+        val travelerIcon = findViewById<ImageView>(R.id.traveler_situation_icon)
+        travelerText.text = situation ?: "移動中"
+        travelerIcon.setImageResource (
+            when(situation){
+                "食事中" -> R.drawable.eatting
+                "観光中(建物)" -> R.drawable.building
+                "観光中(風景)" -> R.drawable.nature
+                "動物に癒され中" -> R.drawable.animal
+                "人と交流中" -> R.drawable.human
+                else -> R.drawable.walking
+            }
+        )
     }
 
     private fun moveComment(fragment: Boolean) {
@@ -240,19 +327,17 @@ class ViewerActivity : AppCompatActivity(), OnMapReadyCallback,
         commentBottom.text = if (fragment) "コメントを閉じる" else "コメントを開く"
     }
 
-    private fun displayComment(){
+    private fun displayComment(comments: List<Comment?>){
         try {
             val commentList = findViewById<LinearLayout>(R.id.comment_list)
             commentList.removeAllViews()
-            val WC = LinearLayout.LayoutParams.WRAP_CONTENT
-            val MP = LinearLayout.LayoutParams.MATCH_PARENT
-            for (oneComment in info.comments) {
-                if (oneComment == null) {
-                    Log.d("oneComment", "null")
-                    continue
-                }
-                val commentText: String = oneComment.comment
-                val commentColor: String = if(oneComment.traveler == 0) "#FFA800" else "#4B4B4B"
+            for (comment in comments) {
+                val commentText = comment!!.comment
+                val commentColor =
+                    when(comment.traveler){
+                        1 -> "#FFA800"
+                        else -> "#4B4B4B"
+                    }
                 commentList.addView(setView(commentText, commentColor), 0, LinearLayout.LayoutParams(MP, WC))
             }
         } catch (e: Exception) {
@@ -289,6 +374,7 @@ class ViewerActivity : AppCompatActivity(), OnMapReadyCallback,
                     // 実行結果を出力
                     Log.d("addCommentResponse", addCommentResponse.toString())
                 }
+                updateRequestFlag = true
             } catch (e: Exception) {
                 Handler(Looper.getMainLooper()).post {
                     // エラー内容を出力
@@ -319,7 +405,7 @@ class ViewerActivity : AppCompatActivity(), OnMapReadyCallback,
             Thread.sleep(200)
             val location = LatLng(route!!.lat, route.lon)
             Handler(Looper.getMainLooper()).post {
-                DrawRoute.drawRoute(mMap, location)
+                DrawRouteActivity.drawRoute(mMap, location)
                 mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(location, 18f))
             }
             if (route.flag == 1) {
@@ -344,6 +430,5 @@ class ViewerActivity : AppCompatActivity(), OnMapReadyCallback,
                 Thread.sleep(300)
             }
         }
-        reliveFlag = 0
     }
 }

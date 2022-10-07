@@ -3,11 +3,11 @@ package com.example.procon33_remotetravelers_app.models.apis
 data class GetInfoResponse(
     val ok: Boolean,
     val error: String?,
-    val current_location: Location,
+    val current_location: Location?,
     val destination: List<Location?>,
     val route: List<FootPrints?>,
     val comments: List<Comment?>,
-    val situation: String?,
+    var situation: String?,
     val reports: List<Report?>,
 )
 
