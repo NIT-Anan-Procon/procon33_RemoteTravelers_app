@@ -324,19 +324,26 @@ class ViewerActivity : AppCompatActivity(), OnMapReadyCallback,
             duration = 200 // ミリ秒
             start() // アニメーション開始
         }
-        commentBottom.text = if (fragment) "コメントを閉じる" else "コメントを開く"
+        commentBottom.text =
+            if (fragment) {
+                "コメントを閉じる"
+            } else {
+                "コメントを開く"
+            }
     }
 
     private fun displayComment(comments: List<Comment?>){
         try {
+            val travelerCommentColor = "#FFA800"    //オレンジ
+            val viewerCommentColor = "#4B4B4B"      //白
             val commentList = findViewById<LinearLayout>(R.id.comment_list)
             commentList.removeAllViews()
             for (comment in comments) {
                 val commentText = comment!!.comment
                 val commentColor =
                     when(comment.traveler){
-                        1 -> "#FFA800"
-                        else -> "#4B4B4B"
+                        1 -> travelerCommentColor
+                        else -> viewerCommentColor
                     }
                 commentList.addView(setView(commentText, commentColor), 0, LinearLayout.LayoutParams(MP, WC))
             }
