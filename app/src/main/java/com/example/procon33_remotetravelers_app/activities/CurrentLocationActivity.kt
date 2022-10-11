@@ -66,7 +66,7 @@ class CurrentLocationActivity {
                 currentLocationMarker?.remove()
                 currentLocationMarker =
                     mMap.addMarker(MarkerOptions().position(currentLocation).title("現在地").zIndex(10f))
-                mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(currentLocation, 18f))
+                mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(currentLocation, 15f))
                 if (!setUpped) {
                     thread {
                         Thread.sleep(2000)

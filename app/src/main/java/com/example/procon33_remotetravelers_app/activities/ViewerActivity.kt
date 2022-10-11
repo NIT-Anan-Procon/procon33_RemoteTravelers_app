@@ -441,17 +441,17 @@ class ViewerActivity : AppCompatActivity(), OnMapReadyCallback,
                         routes[0]!!.lat,
                         routes[0]!!.lon
                     ),
-                    18f,
+                    15f,
                 )
             )
         }
         Thread.sleep(2500)
         for (route in routes) {
-            Thread.sleep(200)
+            Thread.sleep(20)
             val location = LatLng(route!!.lat, route.lon)
             Handler(Looper.getMainLooper()).post {
                 DrawRouteActivity.drawRoute(mMap, location)
-                mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(location, 18f))
+                mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(location, 15f))
             }
             if (route.flag == 1) {
                 Thread.sleep(500)
