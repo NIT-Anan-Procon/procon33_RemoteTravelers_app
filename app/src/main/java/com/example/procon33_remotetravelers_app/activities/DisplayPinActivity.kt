@@ -32,8 +32,9 @@ class DisplayPinActivity {
         private var routesData: List<Route>? = arrayListOf()
         private var lastCurrentLocation: LatLng? = null
         private var lastSuggestLocation: LatLng? = null
+        private var getRouteFlag = false
 
-        //
+        //行き先提案ピンを表示
         fun displayPin(mMap: GoogleMap, destinations: List<Location?>) {
             removePin()
             for (destination in destinations) {
@@ -61,7 +62,9 @@ class DisplayPinActivity {
                 try {
                     if(lastCurrentLocation != currentLocation || lastSuggestLocation != suggestLocation) {
                         getRoute(currentLocation, suggestLocation)
-                        Thread.sleep(500)
+                    }
+                    while(getRouteFlag){
+                        //ルート取得を待機
                     }
                     if (routesData.isNullOrEmpty()) {
                         throw Exception("routes data not found")
@@ -98,6 +101,7 @@ class DisplayPinActivity {
         }
 
         private fun getRoute(current: LatLng, suggest: LatLng) {
+            getRouteFlag = true
             thread {
                 try {
                     // マーカの表示処理
@@ -120,6 +124,8 @@ class DisplayPinActivity {
                         // エラー内容を出力
                         Log.e("getRouteError", e.message.toString())
                     }
+                } finally {
+                    getRouteFlag = false
                 }
             }
         }
