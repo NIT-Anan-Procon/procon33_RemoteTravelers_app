@@ -30,7 +30,6 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.example.procon33_remotetravelers_app.BuildConfig
-import com.example.procon33_remotetravelers_app.MainActivity
 import com.example.procon33_remotetravelers_app.R
 import com.example.procon33_remotetravelers_app.databinding.ActivityTravelerBinding
 import com.example.procon33_remotetravelers_app.models.apis.Comment
@@ -125,8 +124,6 @@ class TravelerActivity : AppCompatActivity(), OnMapReadyCallback,
                     route!!
                     DrawRouteActivity.drawRoute(mMap, LatLng(route.lat, route.lon))
                 }
-                //現在地表示
-                CurrentLocationActivity.displayCurrentLocation(mMap, currentLocation)
                 //旅レポートを表示
                 DisplayReportActivity.createReportMarker(mMap, info.reports, visible = true)
                 //コメント表示
@@ -239,13 +236,13 @@ class TravelerActivity : AppCompatActivity(), OnMapReadyCallback,
         } else {
             locationManager.requestLocationUpdates(
                 GPS_PROVIDER,
-                1000,
+                20000,
                 20f,
                 this
             )
             locationManager.requestLocationUpdates(
                 NETWORK_PROVIDER,
-                1000,
+                20000,
                 20f,
                 this
             )
@@ -417,6 +414,8 @@ class TravelerActivity : AppCompatActivity(), OnMapReadyCallback,
         }
         //
         Handler(Looper.getMainLooper()).post {
+            //現在地表示
+            CurrentLocationActivity.displayCurrentLocation(mMap, currentLocation)
             //行先提案の更新があるか
             if (updatedInfo.destination != null) {
                 //行先提案を再表示
