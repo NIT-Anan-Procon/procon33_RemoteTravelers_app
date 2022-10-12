@@ -19,7 +19,6 @@ import com.example.procon33_remotetravelers_app.services.SignupService
 import com.example.procon33_remotetravelers_app.services.StartTravelService
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
-import io.reactivex.internal.subscriptions.SubscriptionHelper.cancel
 import retrofit2.Retrofit
 import retrofit2.converter.moshi.MoshiConverterFactory
 import java.util.*
@@ -66,6 +65,7 @@ class MainActivity : AppCompatActivity() {
             val intent = Intent(this, TravelerActivity::class.java)
             intent.putExtra("userId", getUserId().toInt())
             startActivity(intent)
+            finish()
         }
 
         //旅アルバムの画面に遷移
@@ -193,6 +193,7 @@ class MainActivity : AppCompatActivity() {
                     val intent = Intent(this, ViewerActivity::class.java)
                     intent.putExtra("userId", getUserId().toInt())
                     startActivity(intent)
+                    finish()
                 }
             }
         } catch (e: Exception) {

@@ -59,7 +59,8 @@ class CreateReportActivity : AppCompatActivity() {
         val excitementSeekBar = findViewById<SeekBar>(R.id.excitement_seekBar)
         val displayNumber = findViewById<TextView>(R.id.display_number)
 
-        excitementSeekBar.progress = 0
+        //seekbarの初期値の設定
+        excitementSeekBar.progress = 30
         excitementSeekBar.max = 100
 
         excitementSeekBar.setOnSeekBarChangeListener(
