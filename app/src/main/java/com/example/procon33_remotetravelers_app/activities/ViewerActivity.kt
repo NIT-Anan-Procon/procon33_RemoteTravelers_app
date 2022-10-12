@@ -88,10 +88,12 @@ class ViewerActivity : AppCompatActivity(), OnMapReadyCallback,
             relive(mMap, info.route)
             Handler(Looper.getMainLooper()).post {
                 //現在地表示
-                CurrentLocationActivity.displayCurrentLocation(
-                    mMap,
-                    LatLng(info.current_location!!.lat, info.current_location!!.lon),
-                )
+                if(info.current_location != null) {
+                    CurrentLocationActivity.displayCurrentLocation(
+                        mMap,
+                        LatLng(info.current_location!!.lat, info.current_location!!.lon),
+                    )
+                }
                 //行先提案ピン表示
                 DisplayPinActivity.displayPin(mMap, info.destination)
                 //コメント表示

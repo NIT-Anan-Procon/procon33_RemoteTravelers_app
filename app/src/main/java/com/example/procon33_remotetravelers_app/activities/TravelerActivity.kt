@@ -104,18 +104,17 @@ class TravelerActivity : AppCompatActivity(), OnMapReadyCallback,
         userId = intent.getIntExtra("userId", 0)
         //初回の画面表示
         thread {
-            //画面情報を取得できるまで繰り返す
+            //マップ表示まで待機
             while(!::mMap.isInitialized){
                 Thread.sleep(100)
             }
-            //マップ表示まで待機
+            //画面情報を取得できるまで繰り返す
             while(!::info.isInitialized) {
                 getInfo(userId)
                 Thread.sleep(1000)
             }
-            //現在地取得まで待機
             while(!::currentLocation.isInitialized){
-                Thread.sleep(100)
+                //現在地取得まで待機
             }
 
             Handler(Looper.getMainLooper()).post {
@@ -412,10 +411,11 @@ class TravelerActivity : AppCompatActivity(), OnMapReadyCallback,
         if(!::updatedInfo.isInitialized){
             return
         }
-        //
         Handler(Looper.getMainLooper()).post {
-            //現在地表示
-            CurrentLocationActivity.displayCurrentLocation(mMap, currentLocation)
+            if(::currentLocation.isInitialized) {
+                //現在地表示
+                CurrentLocationActivity.displayCurrentLocation(mMap, currentLocation)
+            }
             //行先提案の更新があるか
             if (updatedInfo.destination != null) {
                 //行先提案を再表示
