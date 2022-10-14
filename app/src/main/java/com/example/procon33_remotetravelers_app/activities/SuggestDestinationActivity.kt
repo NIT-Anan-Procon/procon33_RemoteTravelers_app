@@ -109,7 +109,7 @@ class SuggestDestinationActivity : AppCompatActivity(), OnMapReadyCallback,
     private fun displayCurrentLocation(){
         currentLocationMarker?.remove()
         currentLocationMarker =
-            mMap.addMarker(MarkerOptions().position(CurrentLocationActivity.currentLocation).title("現在地"))
+            mMap.addMarker(MarkerOptions().position(ViewerActivity.currentLocation).title("現在地"))
     }
 
     //行先提案ピンを確定しDBに保存

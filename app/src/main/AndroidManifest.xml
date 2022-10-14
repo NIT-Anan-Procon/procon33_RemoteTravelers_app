@@ -22,15 +22,19 @@
         android:usesCleartextTraffic="true">
         <activity
             android:name=".activities.ViewSelectReportActivity"
+            android:configChanges="orientation|screenSize"
             android:exported="false" />
         <activity
             android:name=".activities.ViewAlbumActivity"
+            android:configChanges="orientation|screenSize"
             android:exported="false" />
         <activity
             android:name=".activities.ViewReportActivity"
+            android:configChanges="orientation|screenSize"
             android:exported="false" />
         <activity
             android:name=".activities.CreateReportActivity"
+            android:configChanges="orientation|screenSize"
             android:exported="false" />
         <!--
              TODO: Before you run your application, you need a Google Maps API key.
@@ -49,18 +53,22 @@
 
         <activity
             android:name=".activities.TravelerActivity"
+            android:configChanges="orientation|screenSize"
             android:exported="false"
             android:label="@string/title_activity_traveler" />
         <activity
             android:name=".activities.ViewerActivity"
+            android:configChanges="orientation|screenSize"
             android:exported="false"
             android:label="ViewerActivity" />
         <activity
             android:name=".activities.SuggestDestinationActivity"
+            android:configChanges="orientation|screenSize"
             android:exported="false"
             android:label="SuggestDestinationActivity" />
         <activity
             android:name=".MainActivity"
+            android:configChanges="orientation|screenSize"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

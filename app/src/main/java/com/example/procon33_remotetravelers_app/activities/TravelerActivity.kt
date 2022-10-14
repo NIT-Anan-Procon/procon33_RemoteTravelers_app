@@ -19,6 +19,7 @@ import android.os.Handler
 import android.os.Looper
 import android.provider.MediaStore
 import android.provider.Settings
+import android.provider.SyncStateContract.Helpers.update
 import android.util.Log
 import android.view.View
 import android.widget.*
@@ -30,6 +31,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.example.procon33_remotetravelers_app.BuildConfig
+import com.example.procon33_remotetravelers_app.MainActivity
 import com.example.procon33_remotetravelers_app.R
 import com.example.procon33_remotetravelers_app.databinding.ActivityTravelerBinding
 import com.example.procon33_remotetravelers_app.models.apis.Comment
@@ -74,6 +76,8 @@ class TravelerActivity : AppCompatActivity(), OnMapReadyCallback,
         .addConverterFactory(MoshiConverterFactory.create(moshi))
         .build()
 
+    private val currentLocationActivity = CurrentLocationActivity()
+    private val displayPinActivity = DisplayPinActivity()
     private lateinit var mMap: GoogleMap
     private lateinit var binding: ActivityTravelerBinding
     private lateinit var info: GetInfoResponse
@@ -83,7 +87,9 @@ class TravelerActivity : AppCompatActivity(), OnMapReadyCallback,
     private lateinit var suggestLocation: LatLng
     private var userId by Delegates.notNull<Int>()
     private var markerTouchFrag = false
-
+    private var exitFlag = false
+    private var updateTimer = Timer()
+    private var requestTimer = Timer()
     private val requestPermissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestPermission()
     ) { isGranted: Boolean ->
@@ -113,6 +119,7 @@ class TravelerActivity : AppCompatActivity(), OnMapReadyCallback,
                 getInfo(userId)
                 Thread.sleep(1000)
             }
+            //現在地取得まで待機
             while(!::currentLocation.isInitialized){
                 //現在地取得まで待機
             }
@@ -133,14 +140,14 @@ class TravelerActivity : AppCompatActivity(), OnMapReadyCallback,
             stopUpdateFlag = false
         }
         //定期的に画面を更新
-        Timer().scheduleAtFixedRate(0, 5000){
+        updateTimer.scheduleAtFixedRate(0, 5000){
             if(!stopUpdateFlag) {
                 //画面を更新
                 update()
             }
         }
         //画面更新リクエストを待機
-        Timer().scheduleAtFixedRate(0, 100){
+        requestTimer.scheduleAtFixedRate(0, 100){
             if(updateRequestFlag) {
                 //画面を更新
                 Thread.sleep(1000)
@@ -176,10 +183,10 @@ class TravelerActivity : AppCompatActivity(), OnMapReadyCallback,
         val currentLocationButton = findViewById<Button>(R.id.travel_current_location_button)
         currentLocationButton.setOnClickListener {
             if (!stopUpdateFlag) {
-                val (text, color) = CurrentLocationActivity.pressedButton()
+                val (text, color) = currentLocationActivity.pressedButton()
                 currentLocationButton.setText(text)
                 currentLocationButton.setBackgroundResource(color)
-                CurrentLocationActivity.displayCurrentLocation(mMap, currentLocation)
+                currentLocationActivity.displayCurrentLocation(mMap, currentLocation)
             }
         }
 
@@ -204,8 +211,25 @@ class TravelerActivity : AppCompatActivity(), OnMapReadyCallback,
 
         val exitTravelButton = findViewById<Button>(R.id.travel_exit_button)
         exitTravelButton.setOnClickListener {
-            exitTravel(userId)
-            finish()
+            if (!stopUpdateFlag) {
+                exitTravel(userId)
+                while (!exitFlag) {
+                    //旅行終了まで待機
+                }
+                //現在地取得を停止
+                locationManager.removeUpdates(this)
+
+                updateTimer.cancel()
+                requestTimer.cancel()
+
+                //companionObjectの初期化
+                DisplayReportActivity.markers.clear()
+                DisplayReportActivity.bitmaps.clear()
+                stopUpdateFlag = true
+                updateRequestFlag = false
+
+                finish()
+            }
         }
     }
 
@@ -255,13 +279,13 @@ class TravelerActivity : AppCompatActivity(), OnMapReadyCallback,
         saveCurrentLocation()
         if(::mMap.isInitialized){
             //現在地表示
-            CurrentLocationActivity.displayCurrentLocation(mMap, currentLocation)
+            currentLocationActivity.displayCurrentLocation(mMap, currentLocation)
             //旅行者が通ったルート表示
             DrawRouteActivity.drawRoute(mMap, currentLocation)
             //行き先提案までのルート表示中のとき
             if(markerTouchFrag){
                 //旅行者の現在位置に合わせたルートを提案
-                DisplayPinActivity.displayRoute(mMap, currentLocation, suggestLocation)
+                displayPinActivity.displayRoute(mMap, currentLocation, suggestLocation)
             }
         }
     }
@@ -278,7 +302,7 @@ class TravelerActivity : AppCompatActivity(), OnMapReadyCallback,
     //マップを初期化
     override fun onMapReady(googleMap: GoogleMap) {
         mMap = googleMap
-        CurrentLocationActivity.initializeMap(mMap)
+        currentLocationActivity.initializeMap(mMap)
         mMap.setInfoWindowAdapter(CustomInfoWindow(this))
         mMap.setOnInfoWindowClickListener(this)
         mMap.setOnInfoWindowCloseListener(CustomInfoWindow(this))
@@ -287,7 +311,7 @@ class TravelerActivity : AppCompatActivity(), OnMapReadyCallback,
 
     //マーカーがクリックされたとき
     override fun onMarkerClick(marker: Marker): Boolean {
-        if(CurrentLocationActivity.currentLocationMarker == marker){    //現在地マーカー
+        if(currentLocationActivity.currentLocationMarker == marker){    //現在地マーカー
             return true
         }
         if(DisplayReportActivity.markers.contains(marker)) {   //旅レポート
@@ -302,14 +326,14 @@ class TravelerActivity : AppCompatActivity(), OnMapReadyCallback,
         markerTouchFrag = !markerTouchFrag
         if (markerTouchFrag) {
             //行き先提案までのルート表示
-            DisplayPinActivity.displayRoute(
+            displayPinActivity.displayRoute(
                 mMap,
                 currentLocation,
                 suggestLocation
             )
             return true
         }
-        DisplayPinActivity.clearRoute()
+        displayPinActivity.clearRoute()
         return true
     }
 
@@ -414,12 +438,12 @@ class TravelerActivity : AppCompatActivity(), OnMapReadyCallback,
         Handler(Looper.getMainLooper()).post {
             if(::currentLocation.isInitialized) {
                 //現在地表示
-                CurrentLocationActivity.displayCurrentLocation(mMap, currentLocation)
+                currentLocationActivity.displayCurrentLocation(mMap, currentLocation)
             }
             //行先提案の更新があるか
             if (updatedInfo.destination != null) {
                 //行先提案を再表示
-                DisplayPinActivity.displayPin(mMap, updatedInfo.destination!!)
+                displayPinActivity.displayPin(mMap, updatedInfo.destination!!)
             }
             //コメントの更新があるか
             if (updatedInfo.comments != null) {
@@ -580,7 +604,7 @@ class TravelerActivity : AppCompatActivity(), OnMapReadyCallback,
                     user_id = userId
                 ).execute().body()
                     ?: throw IllegalStateException("body is null")
-
+                exitFlag = true
                 Handler(Looper.getMainLooper()).post {
                     // 実行結果を出力
                     Log.d("exitTravelResponse", exitTravelResponse.toString())
