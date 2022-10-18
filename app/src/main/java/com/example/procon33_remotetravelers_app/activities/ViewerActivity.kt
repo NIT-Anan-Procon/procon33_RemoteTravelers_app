@@ -77,7 +77,11 @@ class ViewerActivity : AppCompatActivity(), OnMapReadyCallback,
             //画面情報を取得できるまで繰り返す
             while(!::info.isInitialized) {
                 getInfo(userId)
-                Thread.sleep(2500)
+                Thread.sleep(2000)
+            }
+            while(info.current_location == null) {
+                getInfo(userId)
+                Thread.sleep(2000)
             }
             //マップ表示まで待機
             while(!::mMap.isInitialized){
@@ -109,7 +113,7 @@ class ViewerActivity : AppCompatActivity(), OnMapReadyCallback,
             stopUpdateFlag = false
         }
         //定期的に画面を更新
-        Timer().scheduleAtFixedRate(0, 5000){
+        Timer().scheduleAtFixedRate(0, 2000){
             if(!stopUpdateFlag) {
                 //画面更新
                 update(userId)

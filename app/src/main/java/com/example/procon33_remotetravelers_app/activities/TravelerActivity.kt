@@ -140,7 +140,7 @@ class TravelerActivity : AppCompatActivity(), OnMapReadyCallback,
             stopUpdateFlag = false
         }
         //定期的に画面を更新
-        updateTimer.scheduleAtFixedRate(0, 5000){
+        updateTimer.scheduleAtFixedRate(0, 2000){
             if(!stopUpdateFlag) {
                 //画面を更新
                 update()
