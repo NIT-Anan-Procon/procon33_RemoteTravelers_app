@@ -15,6 +15,7 @@ import retrofit2.Retrofit
 import retrofit2.converter.moshi.MoshiConverterFactory
 import kotlin.concurrent.thread
 import com.google.maps.android.PolyUtil
+import com.example.procon33_remotetravelers_app.BuildConfig
 
 class DisplayPinActivity {
     private val moshi = Moshi.Builder()
@@ -111,7 +112,7 @@ class DisplayPinActivity {
                 val service: GetRouteService =
                     retrofit.create(GetRouteService::class.java)
                 val getRouteResponse = service.getRoute(
-                    origin = currentLocation, destination = suggestLocation, key = "AIzaSyAoQ-8XLGmUPOpGTrzVUnh0030oMkzORGU"
+                    origin = currentLocation, destination = suggestLocation, key = BuildConfig.MAPS_API_KEY
                 ).execute().body()
                     ?: throw IllegalStateException("body is null")
                 routesData = getRouteResponse.routes?.toList()
