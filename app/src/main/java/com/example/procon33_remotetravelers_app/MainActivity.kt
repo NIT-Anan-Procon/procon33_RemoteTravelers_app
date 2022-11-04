@@ -60,6 +60,14 @@ class MainActivity : AppCompatActivity() {
         val travelButton = findViewById<Button>(R.id.travel_button)
         travelButton.setOnClickListener {
             startTravel()
+
+            //自動参加と重複しないようにtimerをキャンセル
+            timer.cancel()
+            startTravel()
+            val intent = Intent(this, TravelerActivity::class.java)
+            intent.putExtra("userId", getUserId().toInt())
+            startActivity(intent)
+            finish()
         }
 
         //旅アルバムの画面に遷移
