@@ -44,6 +44,7 @@ class ViewerActivity : AppCompatActivity(), OnMapReadyCallback,
         const val WC = LinearLayout.LayoutParams.WRAP_CONTENT
         const val MP = LinearLayout.LayoutParams.MATCH_PARENT
 
+        lateinit var currentLocation: LatLng
         var stopUpdateFlag = true
         var updateRequestFlag = false
         var stopRelive = true
@@ -58,6 +59,8 @@ class ViewerActivity : AppCompatActivity(), OnMapReadyCallback,
         .addConverterFactory(MoshiConverterFactory.create(moshi))
         .build()
 
+    private val currentLocationActivity = CurrentLocationActivity()
+    private val displayPinActivity = DisplayPinActivity()
     private lateinit var mMap: GoogleMap
     private lateinit var binding: ActivityViewerBinding
     private lateinit var info: GetInfoResponse
@@ -74,7 +77,11 @@ class ViewerActivity : AppCompatActivity(), OnMapReadyCallback,
             //画面情報を取得できるまで繰り返す
             while(!::info.isInitialized) {
                 getInfo(userId)
-                Thread.sleep(2500)
+                Thread.sleep(2000)
+            }
+            while(info.current_location == null) {
+                getInfo(userId)
+                Thread.sleep(2000)
             }
             //マップ表示まで待機
             while(!::mMap.isInitialized){
@@ -87,15 +94,16 @@ class ViewerActivity : AppCompatActivity(), OnMapReadyCallback,
             //旅の追体験
             relive(mMap, info.route)
             Handler(Looper.getMainLooper()).post {
+                currentLocation = LatLng(info.current_location!!.lat, info.current_location!!.lon)
                 //現在地表示
                 if(info.current_location != null) {
-                    CurrentLocationActivity.displayCurrentLocation(
+                    currentLocationActivity.displayCurrentLocation(
                         mMap,
-                        LatLng(info.current_location!!.lat, info.current_location!!.lon),
+                        currentLocation,
                     )
                 }
                 //行先提案ピン表示
-                DisplayPinActivity.displayPin(mMap, info.destination)
+                displayPinActivity.displayPin(mMap, info.destination)
                 //コメント表示
                 displayComment(info.comments)
                 //旅行者の現在状況表示
@@ -105,7 +113,7 @@ class ViewerActivity : AppCompatActivity(), OnMapReadyCallback,
             stopUpdateFlag = false
         }
         //定期的に画面を更新
-        Timer().scheduleAtFixedRate(0, 5000){
+        Timer().scheduleAtFixedRate(0, 2000){
             if(!stopUpdateFlag) {
                 //画面更新
                 update(userId)
@@ -144,10 +152,10 @@ class ViewerActivity : AppCompatActivity(), OnMapReadyCallback,
         val currentLocationButton = findViewById<Button>(R.id.viewer_current_location_button)
         currentLocationButton.setOnClickListener {
             if(!stopUpdateFlag){
-                val (text, color) = CurrentLocationActivity.pressedButton()
+                val (text, color) = currentLocationActivity.pressedButton()
                 currentLocationButton.setText(text)
                 currentLocationButton.setBackgroundResource(color)
-                CurrentLocationActivity.displayCurrentLocation(mMap, CurrentLocationActivity.currentLocation)
+                currentLocationActivity.displayCurrentLocation(mMap, currentLocationActivity.currentLocation)
             }
         }
 
@@ -177,7 +185,7 @@ class ViewerActivity : AppCompatActivity(), OnMapReadyCallback,
     //マップを初期化
     override fun onMapReady(googleMap: GoogleMap) {
         mMap = googleMap
-        CurrentLocationActivity.initializeMap(mMap)
+        currentLocationActivity.initializeMap(mMap)
         mMap.setInfoWindowAdapter(CustomInfoWindow(this))
         mMap.setOnInfoWindowClickListener(this)
         mMap.setOnInfoWindowCloseListener(CustomInfoWindow(this))
@@ -186,24 +194,29 @@ class ViewerActivity : AppCompatActivity(), OnMapReadyCallback,
 
     //マーカーがクリックされたとき
     override fun onMarkerClick(marker: Marker): Boolean {
-        if(!DisplayReportActivity.markers.contains(marker)) {
-            //ルート処理
-            suggestLocation = LatLng(marker.position.latitude, marker.position.longitude)
-            markerTouchFrag = !markerTouchFrag
-            if (markerTouchFrag) {
-                DisplayPinActivity.displayRoute(
-                    mMap,
-                    LatLng(info.current_location!!.lat, info.current_location!!.lon),
-                    suggestLocation
-                )
-                return true
-            }
-            DisplayPinActivity.clearRoute()
+        if(currentLocationActivity.currentLocationMarker == marker){    //現在地マーカー
             return true
         }
-        //マーカーを透明に設定
-        marker.alpha = 0f
-        marker.showInfoWindow()
+        if(DisplayReportActivity.markers.contains(marker)) {   //旅レポート
+            //マーカーを透明に設定
+            marker.alpha = 0f
+            marker.showInfoWindow()
+            return true
+        }
+
+        //行先提案ピン
+        suggestLocation = LatLng(marker.position.latitude, marker.position.longitude)
+        markerTouchFrag = !markerTouchFrag
+        if (markerTouchFrag) {
+            //行き先提案までのルート表示
+            displayPinActivity.displayRoute(
+                mMap,
+                currentLocation,
+                suggestLocation
+            )
+            return true
+        }
+        displayPinActivity.clearRoute()
         return true
     }
 
@@ -257,13 +270,11 @@ class ViewerActivity : AppCompatActivity(), OnMapReadyCallback,
         Handler(Looper.getMainLooper()).post {
             //現在地の更新があるか
             if (updatedInfo.current_location != null) {
+                currentLocation = LatLng(updatedInfo.current_location!!.lat, updatedInfo.current_location!!.lon)
                 //現在地を表示
-                CurrentLocationActivity.displayCurrentLocation(
+                currentLocationActivity.displayCurrentLocation(
                     mMap,
-                    LatLng(
-                        updatedInfo.current_location!!.lat,
-                        updatedInfo.current_location!!.lon,
-                    )
+                    currentLocation
                 )
                 //旅行者が通ったルートを表示
                 DrawRouteActivity.drawRoute(
@@ -276,7 +287,7 @@ class ViewerActivity : AppCompatActivity(), OnMapReadyCallback,
                 //行き先提案までのルート表示中のとき
                 if (markerTouchFrag) {
                     //旅行者の現在位置に合わせたルートを提案
-                    DisplayPinActivity.displayRoute(
+                    displayPinActivity.displayRoute(
                         mMap,
                         LatLng(
                             updatedInfo.current_location!!.lat,
@@ -289,7 +300,7 @@ class ViewerActivity : AppCompatActivity(), OnMapReadyCallback,
             //行き先提案に更新があるか
             if (updatedInfo.destination != null) {
                 //行先提案を再表示
-                DisplayPinActivity.displayPin(mMap, updatedInfo.destination!!)
+                displayPinActivity.displayPin(mMap, updatedInfo.destination!!)
             }
             //コメントに更新があるか
             if (updatedInfo.comments != null) {

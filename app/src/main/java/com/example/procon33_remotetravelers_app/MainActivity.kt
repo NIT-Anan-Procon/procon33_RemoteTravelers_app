@@ -48,7 +48,7 @@ class MainActivity : AppCompatActivity() {
         if (userId.isNotEmpty()) {
             userId = getString(R.string.user_id_text, userId)
             userIdText.text = userId
-            timer.scheduleAtFixedRate(0, 5000){
+            timer.scheduleAtFixedRate(0, 2000){
                 //すでに旅行に参加しているかどうかの判断
                 checkTraveling()
             }
@@ -59,6 +59,8 @@ class MainActivity : AppCompatActivity() {
         // 旅行するボタンが押されるとTravelerActivityに遷移する
         val travelButton = findViewById<Button>(R.id.travel_button)
         travelButton.setOnClickListener {
+            startTravel()
+
             //自動参加と重複しないようにtimerをキャンセル
             timer.cancel()
             startTravel()
@@ -189,7 +191,7 @@ class MainActivity : AppCompatActivity() {
                     intent.putExtra("userId", getUserId().toInt())
                     startActivity(intent)
                     finish()
-                }else {
+                } else {
                     val intent = Intent(this, ViewerActivity::class.java)
                     intent.putExtra("userId", getUserId().toInt())
                     startActivity(intent)
